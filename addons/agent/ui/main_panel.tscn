@@ -20,10 +20,36 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="ChatContainer" type="ScrollContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MessageList" type="VBoxContainer" parent="VBoxContainer/ChatContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="InputContainer" type="VBoxContainer" parent="VBoxContainer/MarginContainer"]
 layout_mode = 2
 
-[node name="OptionButton" type="OptionButton" parent="VBoxContainer/HBoxContainer"]
+[node name="UserInput" type="TextEdit" parent="VBoxContainer/MarginContainer/InputContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer/InputContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="OptionButton" type="OptionButton" parent="VBoxContainer/MarginContainer/InputContainer/HBoxContainer"]
 layout_mode = 2
 selected = 0
 item_count = 2
@@ -32,50 +58,16 @@ popup/item_0/id = 0
 popup/item_1/text = "Agent"
 popup/item_1/id = 1
 
-[node name="UserInput" type="TextEdit" parent="VBoxContainer/HBoxContainer"]
+[node name="SendButton" type="Button" parent="VBoxContainer/MarginContainer/InputContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="SendButton" type="Button" parent="VBoxContainer/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
+size_flags_horizontal = 8
 text = "发送"
-
-[node name="ThinkPanel" type="PanelContainer" parent="VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/ThinkPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
-
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/ThinkPanel/MarginContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="VBoxContainer/ThinkPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "思考中"
-
-[node name="ThinkContent" type="Label" parent="VBoxContainer/ThinkPanel/MarginContainer/VBoxContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 20)
-layout_mode = 2
-autowrap_mode = 3
-
-[node name="MessageContent" type="Label" parent="VBoxContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 20)
-layout_mode = 2
-autowrap_mode = 3
 
 [node name="DeepSeekChatStream" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("1_fhbwo")
+secret_key = "sk-208101f6f9fd42bbbd0cb45cd064b91a"
 use_thinking = true
 max_tokens = 65536
-print_log = true
 metadata/_custom_type_script = "uid://dlx7bujvsuk11"

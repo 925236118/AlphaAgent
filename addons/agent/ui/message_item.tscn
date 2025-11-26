@@ -1,0 +1,89 @@
+[gd_scene load_steps=10 format=3 uid="uid://cjytvn2j0yi3s"]
+
+[ext_resource type="Script" uid="uid://b2ia356h5kd7m" path="res://addons/agent/ui/message_item.gd" id="1_kn78a"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_kn78a"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_q4qcv"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tt4f8"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_p3yum"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fsx2h"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_u11mo"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dfcb6"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_njs72"]
+
+[node name="MessageItem" type="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+script = ExtResource("1_kn78a")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="ThinkContainer" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/ThinkContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/separation = 20
+
+[node name="ThinkingLabel" type="Label" parent="VBoxContainer/ThinkContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "思考中"
+
+[node name="ThinkingTimeLabel" type="Label" parent="VBoxContainer/ThinkContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.0 s"
+
+[node name="ExpandButton" type="Button" parent="VBoxContainer/ThinkContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+toggle_mode = true
+text = " ▼ "
+
+[node name="ThinkContent" type="RichTextLabel" parent="VBoxContainer/ThinkContainer"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+theme_override_colors/default_color = Color(0.796243, 0.796243, 0.796243, 1)
+theme_override_font_sizes/normal_font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxEmpty_kn78a")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_q4qcv")
+theme_override_styles/background = SubResource("StyleBoxEmpty_tt4f8")
+theme_override_styles/fill = SubResource("StyleBoxEmpty_p3yum")
+fit_content = true
+scroll_active = false
+
+[node name="MessageContainer" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="MessageContent" type="RichTextLabel" parent="VBoxContainer/MessageContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_fsx2h")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_u11mo")
+theme_override_styles/background = SubResource("StyleBoxEmpty_dfcb6")
+theme_override_styles/fill = SubResource("StyleBoxEmpty_njs72")
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[connection signal="toggled" from="VBoxContainer/ThinkContainer/HBoxContainer/ExpandButton" to="." method="_on_expand_button_toggled"]

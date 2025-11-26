@@ -99,7 +99,9 @@ func post_message(messages: Array[Dictionary]):
 				await get_tree().process_frame
 			else:
 				var chunk_string = chunk.get_string_from_utf8()
-				print(chunk_string)
+				
+				if print_log: print(chunk_string)
+				
 				var data_array = chunk_string.split("\n")
 				for data_string in data_array:
 					if data_string.begins_with("data: "):

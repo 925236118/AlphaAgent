@@ -42,12 +42,10 @@ func update_message_content(text: String):
 
 
 func _on_expand_button_toggled(toggled_on: bool) -> void:
-	print(toggled_on)
 	expand_button.text = " ▲ " if toggled_on else " ▼ "
 	think_content.visible = toggled_on
 
 func used_tools(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
-	#content_container.hide()
 	for tool in tool_calls:
 		var panel = PanelContainer.new()
 		var stylebox = StyleBoxFlat.new()

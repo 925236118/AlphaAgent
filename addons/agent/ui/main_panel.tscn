@@ -45,6 +45,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 size_flags_horizontal = 3
+wrap_mode = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer/InputContainer"]
 layout_mode = 2
@@ -78,8 +79,30 @@ temperature = 0.0
 max_tokens = 8192
 tools = Array[Dictionary]([{
 "function": {
-"description": "获取当前的Godot引擎信息。包含Godot版本，CPU型号、CPU 架构、内存信息、显卡信息、设备型号等，也可以获取当前编辑器打开的场景和脚本相关信息。",
-"name": "get_engine_info",
+"description": "获取当前的Godot引擎信息。包含Godot版本，CPU型号、CPU 架构、内存信息、显卡信息、设备型号等，还有当前项目的一些信息，例如项目名称、项目版本、项目描述、项目运行主场景、游戏运行窗口信息、全局的物理信息、全局的渲染设置、主题信息等。",
+"name": "get_project_info",
+"parameters": {
+"properties": {},
+"required": [],
+"type": "object"
+}
+},
+"type": "function"
+}, {
+"function": {
+"description": "获取当前编辑器打开的场景信息和编辑器中打开和编辑的脚本相关信息。",
+"name": "get_editor_info",
+"parameters": {
+"properties": {},
+"required": [],
+"type": "object"
+}
+},
+"type": "function"
+}, {
+"function": {
+"description": "获取当前项目中所有文件以及其UID列表。",
+"name": "get_project_file_list",
 "parameters": {
 "properties": {},
 "required": [],
@@ -99,6 +122,26 @@ tools = Array[Dictionary]([{
 }
 },
 "required": ["path"],
+"type": "object"
+}
+},
+"type": "function"
+}, {
+"function": {
+"description": "写入文件内容。文件格式应为资源文件(.tres)或者脚本文件(.gd)、Godot着色器(.gdshader)、场景文件(.tscn)、文本文件(.txt或.md)、CSV文件(.csv)",
+"name": "write_file",
+"parameters": {
+"properties": {
+"content": {
+"description": "需要写入的文件内容。",
+"type": "string"
+},
+"path": {
+"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+"type": "string"
+}
+},
+"required": ["path", "content"],
 "type": "object"
 }
 },

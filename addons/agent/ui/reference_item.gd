@@ -1,7 +1,9 @@
 @tool
 extends PanelContainer
-@onready var label: Label = $MarginContainer/HBoxContainer/Label
-@onready var button: Button = $MarginContainer/HBoxContainer/Button
+
+@onready var label: Label = $MarginContainer/Label
+@onready var button: Button = $MarginContainer/Button
+
 
 var info = {}
 

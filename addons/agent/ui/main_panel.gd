@@ -6,7 +6,7 @@ extends Control
 @onready var deep_seek_chat_stream: DeepSeekChatStream = %DeepSeekChatStream
 @onready var message_list: VBoxContainer = %MessageList
 @onready var usage_label: Label = %UsageLabel
-@onready var reference_list: HBoxContainer = %ReferenceList
+@onready var reference_list: HFlowContainer = %ReferenceList
 
 @onready var tools: Node = $Tools
 
@@ -32,7 +32,7 @@ func _ready() -> void:
 	deep_seek_chat_stream.tools = tools.get_tools_list()
 
 	send_button.pressed.connect(on_click_send_message)
-	EditorInterface.get_script_editor().editor_script_changed.connect(func (script): print(script))
+	
 	user_input.set_drag_forwarding(
 		Callable(),
 		func (at_position: Vector2, data: Variant):
@@ -40,13 +40,12 @@ func _ready() -> void:
 			return allow_types.find(data.type) != -1,
 
 		func (at_position: Vector2, data: Variant):
-			print(data)
 			var info_list = reference_list.get_children().map(func(node): return node.info)
 			match data.type:
 				"files":
 					var file_info_list = info_list.filter(func(info): return info.type == "file")
 					for file: String in data.files:
-						if file_info_list.find_custom(func(info): info.path == file) != -1:
+						if file_info_list.find_custom(func(info): return info.path == file) != -1:
 							continue
 						var reference_item = REFERENCE_ITEM.instantiate()
 						reference_item.info = {
@@ -56,22 +55,51 @@ func _ready() -> void:
 						reference_list.add_child(reference_item)
 						reference_item.set_label(file.get_file())
 				"nodes":
-					var file_info_list = info_list.filter(func(info): return info.type == "file")
+					var node_info_list = info_list.filter(func(info): return info.type == "node")
+					var root_node = EditorInterface.get_edited_scene_root()
+					var current_scene = root_node.scene_file_path
+					var root_node_name = root_node.name
+					
+					var nodes = data.nodes
+					for node_path: String in nodes:
+						var splite_array = node_path.split("/", false, 20)
+						var path = splite_array[-1]
+						
+						if node_info_list.find_custom(func(info): return info.path == path and info.scene == current_scene) != -1:
+							return
+						var reference_item = REFERENCE_ITEM.instantiate()
+						reference_item.info = {
+							"type": "file",
+							"node_path": path,
+							"scene": current_scene
+						}
+						reference_list.add_child(reference_item)
+						reference_item.set_label(current_scene.get_file() + "/" + path.split('/')[-1])
 					pass
 				"script_list_element":
 					var script = EditorInterface.get_script_editor().get_current_script()
+					var file = ""
 					if script != null:
-						print(script.resource_path)
+						file = script.resource_path
 					else:
-						printerr("暂时无法获取脚本信息")
-						#var editor = data.script_list_element.get_base_editor()
-						#print(editor)
-						#pass
-						# var editor = data.script_list_element
-						# #print(editor.get_property_list())
-						# for p in editor.get_property_list():
-						# 	print(p.name, ", ", editor.get(p.name))
-					pass
+						var script_editor := EditorInterface.get_script_editor()
+						var editor_file_list: ItemList = script_editor.get_child(0).get_child(1).get_child(0).get_child(0).get_child(1)
+						var selected := editor_file_list.get_selected_items()
+						if not selected:
+							return
+						var index := selected[0]
+						file = editor_file_list.get_item_tooltip(index)
+					var file_info_list = info_list.filter(func(info): return info.type == "file")
+					
+					if file_info_list.find_custom(func(info): return info.path == file) != -1:
+						return
+					var reference_item = REFERENCE_ITEM.instantiate()
+					reference_item.info = {
+						"type": "file",
+						"path": file
+					}
+					reference_list.add_child(reference_item)
+					reference_item.set_label(file.get_file())
 	)
 
 func reset_message_info():
@@ -94,7 +122,7 @@ func init_message_list():
 项目以"res://"作为根目录，所有的路径应都为根目录下的绝对路径。操作文件不应该在根目录外。
 
 # 输出
-输出的内容应简短、准确，输出的对话内容如果想使用标记，可以使用BBCode格式。只能使用允许的BBCode标签。输出列表的时候，不要输出前面的项目符号，例如'•'，'1.'，'a.'等。
+输出的内容应简短、准确，输出的对话内容如果想使用标记，可以使用BBCode格式。你只能使用允许的BBCode标签，不能随便创造不存在的标签。输出列表的时候，**不要**输出前面的项目符号，例如'•'，'1.'，'a.'等。
 而如果是在markdown文件中，应该使用markdown语法。不应再使用bbcode。
 由于当前的输出要展示在深色背景上，输出文字时应尽量选择浅色颜色，或者浅色背景加深色文字。如非必要，不要添加颜色标签。
 ## 允许的BBCode标签
@@ -114,6 +142,7 @@ func init_message_list():
 - 蓝色 #abc9ff: 用于提示信息、标题等
 - 绿色 #42ffc2: 用于提示成功demg
 - 黄色 #ffeda1: 用于需要用户确认的权限操作等
+- 黑色 #000000: 用于浅色背景的文字颜色
 
 # 规则
 如果要修改文件，应该尽可能多的收集信息，可以向用户询问问题以获得用户更多的想法。在最终修改内容前可以让用户确认。
@@ -170,7 +199,6 @@ func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 	current_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
 	current_message_item.show_think = deep_seek_chat_stream.use_thinking
 	message_list.add_child(current_message_item)
-	print("current_message_item: ", current_message_item)
 
 	deep_seek_chat_stream.post_message(messages)
 

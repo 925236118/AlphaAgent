@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://bewckbivwp036"]
+[gd_scene load_steps=5 format=3 uid="uid://bewckbivwp036"]
 
 [ext_resource type="Script" uid="uid://cr3yllr6krrdr" path="res://addons/agent/ui/reference_item.gd" id="1_pyu6d"]
 
@@ -8,6 +8,12 @@ corner_radius_top_left = 5
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pyu6d"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_15bjw"]
+bg_color = Color(0.09998574, 0.0999861, 0.09998601, 1)
 
 [node name="ReferenceItem" type="PanelContainer"]
 theme_override_styles/panel = SubResource("StyleBoxFlat_2usmi")
@@ -20,16 +26,15 @@ theme_override_constants/margin_top = 1
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+[node name="Label" type="Label" parent="MarginContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 
-[node name="Label" type="Label" parent="MarginContainer/HBoxContainer"]
+[node name="Button" type="Button" parent="MarginContainer"]
 layout_mode = 2
-text = "test_editor.gd"
-
-[node name="Button" type="Button" parent="MarginContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 8
 size_flags_vertical = 4
-text = "×"
-flat = true
+theme_override_colors/font_color = Color(0.8745098, 0.8745098, 0.8745098, 0)
+theme_override_styles/normal = SubResource("StyleBoxFlat_pyu6d")
+theme_override_styles/hover = SubResource("StyleBoxFlat_15bjw")
+text = " × "

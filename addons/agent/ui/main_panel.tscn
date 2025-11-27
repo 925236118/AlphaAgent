@@ -40,6 +40,10 @@ theme_override_constants/margin_bottom = 10
 [node name="InputContainer" type="VBoxContainer" parent="VBoxContainer/MarginContainer"]
 layout_mode = 2
 
+[node name="ReferenceList" type="HBoxContainer" parent="VBoxContainer/MarginContainer/InputContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="UserInput" type="TextEdit" parent="VBoxContainer/MarginContainer/InputContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 60)

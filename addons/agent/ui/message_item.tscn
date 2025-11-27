@@ -97,5 +97,3 @@ scroll_active = false
 [node name="UseToolContainer" type="VBoxContainer" parent="VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-
-[connection signal="toggled" from="VBoxContainer/ContentContainer/ThinkContainer/HBoxContainer/ExpandButton" to="." method="_on_expand_button_toggled"]

@@ -4,8 +4,9 @@ extends Node
 @export_tool_button("测试") var test_action = test
 
 func test():
+	pass
 	var tool = DeepSeekChatStream.ToolCallsInfo.new()
-	tool.function.name = "get_project_file_list"
+	tool.function.name = "get_editor_info"
 	tool.function.arguments = JSON.stringify({"path": "res://addons/agent/tools/tools.tscn"})
 	print(use_tool(tool))
 
@@ -146,6 +147,7 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 				"editor": {
 					# 当前编辑器信息
 					"opened_scenes": EditorInterface.get_open_scenes(),
+					"current_edited_scene": EditorInterface.get_edited_scene_root().get_scene_file_path(),
 					"current_scene_root_node": EditorInterface.get_edited_scene_root(),
 					"current_opend_script": EditorInterface.get_script_editor().get_current_script().resource_path,
 					"opend_scripts": EditorInterface.get_script_editor().get_open_scripts().map(func (script: Script): return script.resource_path)

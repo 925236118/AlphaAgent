@@ -6,10 +6,12 @@ extends Control
 @onready var deep_seek_chat_stream: DeepSeekChatStream = %DeepSeekChatStream
 @onready var message_list: VBoxContainer = %MessageList
 @onready var usage_label: Label = %UsageLabel
+@onready var reference_list: HBoxContainer = %ReferenceList
 
 @onready var tools: Node = $Tools
 
 const MESSAGE_ITEM = preload("uid://cjytvn2j0yi3s")
+const REFERENCE_ITEM = preload("uid://bewckbivwp036")
 
 var secret = "sk-208101f6f9fd42bbbd0cb45cd064b91a"
 
@@ -18,8 +20,6 @@ var messages: Array[Dictionary] = []
 var current_message_item: AgentChatMessageItem = null
 var current_message: String = ""
 var current_think: String = ""
-
-
 
 func _ready() -> void:
 	# 初始化AI模型相关信息
@@ -32,6 +32,47 @@ func _ready() -> void:
 	deep_seek_chat_stream.tools = tools.get_tools_list()
 
 	send_button.pressed.connect(on_click_send_message)
+	EditorInterface.get_script_editor().editor_script_changed.connect(func (script): print(script))
+	user_input.set_drag_forwarding(
+		Callable(),
+		func (at_position: Vector2, data: Variant):
+			var allow_types = ['files', 'nodes', 'script_list_element']
+			return allow_types.find(data.type) != -1,
+
+		func (at_position: Vector2, data: Variant):
+			print(data)
+			var info_list = reference_list.get_children().map(func(node): return node.info)
+			match data.type:
+				"files":
+					var file_info_list = info_list.filter(func(info): return info.type == "file")
+					for file: String in data.files:
+						if file_info_list.find_custom(func(info): info.path == file) != -1:
+							continue
+						var reference_item = REFERENCE_ITEM.instantiate()
+						reference_item.info = {
+							"type": "file",
+							"path": file
+						}
+						reference_list.add_child(reference_item)
+						reference_item.set_label(file.get_file())
+				"nodes":
+					var file_info_list = info_list.filter(func(info): return info.type == "file")
+					pass
+				"script_list_element":
+					var script = EditorInterface.get_script_editor().get_current_script()
+					if script != null:
+						print(script.resource_path)
+					else:
+						printerr("暂时无法获取脚本信息")
+						#var editor = data.script_list_element.get_base_editor()
+						#print(editor)
+						#pass
+						# var editor = data.script_list_element
+						# #print(editor.get_property_list())
+						# for p in editor.get_property_list():
+						# 	print(p.name, ", ", editor.get(p.name))
+					pass
+	)
 
 func reset_message_info():
 	current_message_item = null
@@ -43,7 +84,7 @@ func init_message_list():
 	messages = [
 		{
 			"role": "system",
-			"content": """
+			"content": """\
 # 角色
 你是一个Godot开发专家，你精通Godot 4.x版本的各种API。
 我将会让你根据我的需要开发一系列的功能。你需要调用各种工具或者Godot引擎的API完成我的想法。
@@ -85,9 +126,11 @@ func on_click_send_message():
 
 	user_input.editable = false
 	send_button.disabled = true
+	var info_list = reference_list.get_children().map(func(node): return node.info)
+	var info_list_string = JSON.stringify(info_list)
 	messages.push_back({
 		"role": "user",
-		"content": user_input.text
+		"content": "用户输入的内容：" + user_input.text + "\n引用的内容信息：" + info_list_string
 	})
 
 	current_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
@@ -130,7 +173,6 @@ func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 	print("current_message_item: ", current_message_item)
 
 	deep_seek_chat_stream.post_message(messages)
-
 
 func on_agent_finish(finish_reason: String, total_tokens: float):
 	print("finish_reason ", finish_reason)

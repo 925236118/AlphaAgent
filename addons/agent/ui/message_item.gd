@@ -19,6 +19,7 @@ var thinking: bool = false
 var think_time: float = 0.0
 
 func _ready() -> void:
+	#expand_button.toggled.connect(_on_expand_button_toggled)
 	think_container.visible = show_think
 	think_time = 0.0
 
@@ -41,9 +42,9 @@ func update_message_content(text: String):
 	message_content.text = text
 
 
-func _on_expand_button_toggled(toggled_on: bool) -> void:
-	expand_button.text = " ▲ " if toggled_on else " ▼ "
-	think_content.visible = toggled_on
+#func _on_expand_button_toggled(toggled_on: bool) -> void:
+	#expand_button.text = " ▲ " if toggled_on else " ▼ "
+	#think_content.visible = toggled_on
 
 func used_tools(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 	for tool in tool_calls:

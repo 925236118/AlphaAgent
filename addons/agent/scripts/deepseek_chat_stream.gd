@@ -150,7 +150,7 @@ func post_message(messages: Array[Dictionary]):
 							if delta.has("tool_calls"):
 								req_tool_calls = delta["tool_calls"]
 							if req_tool_calls.size() != 0:
-								print("req_tool_calls: ", req_tool_calls)
+								if print_log: print("req_tool_calls: ", req_tool_calls)
 								if req_tool_calls[0].has("id"):
 									var tool_call_info = ToolCallsInfo.new()
 									tool_call_info.id = req_tool_calls[0].get("id")

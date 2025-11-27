@@ -1,0 +1,35 @@
+[gd_scene load_steps=3 format=3 uid="uid://bewckbivwp036"]
+
+[ext_resource type="Script" uid="uid://cr3yllr6krrdr" path="res://addons/agent/ui/reference_item.gd" id="1_pyu6d"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2usmi"]
+bg_color = Color(0.18359044, 0.18359047, 0.18359032, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="ReferenceItem" type="PanelContainer"]
+theme_override_styles/panel = SubResource("StyleBoxFlat_2usmi")
+script = ExtResource("1_pyu6d")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 1
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "test_editor.gd"
+
+[node name="Button" type="Button" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "×"
+flat = true

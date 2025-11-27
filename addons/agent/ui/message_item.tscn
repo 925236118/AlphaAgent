@@ -33,31 +33,37 @@ script = ExtResource("1_kn78a")
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
 
-[node name="ThinkContainer" type="VBoxContainer" parent="VBoxContainer"]
+[node name="ContentContainer" type="VBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/ThinkContainer"]
+[node name="ThinkContainer" type="VBoxContainer" parent="VBoxContainer/ContentContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/ContentContainer/ThinkContainer"]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_constants/separation = 20
 
-[node name="ThinkingLabel" type="Label" parent="VBoxContainer/ThinkContainer/HBoxContainer"]
+[node name="ThinkingLabel" type="Label" parent="VBoxContainer/ContentContainer/ThinkContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "思考中"
 
-[node name="ThinkingTimeLabel" type="Label" parent="VBoxContainer/ThinkContainer/HBoxContainer"]
+[node name="ThinkingTimeLabel" type="Label" parent="VBoxContainer/ContentContainer/ThinkContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "0.0 s"
 
-[node name="ExpandButton" type="Button" parent="VBoxContainer/ThinkContainer/HBoxContainer"]
+[node name="ExpandButton" type="Button" parent="VBoxContainer/ContentContainer/ThinkContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
 text = " ▼ "
 
-[node name="ThinkContent" type="RichTextLabel" parent="VBoxContainer/ThinkContainer"]
+[node name="ThinkContent" type="RichTextLabel" parent="VBoxContainer/ContentContainer/ThinkContainer"]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(0, 20)
@@ -71,10 +77,12 @@ theme_override_styles/fill = SubResource("StyleBoxEmpty_p3yum")
 fit_content = true
 scroll_active = false
 
-[node name="MessageContainer" type="VBoxContainer" parent="VBoxContainer"]
+[node name="MessageContainer" type="VBoxContainer" parent="VBoxContainer/ContentContainer"]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
 
-[node name="MessageContent" type="RichTextLabel" parent="VBoxContainer/MessageContainer"]
+[node name="MessageContent" type="RichTextLabel" parent="VBoxContainer/ContentContainer/MessageContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
@@ -86,4 +94,8 @@ bbcode_enabled = true
 fit_content = true
 scroll_active = false
 
-[connection signal="toggled" from="VBoxContainer/ThinkContainer/HBoxContainer/ExpandButton" to="." method="_on_expand_button_toggled"]
+[node name="UseToolContainer" type="VBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[connection signal="toggled" from="VBoxContainer/ContentContainer/ThinkContainer/HBoxContainer/ExpandButton" to="." method="_on_expand_button_toggled"]

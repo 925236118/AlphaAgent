@@ -1,14 +1,16 @@
 @tool
-class_name MessageItem
+class_name AgentChatMessageItem
 extends MarginContainer
 
-@onready var think_container: VBoxContainer = $VBoxContainer/ThinkContainer
+@onready var content_container: VBoxContainer = %ContentContainer
+@onready var think_container: VBoxContainer = %ThinkContainer
 @onready var think_content: RichTextLabel = %ThinkContent
-@onready var message_container: VBoxContainer = $VBoxContainer/MessageContainer
+@onready var message_container: VBoxContainer = %MessageContainer
 @onready var message_content: RichTextLabel = %MessageContent
 @onready var thinking_time_label: Label = %ThinkingTimeLabel
 @onready var thinking_label: Label = %ThinkingLabel
 @onready var expand_button: Button = %ExpandButton
+@onready var use_tool_container: VBoxContainer = %UseToolContainer
 
 @export var show_think: bool = false
 
@@ -43,3 +45,15 @@ func _on_expand_button_toggled(toggled_on: bool) -> void:
 	print(toggled_on)
 	expand_button.text = " ▲ " if toggled_on else " ▼ "
 	think_content.visible = toggled_on
+
+func used_tools(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
+	#content_container.hide()
+	for tool in tool_calls:
+		var panel = PanelContainer.new()
+		var stylebox = StyleBoxFlat.new()
+		stylebox.bg_color = Color("#202020")
+		panel.add_theme_stylebox_override("panel", stylebox)
+		var label = Label.new()
+		panel.add_child(label)
+		use_tool_container.add_child(panel)
+		label.text = "调用工具 " + tool.function.name

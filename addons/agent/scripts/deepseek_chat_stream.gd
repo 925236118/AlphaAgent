@@ -20,13 +20,40 @@ extends Node
 @export var max_tokens: int = 4096
 ## 是否输出调试日志
 @export var print_log: bool = false
+## 可以供模型调用的FunctionCalling
+@export var tools: Array = []
 
 ## 返回正文
 signal message(msg: String)
 ## 返回正思考内容
 signal think(msg: String)
 ## 返回结束
-signal generate_finish
+signal generate_finish(finish_reason: String, total_tokens: float)
+## 使用工具
+signal use_tool(tool_calls: Array[ToolCallsInfo])
+
+var tool_calls: Array[ToolCallsInfo] = []
+
+class ToolCallsInfo:
+	var id: String = ""
+	var function: ToolCallsInfoFunc = ToolCallsInfoFunc.new()
+	var type: String = "function"
+	func to_dict():
+		return {
+			"id": id,
+			"type": type,
+			"function": function.to_dict()
+		}
+
+class ToolCallsInfoFunc:
+	var name: String = ""
+	var arguments: String = ""
+
+	func to_dict():
+		return {
+			"name": name,
+			"arguments": arguments
+		}
 
 ## 发送请求的http客户端
 @onready var http_client: HTTPClient = HTTPClient.new()
@@ -35,6 +62,7 @@ var generatting: bool = false
 
 ## 发送请求
 func post_message(messages: Array[Dictionary]):
+	tool_calls = []
 	if print_log: print("请求消息列表: ", messages)
 	# 准备请求数据
 	var headers = [
@@ -56,8 +84,7 @@ func post_message(messages: Array[Dictionary]):
 		"stream_options": null,
 		"temperature": temperature,
 		"top_p": 1,
-		"tools": null,
-		"tool_choice": "none",
+		"tools": null if tools.size() == 0 else tools,
 		"logprobs": false,
 		"top_logprobs": null
 	})
@@ -94,14 +121,13 @@ func post_message(messages: Array[Dictionary]):
 		while http_client.get_status() == HTTPClient.STATUS_BODY:
 			http_client.poll()
 			var chunk = http_client.read_response_body_chunk()
-			if print_log: print("chunk.size()", chunk.size())
 			if chunk.size() == 0:
 				await get_tree().process_frame
 			else:
 				var chunk_string = chunk.get_string_from_utf8()
-				
+
 				if print_log: print(chunk_string)
-				
+
 				var data_array = chunk_string.split("\n")
 				for data_string in data_array:
 					if data_string.begins_with("data: "):
@@ -120,13 +146,32 @@ func post_message(messages: Array[Dictionary]):
 						if data and data.has("choices"):
 							var choices := data["choices"] as Array
 							var delta = choices[0]["delta"]
-							if use_thinking and delta.has("reasoning_content") and delta.get("reasoning_content") != null:
+							var req_tool_calls: Array = []
+							if delta.has("tool_calls"):
+								req_tool_calls = delta["tool_calls"]
+							if req_tool_calls.size() != 0:
+								print("req_tool_calls: ", req_tool_calls)
+								if req_tool_calls[0].has("id"):
+									var tool_call_info = ToolCallsInfo.new()
+									tool_call_info.id = req_tool_calls[0].get("id")
+									tool_call_info.function.name = req_tool_calls[0].get("function", {"name": ""}).get("name")
+									tool_call_info.function.arguments = req_tool_calls[0].get("function", {"arguments": ""}).get("arguments")
+
+									tool_calls.push_back(tool_call_info)
+								else:
+									tool_calls[-1].function.arguments += req_tool_calls[0].get("function", {"arguments": ""}).get("arguments")
+							elif use_thinking and delta.has("reasoning_content") and delta.get("reasoning_content") != null:
 								think.emit(delta["reasoning_content"])
 							else:
 								message.emit(delta["content"])
-							if choices[0].has("finish_reason") and choices[0].get("finish_reason") == "stop":
+
+							# 处理结束逻辑
+							if choices[0].has("finish_reason") and choices[0].get("finish_reason") == "tool_calls":
+								use_tool.emit(tool_calls)
+							if choices[0].has("finish_reason") and choices[0].get("finish_reason") != null:
 								generatting = false
-								generate_finish.emit()
+								var usage = data["usage"] as Dictionary
+								generate_finish.emit(choices[0].get("finish_reason"), usage["total_tokens"])
 						else:
 							generatting = false
 							print(data)

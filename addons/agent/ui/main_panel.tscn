@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=4 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Script" uid="uid://dlx7bujvsuk11" path="res://addons/agent/scripts/deepseek_chat_stream.gd" id="1_fhbwo"]
+[ext_resource type="PackedScene" uid="uid://cq2jo5hlpns6j" path="res://addons/agent/tools/tools.tscn" id="3_2usmi"]
 
 [node name="Agent" type="Control"]
 layout_mode = 3
@@ -50,6 +51,7 @@ layout_mode = 2
 alignment = 2
 
 [node name="OptionButton" type="OptionButton" parent="VBoxContainer/MarginContainer/InputContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
 selected = 0
 item_count = 2
@@ -57,6 +59,10 @@ popup/item_0/text = "Ask"
 popup/item_0/id = 0
 popup/item_1/text = "Agent"
 popup/item_1/id = 1
+
+[node name="UsageLabel" type="Label" parent="VBoxContainer/MarginContainer/InputContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
 
 [node name="SendButton" type="Button" parent="VBoxContainer/MarginContainer/InputContainer/HBoxContainer"]
 unique_name_in_owner = true
@@ -68,6 +74,36 @@ text = "发送"
 unique_name_in_owner = true
 script = ExtResource("1_fhbwo")
 secret_key = "sk-208101f6f9fd42bbbd0cb45cd064b91a"
-use_thinking = true
-max_tokens = 65536
+temperature = 0.0
+max_tokens = 8192
+tools = Array[Dictionary]([{
+"function": {
+"description": "获取当前的Godot引擎信息。包含Godot版本，CPU型号、CPU 架构、内存信息、显卡信息、设备型号等，也可以获取当前编辑器打开的场景和脚本相关信息。",
+"name": "get_engine_info",
+"parameters": {
+"properties": {},
+"required": [],
+"type": "object"
+}
+},
+"type": "function"
+}, {
+"function": {
+"description": "读取文件内容。",
+"name": "read_file",
+"parameters": {
+"properties": {
+"path": {
+"description": "需要读取的文件目录，必须是以res://开头的绝对路径。",
+"type": "string"
+}
+},
+"required": ["path"],
+"type": "object"
+}
+},
+"type": "function"
+}])
 metadata/_custom_type_script = "uid://dlx7bujvsuk11"
+
+[node name="Tools" parent="." instance=ExtResource("3_2usmi")]

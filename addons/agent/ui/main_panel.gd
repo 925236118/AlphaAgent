@@ -5,7 +5,9 @@ extends Control
 @onready var send_button: Button = %SendButton
 @onready var deep_seek_chat_stream: DeepSeekChatStream = %DeepSeekChatStream
 @onready var message_list: VBoxContainer = %MessageList
+@onready var usage_label: Label = %UsageLabel
 
+@onready var tools: Node = $Tools
 
 const MESSAGE_ITEM = preload("uid://cjytvn2j0yi3s")
 
@@ -13,17 +15,21 @@ var secret = "sk-208101f6f9fd42bbbd0cb45cd064b91a"
 
 var messages: Array[Dictionary] = []
 
-var current_message_item: MessageItem = null
+var current_message_item: AgentChatMessageItem = null
 var current_message: String = ""
 var current_think: String = ""
 
 
+
 func _ready() -> void:
-	deep_seek_chat_stream.secret_key = secret
+	# 初始化AI模型相关信息
 	init_message_list()
+	deep_seek_chat_stream.secret_key = secret
 	deep_seek_chat_stream.think.connect(on_agent_think)
 	deep_seek_chat_stream.message.connect(on_agent_message)
+	deep_seek_chat_stream.use_tool.connect(on_use_tool)
 	deep_seek_chat_stream.generate_finish.connect(on_agent_finish)
+	deep_seek_chat_stream.tools = tools.get_tools_list()
 
 	send_button.pressed.connect(on_click_send_message)
 
@@ -31,8 +37,8 @@ func reset_message_info():
 	current_message_item = null
 	current_think = ""
 	current_message = ""
-	
 
+# 初始化消息列表，添加系统提示词
 func init_message_list():
 	messages = [
 		{
@@ -46,8 +52,8 @@ func init_message_list():
 你可以根据发送给你的内容，返回逻辑代码。并说明逻辑。
 
 # 输出
-输出的内容应简短、准确，文本内容如果想使用标记，可以使用BBCode格式。不要使用未说明的标签。输出列表的时候，不要输出前面的项目符号，例如'•'，'1.'，'a.'等。
-由于当前的输出要展示在深色背景上，输出文字时应尽量选择浅色颜色，或者浅色背景加深色文字。
+输出的内容应简短、准确，文本内容如果想使用标记，可以使用BBCode格式。只能使用允许的BBCode标签。输出列表的时候，不要输出前面的项目符号，例如'•'，'1.'，'a.'等。
+由于当前的输出要展示在深色背景上，输出文字时应尽量选择浅色颜色，或者浅色背景加深色文字。如非必要，不要添加颜色标签。
 允许的BBCode标签有：
 - 粗体: b
 - 斜体: i
@@ -65,18 +71,18 @@ func init_message_list():
 
 func on_click_send_message():
 	reset_message_info()
-	
+
 	user_input.editable = false
 	send_button.disabled = true
 	messages.push_back({
 		"role": "user",
 		"content": user_input.text
 	})
-	
-	current_message_item = MESSAGE_ITEM.instantiate() as MessageItem
+
+	current_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
 	current_message_item.show_think = deep_seek_chat_stream.use_thinking
 	message_list.add_child(current_message_item)
-	
+
 	deep_seek_chat_stream.post_message(messages)
 
 func on_agent_think(think: String):
@@ -87,9 +93,40 @@ func on_agent_message(msg: String):
 	current_message += msg
 	current_message_item.update_message_content(current_message)
 
-func on_agent_finish():
+func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
+	current_message_item.used_tools(tool_calls)
+
+	reset_message_info()
+	# 存储调用工具信息
+	messages.push_back({
+		"role": "assistant",
+		"content": null,
+		"tool_calls": tool_calls.map(func (tool: DeepSeekChatStream.ToolCallsInfo): return tool.to_dict())
+	})
+
+	for tool in tool_calls:
+		print(tool.id)
+		messages.push_back({
+			"role": "tool",
+			"tool_call_id": tool.id,
+			"content": await tools.use_tool(tool)
+		})
+
+	await get_tree().create_timer(0.5).timeout
+	current_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
+	current_message_item.show_think = deep_seek_chat_stream.use_thinking
+	message_list.add_child(current_message_item)
+	print("current_message_item: ", current_message_item)
+
+	deep_seek_chat_stream.post_message(messages)
+
+
+func on_agent_finish(finish_reason: String, total_tokens: float):
+	print("finish_reason ", finish_reason)
+	print("total_tokens ", total_tokens)
 	user_input.editable = true
 	send_button.disabled = false
+	usage_label.text = "%.2f" % (total_tokens / (128 * 1024)) + "%"
 	messages.push_back({
 		"role": "assistant",
 		"content": current_message

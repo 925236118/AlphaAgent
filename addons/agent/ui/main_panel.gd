@@ -264,6 +264,7 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 		user_input.editable = true
 		send_button.disabled = false
 	usage_label.text = "%.2f" % (total_tokens / (128 * 1024)) + "%"
+	usage_label.tooltip_text = ("%.2f" % (total_tokens / (128 * 1024))) + "%" + " | " + ("%d / 128k usage tokens" % total_tokens)
 	messages.push_back({
 		"role": "assistant",
 		"content": current_message

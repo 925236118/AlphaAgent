@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=18 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Script" uid="uid://dlx7bujvsuk11" path="res://addons/agent/scripts/deepseek_chat_stream.gd" id="1_fhbwo"]
@@ -8,6 +8,10 @@
 [ext_resource type="Texture2D" uid="uid://dqf82stl4f3bh" path="res://addons/agent/icons/send_message.svg" id="4_2dutf"]
 [ext_resource type="Texture2D" uid="uid://bwxx0wr0tfjj8" path="res://addons/agent/icons/delete.svg" id="4_5v6i3"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_aabuu"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_n876e"]
+
 [sub_resource type="LabelSettings" id="LabelSettings_2usmi"]
 font_size = 128
 font_color = Color(0, 0, 0, 0.24313726)
@@ -16,9 +20,9 @@ font_color = Color(0, 0, 0, 0.24313726)
 font_color = Color(0.7666196, 0.76661956, 0.76661956, 0.5254902)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5v6i3"]
-content_margin_left = 0.0
+content_margin_left = 8.0
 content_margin_top = 0.0
-content_margin_right = 0.0
+content_margin_right = 8.0
 content_margin_bottom = 0.0
 bg_color = Color(0.14406255, 0.14406255, 0.14406249, 1)
 border_width_bottom = 2
@@ -33,6 +37,10 @@ corner_radius_bottom_left = 5
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cpi8b"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_elhta"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_c8smv"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5t7oo"]
 
 [node name="Agent" type="Control"]
 layout_mode = 3
@@ -67,6 +75,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "查看历史记录"
+theme_override_styles/focus = SubResource("StyleBoxEmpty_aabuu")
 text = "      "
 icon = ExtResource("2_6rfr6")
 icon_alignment = 1
@@ -77,6 +86,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "创建新对话"
+theme_override_styles/focus = SubResource("StyleBoxEmpty_n876e")
 text = "      "
 icon = ExtResource("3_njbgt")
 icon_alignment = 1
@@ -176,12 +186,14 @@ popup/item_1/id = 1
 [node name="UsageLabel" type="Label" parent="VBoxContainer/MarginContainer/PanelContainer/InputContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 0
 
 [node name="ClearButton" type="Button" parent="VBoxContainer/MarginContainer/PanelContainer/InputContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "清空输入内容"
+theme_override_styles/focus = SubResource("StyleBoxEmpty_c8smv")
 text = "      "
 icon = ExtResource("4_5v6i3")
 flat = true
@@ -193,6 +205,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "发送"
+theme_override_styles/focus = SubResource("StyleBoxEmpty_5t7oo")
 text = "      "
 icon = ExtResource("4_2dutf")
 flat = true
@@ -314,6 +327,26 @@ tools = Array[Dictionary]([{
 }
 },
 "required": ["class_name"],
+"type": "object"
+}
+},
+"type": "function"
+}, {
+"function": {
+"description": "将一个脚本挂在到场景节点上",
+"name": "add_script_to_scene",
+"parameters": {
+"properties": {
+"scene_path": {
+"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+"type": "string"
+},
+"script_path": {
+"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+"type": "string"
+}
+},
+"required": ["scene_path", "script_path"],
 "type": "object"
 }
 },

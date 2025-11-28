@@ -4,10 +4,15 @@ extends Node
 @export_tool_button("测试") var test_action = test
 
 func test():
+
 	var tool = DeepSeekChatStream.ToolCallsInfo.new()
-	tool.function.name = "get_editor_info"
-	tool.function.arguments = JSON.stringify({"path": "res://addons/agent/tools/tools.tscn"})
+	tool.function.name = "write_file"
+	tool.function.arguments = JSON.stringify({"path": "res://create_test.md", "content": """extends Node"""
+	})
+
+
 	print(use_tool(tool))
+
 
 func get_tools_list() -> Array[Dictionary]:
 	return [
@@ -16,7 +21,7 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "get_project_info",
-				"description": "获取当前的Godot引擎信息。包含Godot版本，CPU型号、CPU 架构、内存信息、显卡信息、设备型号等，还有当前项目的一些信息，例如项目名称、项目版本、项目描述、项目运行主场景、游戏运行窗口信息、全局的物理信息、全局的渲染设置、主题信息等。",
+				"description": "获取当前的Godot引擎信息。包含Godot版本，CPU型号、CPU 架构、内存信息、显卡信息、设备型号、当前系统时间等，还有当前项目的一些信息，例如项目名称、项目版本、项目描述、项目运行主场景、游戏运行窗口信息、全局的物理信息、全局的渲染设置、主题信息等。",
 				"parameters": {
 					"type": "object",
 					"properties": {},
@@ -95,7 +100,7 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "create_folder",
-				"description": "创建文件夹。在给定的目录下创建一个指定称的空的文件夹。如果不给名称就叫新建文件夹，有重复的就后缀写上（数字）",
+				"description": "创建文件夹。在给定的目录下创建一个指定称的空的文件夹。如果不给名称就叫新建文件夹，有重复的就后缀写上（数字），每次创建的文件夹应存在上级。",
 				"parameters": {
 					"type": "object",
 					"properties": {
@@ -131,6 +136,7 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 					"video_adapter_name": RenderingServer.get_video_adapter_name(),
 					"video_adapter_driver": OS.get_video_adapter_driver_info(),
 					"rendering_method": RenderingServer.get_current_rendering_method(),
+					"system_time": Time.get_datetime_string_from_system()
 				},
 				"project": {
 					"project_name": ProjectSettings.get_setting("application/config/name"),
@@ -242,15 +248,16 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 			if not json == null and json.has("path") and json.has("content"):
 				var path = json.path
 				var content = json.content
-				var is_new_file = not FileAccess.file_exists(path)
+				# var is_new_file = not FileAccess.file_exists(path)
 				var file = FileAccess.open(path, FileAccess.WRITE)
 				if not file == null:
 					file.store_string(content)
 					file.close()
-					if is_new_file:
-						EditorInterface.get_resource_filesystem().update_file(path)
-					else:
-						EditorInterface.get_resource_filesystem().reimport_files([path])
+					
+					EditorInterface.get_resource_filesystem().update_file(path)
+
+					EditorInterface.get_script_editor().notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
+
 					result = {
 						"file_path": path,
 						"file_uid": ResourceUID.path_to_uid(path),

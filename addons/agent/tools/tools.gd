@@ -5,7 +5,7 @@ extends Node
 
 func test():
 	var tool = DeepSeekChatStream.ToolCallsInfo.new()
-	tool.function.name = "get_project_file_list"
+	tool.function.name = "get_editor_info"
 	tool.function.arguments = JSON.stringify({"path": "res://addons/agent/tools/tools.tscn"})
 	print(use_tool(tool))
 
@@ -160,13 +160,30 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 				}
 			}
 		"get_editor_info":
+			var script_editor := EditorInterface.get_script_editor()
+			var editor_file_list: ItemList = script_editor.get_child(0).get_child(1).get_child(0).get_child(0).get_child(1)
+			var selected := editor_file_list.get_selected_items()
+			var item_count = editor_file_list.item_count
+			var select_index = -1
+			if selected:
+				select_index = selected[0]
+				#print(il.get_item_tooltip(index))
+			var edit_file_list = []
+			var current_opend_script = ""
+			for index in item_count:
+				var file_path = editor_file_list.get_item_tooltip(index)
+				if file_path.begins_with("res://"):
+					edit_file_list.push_back(file_path)
+					if select_index == index:
+						current_opend_script = file_path
 			result = {
 				"editor": {
 					# 当前编辑器信息
 					"opened_scenes": EditorInterface.get_open_scenes(),
+					"current_edited_scene": EditorInterface.get_edited_scene_root().get_scene_file_path(),
 					"current_scene_root_node": EditorInterface.get_edited_scene_root(),
-					"current_opend_script": EditorInterface.get_script_editor().get_current_script().resource_path,
-					"opend_scripts": EditorInterface.get_script_editor().get_open_scripts().map(func (script: Script): return script.resource_path)
+					"current_opend_script": current_opend_script,
+					"opend_scripts": edit_file_list
 				},
 			}
 		"get_project_file_list":

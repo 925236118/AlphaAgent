@@ -17,3 +17,7 @@ config/icon="res://icon.svg"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/agent/plugin.cfg")
+
+[test]
+
+folder_created=true

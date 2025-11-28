@@ -89,7 +89,25 @@ func get_tools_list() -> Array[Dictionary]:
 					"required": ["path", "content"]
 				}
 			}
-		}
+		},
+		# create_folder
+		{
+			"type": "function",
+			"function": {
+				"name": "create_folder",
+				"description": "创建文件夹。在给定的目录下创建一个指定称的空的文件夹。如果不给名称就叫新建文件夹，有重复的就后缀写上（数字）",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"path": {
+							"type": "string",
+							"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+						}
+					},
+					"required": ["path"]
+				}
+			}
+		},
 	]
 
 
@@ -226,6 +244,27 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 					result = {
 						"open_error": FileAccess.get_open_error()
 					}
+		"create_folder":
+			var json = JSON.parse_string(tool_call.function.arguments)
+			if not json == null and json.has("path"): # 如果有路径就执行
+				var path = json.path
+				var has_folder = DirAccess.dir_exists_absolute(path)
+				if has_folder:
+					result = {
+						"error":"文件夹下的文件数量"
+					}
+				else:
+					var error = DirAccess.make_dir_absolute(path)
+					if error == OK:
+						result = {
+							"error":"文件创建成功，文件夹下的文件数量"
+						}
+					else:
+						result = {
+							"error":"文件夹创建失败，error"
+						}
+						
+				
 		_:
 			result = {
 				"error": "错误的function.name"

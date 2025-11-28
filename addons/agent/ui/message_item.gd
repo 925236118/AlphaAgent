@@ -11,6 +11,8 @@ extends MarginContainer
 @onready var thinking_label: Label = %ThinkingLabel
 @onready var expand_button: Button = %ExpandButton
 @onready var use_tool_container: VBoxContainer = %UseToolContainer
+@onready var wait_using_tool: PanelContainer = %WaitUsingTool
+@onready var wait_using_tool_rich_text_label: RichTextLabel = %WaitUsingTool/RichTextLabel
 
 @export var show_think: bool = false
 
@@ -22,6 +24,7 @@ func _ready() -> void:
 	#expand_button.toggled.connect(_on_expand_button_toggled)
 	think_container.visible = show_think
 	think_time = 0.0
+	message_content.meta_clicked.connect(on_click_rich_text_url)
 
 func _process(delta: float) -> void:
 	if thinking:
@@ -47,7 +50,16 @@ func update_message_content(text: String):
 	#expand_button.text = " ▲ " if toggled_on else " ▼ "
 	#think_content.visible = toggled_on
 
+func response_use_tool():
+	wait_using_tool.show()
+
+	var wait_placeholder_text = [
+		" 正在等待 Agent 调用工具，请耐心等待 "
+	]
+	wait_using_tool_rich_text_label.text = "[agent_thinking freq=5.0 span=5.0] %s [/agent_thinking]" % wait_placeholder_text.pick_random()
+
 func used_tools(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
+	wait_using_tool.hide()
 	for tool in tool_calls:
 		var panel = PanelContainer.new()
 		var stylebox = StyleBoxFlat.new()
@@ -57,3 +69,16 @@ func used_tools(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 		panel.add_child(label)
 		use_tool_container.add_child(panel)
 		label.text = "调用工具 " + tool.function.name
+
+func on_click_rich_text_url(meta):
+	var meta_string = str(meta)
+	if meta_string.begins_with("{") and meta_string.ends_with("}"):
+		var json = JSON.parse_string(meta_string)
+		var path: String = json.path
+		if path.ends_with(".tscn") or path.ends_with(".gd") or path.ends_with(".gdshader") or path.ends_with(".md") or path.ends_with(".txt") or path.ends_with(".res") or path.ends_with(".tres"):
+			var resource = load(path)
+			EditorInterface.edit_resource(resource)
+	elif meta_string.begins_with("http"):
+		OS.shell_open(meta_string)
+	else:
+		print("不支持的跳转方式，您可以复制链接后自行跳转： ", meta)

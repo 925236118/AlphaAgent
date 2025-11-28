@@ -1,8 +1,15 @@
-[gd_scene load_steps=4 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=6 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Script" uid="uid://dlx7bujvsuk11" path="res://addons/agent/scripts/deepseek_chat_stream.gd" id="1_fhbwo"]
 [ext_resource type="PackedScene" uid="uid://cq2jo5hlpns6j" path="res://addons/agent/tools/tools.tscn" id="3_2usmi"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_2usmi"]
+font_size = 128
+font_color = Color(0, 0, 0, 0.24313726)
+
+[sub_resource type="LabelSettings" id="LabelSettings_6rfr6"]
+font_color = Color(0.7666196, 0.76661956, 0.76661956, 0.5254902)
 
 [node name="Agent" type="Control"]
 layout_mode = 3
@@ -21,7 +28,62 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="MarginContainer2" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="TopBar" type="VBoxContainer" parent="VBoxContainer/MarginContainer2"]
+layout_mode = 2
+
+[node name="NewChatButton" type="Button" parent="VBoxContainer/MarginContainer2/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+tooltip_text = "创建新对话"
+text = " + 新对话"
+
+[node name="WelcomeMessage" type="Control" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/WelcomeMessage"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/WelcomeMessage/VBoxContainer"]
+layout_mode = 2
+text = "α"
+label_settings = SubResource("LabelSettings_2usmi")
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="VBoxContainer/WelcomeMessage/VBoxContainer"]
+layout_mode = 2
+text = "帮助构建游戏项目
+帮助学习Godot程序
+帮助梳理已有功能
+在下方输入内容开始"
+label_settings = SubResource("LabelSettings_6rfr6")
+horizontal_alignment = 1
+
+[node name="LinkButton" type="LinkButton" parent="VBoxContainer/WelcomeMessage/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.7647059, 0.7647059, 0.7647059, 0.5254902)
+text = "更多内容"
+
 [node name="ChatContainer" type="ScrollContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -50,6 +112,7 @@ custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 size_flags_horizontal = 3
 wrap_mode = 1
+scroll_fit_content_height = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer/InputContainer"]
 layout_mode = 2
@@ -69,11 +132,17 @@ popup/item_1/id = 1
 unique_name_in_owner = true
 layout_mode = 2
 
+[node name="ClearButton" type="Button" parent="VBoxContainer/MarginContainer/InputContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+text = " 清空内容 "
+
 [node name="SendButton" type="Button" parent="VBoxContainer/MarginContainer/InputContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
-text = "发送"
+text = " 发送 "
 
 [node name="DeepSeekChatStream" type="Node" parent="."]
 unique_name_in_owner = true
@@ -83,7 +152,7 @@ temperature = 0.0
 max_tokens = 8192
 tools = Array[Dictionary]([{
 "function": {
-"description": "获取当前的Godot引擎信息。包含Godot版本，CPU型号、CPU 架构、内存信息、显卡信息、设备型号等，还有当前项目的一些信息，例如项目名称、项目版本、项目描述、项目运行主场景、游戏运行窗口信息、全局的物理信息、全局的渲染设置、主题信息等。",
+"description": "获取当前的Godot引擎信息。包含Godot版本，CPU型号、CPU 架构、内存信息、显卡信息、设备型号、当前系统时间等，还有当前项目的一些信息，例如项目名称、项目版本、项目描述、项目运行主场景、游戏运行窗口信息、全局的物理信息、全局的渲染设置、主题信息等。",
 "name": "get_project_info",
 "parameters": {
 "properties": {},
@@ -146,6 +215,50 @@ tools = Array[Dictionary]([{
 }
 },
 "required": ["path", "content"],
+"type": "object"
+}
+},
+"type": "function"
+}, {
+"function": {
+"description": "创建文件夹。在给定的目录下创建一个指定称的空的文件夹。如果不给名称就叫新建文件夹，有重复的就后缀写上（数字），每次创建的文件夹应存在上级。",
+"name": "create_folder",
+"parameters": {
+"properties": {
+"path": {
+"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+"type": "string"
+}
+},
+"required": ["path"],
+"type": "object"
+}
+},
+"type": "function"
+}, {
+"function": {
+"description": "获得Godot原生的类的文档，文档中包含这个类的属性、方法以及参数和返回值、信号、枚举常量、父类、派生类等信息。直接查询为请求信息的列表。可以单独查询某些数据。",
+"name": "get_class_doc",
+"parameters": {
+"properties": {
+"class_name": {
+"description": "需要查询的类名",
+"type": "string"
+},
+"enums": {
+"description": "需要查询的枚举列表",
+"type": "array"
+},
+"properties": {
+"description": "需要查询的属性名列表",
+"type": "array"
+},
+"signals": {
+"description": "需要查询的信号名列表",
+"type": "array"
+}
+},
+"required": ["class_name"],
 "type": "object"
 }
 },

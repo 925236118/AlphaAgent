@@ -1,6 +1,7 @@
-[gd_scene load_steps=10 format=3 uid="uid://cjytvn2j0yi3s"]
+[gd_scene load_steps=13 format=3 uid="uid://cjytvn2j0yi3s"]
 
 [ext_resource type="Script" uid="uid://b2ia356h5kd7m" path="res://addons/agent/ui/message_item.gd" id="1_kn78a"]
+[ext_resource type="Script" uid="uid://ddyk6f1xy0q5e" path="res://addons/agent/ui/richtext_effects/agent_thinking_text_effect.gd" id="2_q4qcv"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_kn78a"]
 
@@ -17,6 +18,13 @@
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dfcb6"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_njs72"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kn78a"]
+bg_color = Color(0.1254902, 0.1254902, 0.1254902, 1)
+
+[sub_resource type="RichTextEffect" id="RichTextEffect_q4qcv"]
+script = ExtResource("2_q4qcv")
+metadata/_custom_type_script = "uid://ddyk6f1xy0q5e"
 
 [node name="MessageItem" type="MarginContainer"]
 anchors_preset = 15
@@ -93,6 +101,19 @@ theme_override_styles/fill = SubResource("StyleBoxEmpty_njs72")
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
+
+[node name="WaitUsingTool" type="PanelContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_kn78a")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="VBoxContainer/WaitUsingTool"]
+layout_mode = 2
+bbcode_enabled = true
+text = "[agent_thinking freq=5.0 span=5.0]程序员正在喝茶[/agent_thinking]"
+fit_content = true
+custom_effects = [SubResource("RichTextEffect_q4qcv")]
 
 [node name="UseToolContainer" type="VBoxContainer" parent="VBoxContainer"]
 unique_name_in_owner = true

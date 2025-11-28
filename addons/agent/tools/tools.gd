@@ -4,14 +4,17 @@ extends Node
 @export_tool_button("测试") var test_action = test
 
 func test():
-
+	#print(EditorInterface.get_editor_main_screen())
 	var tool = DeepSeekChatStream.ToolCallsInfo.new()
-	tool.function.name = "write_file"
-	tool.function.arguments = JSON.stringify({"path": "res://create_test.md", "content": """extends Node"""
-	})
-
-
+	tool.function.name = "get_class_doc"
+	tool.function.arguments = JSON.stringify({"class_name": "Node", "enums": ["ProcessMode", "ProcessThreadMessages"]})
+#
+#
 	print(use_tool(tool))
+
+	#var node = EditorInterface.get_editor_main_screen()
+#
+	#print(node.get_children())
 
 
 func get_tools_list() -> Array[Dictionary]:
@@ -113,6 +116,37 @@ func get_tools_list() -> Array[Dictionary]:
 				}
 			}
 		},
+		# get_class_doc
+		{
+			"type": "function",
+			"function": {
+				"name": "get_class_doc",
+				"description": "获得Godot原生的类的文档，文档中包含这个类的属性、方法以及参数和返回值、信号、枚举常量、父类、派生类等信息。直接查询为请求信息的列表。可以单独查询某些数据。",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"class_name": {
+							"type": "string",
+							"description": "需要查询的类名",
+						},
+						"signals": {
+							"type": "array",
+							"description": "需要查询的信号名列表",
+						},
+						"properties": {
+							"type": "array",
+							"description": "需要查询的属性名列表",
+						},
+						"enums": {
+							"type": "array",
+							"description": "需要查询的枚举列表",
+						}
+					},
+					"required": ["class_name"]
+				}
+			}
+		},
+
 	]
 
 
@@ -246,17 +280,20 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 		"write_file":
 			var json = JSON.parse_string(tool_call.function.arguments)
 			if not json == null and json.has("path") and json.has("content"):
-				var path = json.path
+				var path: String = json.path
 				var content = json.content
 				# var is_new_file = not FileAccess.file_exists(path)
 				var file = FileAccess.open(path, FileAccess.WRITE)
 				if not file == null:
 					file.store_string(content)
 					file.close()
-					
+
 					EditorInterface.get_resource_filesystem().update_file(path)
 
 					EditorInterface.get_script_editor().notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
+
+					if path.get_file().get_extension() == "tscn":
+						EditorInterface.reload_scene_from_path(path)
 
 					result = {
 						"file_path": path,
@@ -288,6 +325,53 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 							"error":"文件夹创建失败，%s" % error_string(error)
 						}
 				EditorInterface.get_resource_filesystem().scan()
+		"get_class_doc":
+			var json = JSON.parse_string(tool_call.function.arguments)
+			if not json == null and json.has("class_name"):
+				var cname = json.get("class_name")
+				if ClassDB.class_exists(cname):
+					if json.has("signals"):
+						var signals_array = json.get("signals")
+						result = {
+							"class_name": cname,
+							"signals": signals_array.map(func (sig): return ClassDB.class_get_signal(cname, sig))
+						}
+					elif json.has("properties"):
+						var properties_array = json.get("properties")
+						result = {
+							"class_name": cname,
+							"properties": properties_array.map(func (prop): return {
+								"default_value": ClassDB.class_get_property_default_value(cname, prop),
+								"setter": ClassDB.class_get_property_setter(cname, prop),
+								"getter": ClassDB.class_get_property_getter(cname, prop),
+							})
+						}
+					elif json.has("enums"):
+						var enums_array = json.get("enums")
+						result = {
+							"class_name": cname,
+							"enums": enums_array.map(func (enum_name): return {
+								"enum": enum_name,
+								"values": ClassDB.class_get_enum_constants(cname, enum_name)
+							})
+						}
+					else:
+						result = {
+							"class_name": cname,
+							"api_type": ClassDB.class_get_api_type(cname),
+							"properties": ClassDB.class_get_property_list(cname),
+							"methods": ClassDB.class_get_method_list(cname),
+							"enums": ClassDB.class_get_enum_list(cname),
+							"parent_class": ClassDB.get_parent_class(cname),
+							"inheriters_class": ClassDB.get_inheriters_from_class(cname),
+							"signals": ClassDB.class_get_signal_list(cname),
+							"constants": ClassDB.class_get_integer_constant_list(cname)
+						}
+				else:
+					result = {
+						"error": "%s 类不存在" % cname
+					}
+
 
 
 		_:

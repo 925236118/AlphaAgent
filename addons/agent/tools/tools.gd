@@ -146,7 +146,29 @@ func get_tools_list() -> Array[Dictionary]:
 				}
 			}
 		},
-
+		# add_script_to_scene
+		{
+			"type": "function",
+			"function": {
+				"name": "add_script_to_scene",
+				"description": "将一个脚本挂在到场景节点上",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"scene_path": {
+							"type": "string",
+							"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+						},
+						"script_path": {
+							"type": "string",
+							"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+						}
+					},
+					"required": ["scene_path","script_path"]
+				}
+			}
+		},
+		
 	]
 
 
@@ -371,6 +393,45 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 					result = {
 						"error": "%s 类不存在" % cname
 					}
+		"add_script_to_scene":
+			var json = JSON.parse_string(tool_call.function.arguments)
+			if not json == null and json.has("scene_path") and json.has("script_path"):
+				var scene_path = json.scene_path
+				var script_path = json.script_path
+				var has_scene_file = DirAccess.dir_exists_absolute(scene_path)
+				var has_script_path = DirAccess.dir_exists_absolute(script_path)
+				if has_scene_file and has_script_path:
+					var scene_file = FileAccess.open(scene_path, FileAccess.WRITE)
+					var script_file = FileAccess.open(script_path, FileAccess.WRITE)
+					var has_script = scene_file.get_script()
+					if has_script == null:
+						scene_file.set_script(script_file)
+						var scene_class = scene_file.get_class()
+						var script_class = script_file.get_instance_base_type()
+						var is_same_class:bool = false
+						result = {
+							"scene_class":scene_class,
+							"script_class":script_class,
+						}
+						if scene_class == script_class:
+							is_same_class = true
+							result["success"] = "脚本加载成功"
+						else:
+							result["error"] = "场景节点类型与脚本继承类型不符"
+					else:
+						result = {
+							"error":"该场景节点已挂载脚本"
+						}
+				else:
+					if not has_scene_file:
+						result = {
+							"error":"场景文件不存在，询问是否需要新建该场景"
+						}
+					if not has_script_path:
+						result = {
+							"error":"脚本文件不存在，询问是否需要新建该脚本"
+						}
+				EditorInterface.get_resource_filesystem().scan()
 
 
 

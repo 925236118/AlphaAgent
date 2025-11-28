@@ -37,9 +37,10 @@ func update_message_content(text: String):
 	thinking = false
 	if show_think:
 		thinking_label.text = "思考了"
-	message_container.show()
-	message_content.show()
 	message_content.text = text
+	if message_content.text.trim_prefix(" ") != "":
+		message_container.show()
+		message_content.show()
 
 
 #func _on_expand_button_toggled(toggled_on: bool) -> void:

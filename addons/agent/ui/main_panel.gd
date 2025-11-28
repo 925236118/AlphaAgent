@@ -32,7 +32,7 @@ func _ready() -> void:
 	deep_seek_chat_stream.tools = tools.get_tools_list()
 
 	send_button.pressed.connect(on_click_send_message)
-	
+
 	user_input.set_drag_forwarding(
 		Callable(),
 		func (at_position: Vector2, data: Variant):
@@ -59,12 +59,12 @@ func _ready() -> void:
 					var root_node = EditorInterface.get_edited_scene_root()
 					var current_scene = root_node.scene_file_path
 					var root_node_name = root_node.name
-					
+
 					var nodes = data.nodes
 					for node_path: String in nodes:
 						var splite_array = node_path.split("/", false, 20)
 						var path = splite_array[-1]
-						
+
 						if node_info_list.find_custom(func(info): return info.path == path and info.scene == current_scene) != -1:
 							return
 						var reference_item = REFERENCE_ITEM.instantiate()
@@ -90,7 +90,7 @@ func _ready() -> void:
 						var index := selected[0]
 						file = editor_file_list.get_item_tooltip(index)
 					var file_info_list = info_list.filter(func(info): return info.type == "file")
-					
+
 					if file_info_list.find_custom(func(info): return info.path == file) != -1:
 						return
 					var reference_item = REFERENCE_ITEM.instantiate()

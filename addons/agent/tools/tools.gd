@@ -250,7 +250,7 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 					if is_new_file:
 						EditorInterface.get_resource_filesystem().update_file(path)
 					else:
-						EditorInterface.get_resource_filesystem().scan()
+						EditorInterface.get_resource_filesystem().reimport_files([path])
 					result = {
 						"file_path": path,
 						"file_uid": ResourceUID.path_to_uid(path),
@@ -268,20 +268,21 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 				var has_folder = DirAccess.dir_exists_absolute(path)
 				if has_folder:
 					result = {
-						"error":"文件夹下的文件数量"
+						"error":"文件夹已存在，无需创建"
 					}
 				else:
 					var error = DirAccess.make_dir_absolute(path)
 					if error == OK:
 						result = {
-							"error":"文件创建成功，文件夹下的文件数量"
+							"success":"文件创建成功"
 						}
 					else:
 						result = {
-							"error":"文件夹创建失败，error"
+							"error":"文件夹创建失败，%s" % error_string(error)
 						}
-						
-				
+				EditorInterface.get_resource_filesystem().scan()
+
+
 		_:
 			result = {
 				"error": "错误的function.name"

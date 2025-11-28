@@ -1,8 +1,12 @@
-[gd_scene load_steps=6 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=14 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Script" uid="uid://dlx7bujvsuk11" path="res://addons/agent/scripts/deepseek_chat_stream.gd" id="1_fhbwo"]
+[ext_resource type="Texture2D" uid="uid://dd5t0pwniqnr1" path="res://addons/agent/icons/history.svg" id="2_6rfr6"]
 [ext_resource type="PackedScene" uid="uid://cq2jo5hlpns6j" path="res://addons/agent/tools/tools.tscn" id="3_2usmi"]
+[ext_resource type="Texture2D" uid="uid://ctaxjkunancs7" path="res://addons/agent/icons/add.svg" id="3_njbgt"]
+[ext_resource type="Texture2D" uid="uid://dqf82stl4f3bh" path="res://addons/agent/icons/send_message.svg" id="4_2dutf"]
+[ext_resource type="Texture2D" uid="uid://bwxx0wr0tfjj8" path="res://addons/agent/icons/delete.svg" id="4_5v6i3"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_2usmi"]
 font_size = 128
@@ -10,6 +14,21 @@ font_color = Color(0, 0, 0, 0.24313726)
 
 [sub_resource type="LabelSettings" id="LabelSettings_6rfr6"]
 font_color = Color(0.7666196, 0.76661956, 0.76661956, 0.5254902)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5v6i3"]
+bg_color = Color(0.1254902, 0.1254902, 0.1254902, 1)
+border_width_bottom = 2
+border_color = Color(0.97746664, 0.74914473, 0.5341017, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5v6i3"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cpi8b"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_elhta"]
 
 [node name="Agent" type="Control"]
 layout_mode = 3
@@ -35,15 +54,29 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="TopBar" type="VBoxContainer" parent="VBoxContainer/MarginContainer2"]
+[node name="TopBar" type="HBoxContainer" parent="VBoxContainer/MarginContainer2"]
 layout_mode = 2
+alignment = 2
+
+[node name="HistoryButton" type="Button" parent="VBoxContainer/MarginContainer2/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+tooltip_text = "查看历史记录"
+text = "      "
+icon = ExtResource("2_6rfr6")
+icon_alignment = 1
+expand_icon = true
 
 [node name="NewChatButton" type="Button" parent="VBoxContainer/MarginContainer2/TopBar"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "创建新对话"
-text = " + 新对话"
+text = "      "
+icon = ExtResource("3_njbgt")
+icon_alignment = 1
+expand_icon = true
 
 [node name="WelcomeMessage" type="Control" parent="VBoxContainer"]
 unique_name_in_owner = true
@@ -94,31 +127,46 @@ size_flags_horizontal = 3
 
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
 layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 10
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/MarginContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_5v6i3")
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/MarginContainer/PanelContainer"]
+layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="InputContainer" type="VBoxContainer" parent="VBoxContainer/MarginContainer"]
+[node name="InputContainer" type="VBoxContainer" parent="VBoxContainer/MarginContainer/PanelContainer/MarginContainer"]
 layout_mode = 2
 
-[node name="ReferenceList" type="HFlowContainer" parent="VBoxContainer/MarginContainer/InputContainer"]
+[node name="ReferenceList" type="HFlowContainer" parent="VBoxContainer/MarginContainer/PanelContainer/MarginContainer/InputContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="UserInput" type="TextEdit" parent="VBoxContainer/MarginContainer/InputContainer"]
+[node name="UserInput" type="TextEdit" parent="VBoxContainer/MarginContainer/PanelContainer/MarginContainer/InputContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxEmpty_5v6i3")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_cpi8b")
+theme_override_styles/read_only = SubResource("StyleBoxEmpty_elhta")
+placeholder_text = "输入问题，或拖拽添加引用"
 wrap_mode = 1
 scroll_fit_content_height = true
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer/InputContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer/PanelContainer/MarginContainer/InputContainer"]
 layout_mode = 2
 alignment = 2
 
-[node name="OptionButton" type="OptionButton" parent="VBoxContainer/MarginContainer/InputContainer/HBoxContainer"]
+[node name="OptionButton" type="OptionButton" parent="VBoxContainer/MarginContainer/PanelContainer/MarginContainer/InputContainer/HBoxContainer"]
 visible = false
 layout_mode = 2
 selected = 0
@@ -128,21 +176,31 @@ popup/item_0/id = 0
 popup/item_1/text = "Agent"
 popup/item_1/id = 1
 
-[node name="UsageLabel" type="Label" parent="VBoxContainer/MarginContainer/InputContainer/HBoxContainer"]
+[node name="UsageLabel" type="Label" parent="VBoxContainer/MarginContainer/PanelContainer/MarginContainer/InputContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ClearButton" type="Button" parent="VBoxContainer/MarginContainer/InputContainer/HBoxContainer"]
+[node name="ClearButton" type="Button" parent="VBoxContainer/MarginContainer/PanelContainer/MarginContainer/InputContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
-text = " 清空内容 "
+tooltip_text = "清空输入内容"
+text = "      "
+icon = ExtResource("4_5v6i3")
+flat = true
+icon_alignment = 1
+expand_icon = true
 
-[node name="SendButton" type="Button" parent="VBoxContainer/MarginContainer/InputContainer/HBoxContainer"]
+[node name="SendButton" type="Button" parent="VBoxContainer/MarginContainer/PanelContainer/MarginContainer/InputContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
-text = " 发送 "
+tooltip_text = "发送"
+text = "      "
+icon = ExtResource("4_2dutf")
+flat = true
+icon_alignment = 1
+expand_icon = true
 
 [node name="DeepSeekChatStream" type="Node" parent="."]
 unique_name_in_owner = true

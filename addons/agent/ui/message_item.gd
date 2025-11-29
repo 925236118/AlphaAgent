@@ -7,6 +7,9 @@ extends MarginContainer
 @onready var think_content: RichTextLabel = %ThinkContent
 @onready var message_container: VBoxContainer = %MessageContainer
 @onready var message_content: RichTextLabel = %MessageContent
+@onready var user_message_container: VBoxContainer = %UserMessageContainer
+@onready var user_message_content: RichTextLabel = %UserMessageContent
+
 @onready var thinking_time_label: Label = %ThinkingTimeLabel
 @onready var thinking_label: Label = %ThinkingLabel
 @onready var expand_button: Button = %ExpandButton
@@ -21,7 +24,7 @@ var thinking: bool = false
 var think_time: float = 0.0
 
 func _ready() -> void:
-	#expand_button.toggled.connect(_on_expand_button_toggled)
+	expand_button.toggled.connect(_on_expand_button_toggled)
 	think_container.visible = show_think
 	think_time = 0.0
 	message_content.meta_clicked.connect(on_click_rich_text_url)
@@ -45,10 +48,14 @@ func update_message_content(text: String):
 		message_container.show()
 		message_content.show()
 
+func update_user_message_content(text: String):
+	user_message_container.show()
+	user_message_content.show()
+	user_message_content.text = text
 
-#func _on_expand_button_toggled(toggled_on: bool) -> void:
-	#expand_button.text = " ▲ " if toggled_on else " ▼ "
-	#think_content.visible = toggled_on
+func _on_expand_button_toggled(toggled_on: bool) -> void:
+	expand_button.text = " ▲ " if toggled_on else " ▼ "
+	think_content.visible = toggled_on
 
 func response_use_tool():
 	wait_using_tool.show()

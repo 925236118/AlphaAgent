@@ -12,3 +12,6 @@ func _ready() -> void:
 
 func set_label(text):
 	label.text = text
+
+func set_tooltip(text):
+	tooltip_text = text

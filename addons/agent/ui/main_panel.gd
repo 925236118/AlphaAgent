@@ -1,21 +1,16 @@
 @tool
 extends Control
 
-@onready var user_input: TextEdit = %UserInput
-@onready var send_button: Button = %SendButton
-@onready var clear_button: Button = %ClearButton
 @onready var deep_seek_chat_stream: DeepSeekChatStream = %DeepSeekChatStream
 @onready var message_list: VBoxContainer = %MessageList
-@onready var usage_label: Label = %UsageLabel
-@onready var reference_list: HFlowContainer = %ReferenceList
 @onready var new_chat_button: Button = %NewChatButton
 @onready var chat_container: ScrollContainer = %ChatContainer
 @onready var welcome_message: Control = %WelcomeMessage
+@onready var input_container: MarginContainer = %InputContainer
 
 @onready var tools: Node = $Tools
 
 const MESSAGE_ITEM = preload("uid://cjytvn2j0yi3s")
-const REFERENCE_ITEM = preload("uid://bewckbivwp036")
 
 var secret = "sk-208101f6f9fd42bbbd0cb45cd064b91a"
 
@@ -24,6 +19,7 @@ var messages: Array[Dictionary] = []
 var current_message_item: AgentChatMessageItem = null
 var current_message: String = ""
 var current_think: String = ""
+
 
 func _ready() -> void:
 	# 展示欢迎语
@@ -37,85 +33,11 @@ func _ready() -> void:
 	deep_seek_chat_stream.use_tool.connect(on_use_tool)
 	deep_seek_chat_stream.generate_finish.connect(on_agent_finish)
 	deep_seek_chat_stream.response_use_tool.connect(on_response_use_tool)
-	deep_seek_chat_stream.tools = tools.get_tools_list()
 
-	send_button.pressed.connect(on_click_send_message)
-	clear_button.pressed.connect(on_click_clear_button)
 	new_chat_button.pressed.connect(on_click_new_chat_button)
-
-	user_input.set_drag_forwarding(
-		Callable(),
-		func (at_position: Vector2, data: Variant):
-			var allow_types = ['files', 'nodes', 'script_list_element', 'shader_list_element']
-			return allow_types.find(data.type) != -1,
-
-		func (at_position: Vector2, data: Variant):
-			var info_list = reference_list.get_children().map(func(node): return node.info)
-			match data.type:
-				"files":
-					var file_info_list = info_list.filter(func(info): return info.type == "file")
-					for file: String in data.files:
-						if file_info_list.find_custom(func(info): return info.path == file) != -1:
-							continue
-						var reference_item = REFERENCE_ITEM.instantiate()
-						reference_item.info = {
-							"type": "file",
-							"path": file
-						}
-						reference_list.add_child(reference_item)
-						reference_item.set_label(file.get_file())
-				"nodes":
-					var node_info_list = info_list.filter(func(info): return info.type == "node")
-					var root_node = EditorInterface.get_edited_scene_root()
-					var current_scene = root_node.scene_file_path
-					var root_node_name = root_node.name
-
-					var nodes = data.nodes
-					for node_path: String in nodes:
-						var splite_array = node_path.split("/", false, 20)
-						var path = splite_array[-1]
-
-						if node_info_list.find_custom(func(info): return info.path == path and info.scene == current_scene) != -1:
-							return
-						var reference_item = REFERENCE_ITEM.instantiate()
-						reference_item.info = {
-							"type": "file",
-							"node_path": path,
-							"scene": current_scene
-						}
-						reference_list.add_child(reference_item)
-						reference_item.set_label(current_scene.get_file() + "/" + path.split('/')[-1])
-					pass
-				"script_list_element":
-					var script = EditorInterface.get_script_editor().get_current_script()
-					var file = ""
-					if script != null:
-						file = script.resource_path
-					else:
-						var script_editor := EditorInterface.get_script_editor()
-						var editor_file_list: ItemList = script_editor.get_child(0).get_child(1).get_child(0).get_child(0).get_child(1)
-						var selected := editor_file_list.get_selected_items()
-						if not selected:
-							return
-						var index := selected[0]
-						file = editor_file_list.get_item_tooltip(index)
-					var file_info_list = info_list.filter(func(info): return info.type == "file")
-
-					if file_info_list.find_custom(func(info): return info.path == file) != -1:
-						return
-					var reference_item = REFERENCE_ITEM.instantiate()
-					reference_item.info = {
-						"type": "file",
-						"path": file
-					}
-					reference_list.add_child(reference_item)
-					reference_item.set_label(file.get_file())
-				"shader_list_element":
-					print("暂时不支持拖拽shader，请从文件系统中拖入。")
-					#var shader_editor =
-					pass
-	)
-
+	input_container.send_message.connect(on_input_container_send_message)
+	
+	
 func reset_message_info():
 	current_message_item = null
 	current_think = ""
@@ -175,40 +97,26 @@ func init_message_list():
 		}
 	]
 
-func clear_reference_list():
-	var ref_count = reference_list.get_child_count()
-	for i in ref_count:
-		reference_list.get_child(ref_count - i - 1).queue_free()
-
-func on_click_clear_button():
-	user_input.text = ""
-	clear_reference_list()
-
-func on_click_new_chat_button():
-	welcome_message.show()
-	chat_container.hide()
-	user_input.text = ""
-	clear_reference_list()
-	init_message_list()
-	reset_message_info()
-	usage_label.text = ""
-	var message_count = message_list.get_child_count()
-	for i in message_count:
-		message_list.get_child(message_count - i - 1).queue_free()
-
-func on_click_send_message():
+func on_input_container_send_message(user_message: Dictionary, message_content: String):
 	welcome_message.hide()
 	chat_container.show()
 	reset_message_info()
+	messages.push_back(user_message)
+	print(input_container.get_input_mode())
+	match input_container.get_input_mode():
+		"Ask":
+			deep_seek_chat_stream.tools = []
+			deep_seek_chat_stream.use_thinking = true
+			deep_seek_chat_stream.max_tokens = 16 * 1024
+		"Agent":
+			deep_seek_chat_stream.tools = tools.get_tools_list()
+			deep_seek_chat_stream.use_thinking = false
+			deep_seek_chat_stream.max_tokens = 8 * 1024
 
-	user_input.editable = false
-	send_button.disabled = true
-	var info_list = reference_list.get_children().map(func(node): return node.info)
-	var info_list_string = JSON.stringify(info_list)
-	messages.push_back({
-		"role": "user",
-		"content": "用户输入的内容：" + user_input.text + "\n引用的内容信息：" + info_list_string
-	})
+	var user_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
+	user_message_item.show_think = false
+	message_list.add_child(user_message_item)
+	user_message_item.update_user_message_content(message_content)
 
 	current_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
 	current_message_item.show_think = deep_seek_chat_stream.use_thinking
@@ -219,6 +127,7 @@ func on_click_send_message():
 func on_agent_think(think: String):
 	current_think += think
 	current_message_item.update_think_content(current_think)
+	chat_container.scroll_vertical = 100000
 
 func on_agent_message(msg: String):
 	current_message += msg
@@ -257,14 +166,24 @@ func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 
 	chat_container.scroll_vertical = 100000
 
+func on_click_new_chat_button():
+	welcome_message.show()
+	chat_container.hide()
+	init_message_list()
+	reset_message_info()
+	
+	input_container.init()
+	
+	var message_count = message_list.get_child_count()
+	for i in message_count:
+		message_list.get_child(message_count - i - 1).queue_free()
+
 func on_agent_finish(finish_reason: String, total_tokens: float):
 	#print("finish_reason ", finish_reason)
 	#print("total_tokens ", total_tokens)
 	if finish_reason != "tool_calls":
-		user_input.editable = true
-		send_button.disabled = false
-	usage_label.text = "%.2f" % (total_tokens / (128 * 1024)) + "%"
-	usage_label.tooltip_text = ("%.2f" % (total_tokens / (128 * 1024))) + "%" + " | " + ("%d / 128k usage tokens" % total_tokens)
+		input_container.disable = true
+	input_container.set_usage_label(total_tokens, 128)
 	messages.push_back({
 		"role": "assistant",
 		"content": current_message

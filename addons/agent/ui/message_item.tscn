@@ -1,7 +1,15 @@
-[gd_scene load_steps=13 format=3 uid="uid://cjytvn2j0yi3s"]
+[gd_scene load_steps=17 format=3 uid="uid://cjytvn2j0yi3s"]
 
 [ext_resource type="Script" uid="uid://b2ia356h5kd7m" path="res://addons/agent/ui/message_item.gd" id="1_kn78a"]
 [ext_resource type="Script" uid="uid://ddyk6f1xy0q5e" path="res://addons/agent/ui/richtext_effects/agent_thinking_text_effect.gd" id="2_q4qcv"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_nnls0"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_q4qcv"]
+content_margin_left = 10.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 1
+border_color = Color(0.1254902, 0.1254902, 0.1254902, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_kn78a"]
 
@@ -19,6 +27,12 @@
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_njs72"]
 
+[sub_resource type="Gradient" id="Gradient_q4qcv"]
+colors = PackedColorArray(0.2784314, 0.54901963, 0.7490196, 1, 0.2784314, 0.54901963, 0.7490196, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_tt4f8"]
+gradient = SubResource("Gradient_q4qcv")
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kn78a"]
 bg_color = Color(0.1254902, 0.1254902, 0.1254902, 1)
 
@@ -33,9 +47,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
 script = ExtResource("1_kn78a")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
@@ -65,19 +77,31 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "0.0 s"
 
-[node name="ExpandButton" type="Button" parent="VBoxContainer/ContentContainer/ThinkContainer/HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/ContentContainer/ThinkContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 2
+
+[node name="ExpandButton" type="Button" parent="VBoxContainer/ContentContainer/ThinkContainer/HBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 8
+theme_override_styles/focus = SubResource("StyleBoxEmpty_nnls0")
 toggle_mode = true
 text = " ▼ "
+flat = true
 
-[node name="ThinkContent" type="RichTextLabel" parent="VBoxContainer/ContentContainer/ThinkContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/ContentContainer/ThinkContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_q4qcv")
+
+[node name="ThinkContent" type="RichTextLabel" parent="VBoxContainer/ContentContainer/ThinkContainer/PanelContainer"]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
-theme_override_colors/default_color = Color(0.796243, 0.796243, 0.796243, 1)
-theme_override_font_sizes/normal_font_size = 14
+theme_override_colors/default_color = Color(1, 1, 1, 0.5294118)
+theme_override_font_sizes/normal_font_size = 12
 theme_override_styles/normal = SubResource("StyleBoxEmpty_kn78a")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_q4qcv")
 theme_override_styles/background = SubResource("StyleBoxEmpty_tt4f8")
@@ -101,6 +125,28 @@ theme_override_styles/fill = SubResource("StyleBoxEmpty_njs72")
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
+
+[node name="UserMessageContainer" type="VBoxContainer" parent="VBoxContainer/ContentContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="UserMessageContent" type="RichTextLabel" parent="VBoxContainer/ContentContainer/UserMessageContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_fsx2h")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_u11mo")
+theme_override_styles/background = SubResource("StyleBoxEmpty_dfcb6")
+theme_override_styles/fill = SubResource("StyleBoxEmpty_njs72")
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer/ContentContainer/UserMessageContainer"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+texture = SubResource("GradientTexture1D_tt4f8")
 
 [node name="WaitUsingTool" type="PanelContainer" parent="VBoxContainer"]
 unique_name_in_owner = true

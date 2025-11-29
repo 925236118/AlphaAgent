@@ -27,6 +27,7 @@ theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 1
 
 [node name="Label" type="Label" parent="MarginContainer"]
+custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 

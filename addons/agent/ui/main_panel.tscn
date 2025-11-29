@@ -1,12 +1,11 @@
-[gd_scene load_steps=18 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=12 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Script" uid="uid://dlx7bujvsuk11" path="res://addons/agent/scripts/deepseek_chat_stream.gd" id="1_fhbwo"]
 [ext_resource type="Texture2D" uid="uid://dd5t0pwniqnr1" path="res://addons/agent/icons/history.svg" id="2_6rfr6"]
 [ext_resource type="PackedScene" uid="uid://cq2jo5hlpns6j" path="res://addons/agent/tools/tools.tscn" id="3_2usmi"]
 [ext_resource type="Texture2D" uid="uid://ctaxjkunancs7" path="res://addons/agent/icons/add.svg" id="3_njbgt"]
-[ext_resource type="Texture2D" uid="uid://dqf82stl4f3bh" path="res://addons/agent/icons/send_message.svg" id="4_2dutf"]
-[ext_resource type="Texture2D" uid="uid://bwxx0wr0tfjj8" path="res://addons/agent/icons/delete.svg" id="4_5v6i3"]
+[ext_resource type="PackedScene" uid="uid://dqkrjn0mak6lh" path="res://addons/agent/ui/input_container.tscn" id="4_2dutf"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_aabuu"]
 
@@ -20,27 +19,14 @@ font_color = Color(0, 0, 0, 0.24313726)
 font_color = Color(0.7666196, 0.76661956, 0.76661956, 0.5254902)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5v6i3"]
-content_margin_left = 8.0
-content_margin_top = 0.0
-content_margin_right = 8.0
-content_margin_bottom = 0.0
 bg_color = Color(0.14406255, 0.14406255, 0.14406249, 1)
 border_width_bottom = 2
-border_color = Color(1, 0.73613757, 0.54175943, 0.52156866)
+border_color = Color(0.2784314, 0.54901963, 0.7490196, 1)
 corner_radius_top_left = 5
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5v6i3"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cpi8b"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_elhta"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_c8smv"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5t7oo"]
+corner_detail = 16
 
 [node name="Agent" type="Control"]
 layout_mode = 3
@@ -69,6 +55,10 @@ theme_override_constants/margin_bottom = 10
 [node name="TopBar" type="HBoxContainer" parent="VBoxContainer/MarginContainer2"]
 layout_mode = 2
 alignment = 2
+
+[node name="ChatTitle" type="Label" parent="VBoxContainer/MarginContainer2/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="HistoryButton" type="Button" parent="VBoxContainer/MarginContainer2/TopBar"]
 unique_name_in_owner = true
@@ -150,67 +140,9 @@ theme_override_constants/margin_bottom = 10
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_5v6i3")
 
-[node name="InputContainer" type="VBoxContainer" parent="VBoxContainer/MarginContainer/PanelContainer"]
-layout_mode = 2
-
-[node name="ReferenceList" type="HFlowContainer" parent="VBoxContainer/MarginContainer/PanelContainer/InputContainer"]
+[node name="InputContainer" parent="VBoxContainer/MarginContainer/PanelContainer" instance=ExtResource("4_2dutf")]
 unique_name_in_owner = true
 layout_mode = 2
-
-[node name="UserInput" type="TextEdit" parent="VBoxContainer/MarginContainer/PanelContainer/InputContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 60)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/normal = SubResource("StyleBoxEmpty_5v6i3")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_cpi8b")
-theme_override_styles/read_only = SubResource("StyleBoxEmpty_elhta")
-placeholder_text = "输入问题，或拖拽添加引用"
-wrap_mode = 1
-scroll_fit_content_height = true
-
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer/PanelContainer/InputContainer"]
-layout_mode = 2
-alignment = 2
-
-[node name="OptionButton" type="OptionButton" parent="VBoxContainer/MarginContainer/PanelContainer/InputContainer/HBoxContainer"]
-visible = false
-layout_mode = 2
-selected = 0
-item_count = 2
-popup/item_0/text = "Ask"
-popup/item_0/id = 0
-popup/item_1/text = "Agent"
-popup/item_1/id = 1
-
-[node name="UsageLabel" type="Label" parent="VBoxContainer/MarginContainer/PanelContainer/InputContainer/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-mouse_filter = 0
-
-[node name="ClearButton" type="Button" parent="VBoxContainer/MarginContainer/PanelContainer/InputContainer/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 8
-tooltip_text = "清空输入内容"
-theme_override_styles/focus = SubResource("StyleBoxEmpty_c8smv")
-text = "      "
-icon = ExtResource("4_5v6i3")
-flat = true
-icon_alignment = 1
-expand_icon = true
-
-[node name="SendButton" type="Button" parent="VBoxContainer/MarginContainer/PanelContainer/InputContainer/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 8
-tooltip_text = "发送"
-theme_override_styles/focus = SubResource("StyleBoxEmpty_5t7oo")
-text = "      "
-icon = ExtResource("4_2dutf")
-flat = true
-icon_alignment = 1
-expand_icon = true
 
 [node name="DeepSeekChatStream" type="Node" parent="."]
 unique_name_in_owner = true
@@ -218,7 +150,7 @@ script = ExtResource("1_fhbwo")
 secret_key = "sk-208101f6f9fd42bbbd0cb45cd064b91a"
 temperature = 0.0
 max_tokens = 8192
-tools = Array[Dictionary]([{
+tools = [{
 "function": {
 "description": "获取当前的Godot引擎信息。包含Godot版本，CPU型号、CPU 架构、内存信息、显卡信息、设备型号、当前系统时间等，还有当前项目的一些信息，例如项目名称、项目版本、项目描述、项目运行主场景、游戏运行窗口信息、全局的物理信息、全局的渲染设置、主题信息等。",
 "name": "get_project_info",
@@ -351,7 +283,7 @@ tools = Array[Dictionary]([{
 }
 },
 "type": "function"
-}])
+}]
 metadata/_custom_type_script = "uid://dlx7bujvsuk11"
 
 [node name="Tools" parent="." instance=ExtResource("3_2usmi")]

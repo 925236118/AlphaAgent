@@ -38,13 +38,11 @@ layout_mode = 2
 
 [node name="InputMenuList" type="ItemList" parent="VBoxContainer"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_xi1dg")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_1ot7o")
 allow_search = false
 auto_height = true
-item_count = 1
 
 [node name="ReferenceList" type="HFlowContainer" parent="VBoxContainer"]
 unique_name_in_owner = true
@@ -58,6 +56,7 @@ size_flags_horizontal = 3
 theme_override_styles/normal = SubResource("StyleBoxEmpty_5v6i3")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_cpi8b")
 theme_override_styles/read_only = SubResource("StyleBoxEmpty_elhta")
+placeholder_text = "输入问题，或拖拽添加引用。"
 drag_and_drop_selection_enabled = false
 wrap_mode = 1
 scroll_fit_content_height = true

@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=16 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Script" uid="uid://dlx7bujvsuk11" path="res://addons/agent/scripts/deepseek_chat_stream.gd" id="1_fhbwo"]
@@ -6,6 +6,12 @@
 [ext_resource type="PackedScene" uid="uid://cq2jo5hlpns6j" path="res://addons/agent/tools/tools.tscn" id="3_2usmi"]
 [ext_resource type="Texture2D" uid="uid://ctaxjkunancs7" path="res://addons/agent/icons/add.svg" id="3_njbgt"]
 [ext_resource type="PackedScene" uid="uid://dqkrjn0mak6lh" path="res://addons/agent/ui/input_container.tscn" id="4_2dutf"]
+[ext_resource type="Texture2D" uid="uid://bmq6b8c3ud8ig" path="res://addons/agent/icons/menu.svg" id="4_cpi8b"]
+[ext_resource type="PackedScene" uid="uid://d2qy4nnjypt6o" path="res://addons/agent/ui/history_container.tscn" id="5_elhta"]
+[ext_resource type="Script" uid="uid://c857yifca6rog" path="res://addons/agent/scripts/deepseek_chat.gd" id="7_5v6i3"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_5v6i3"]
+font_color = Color(0.7647059, 0.7647059, 0.7647059, 0.5254902)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_aabuu"]
 
@@ -57,17 +63,22 @@ layout_mode = 2
 alignment = 2
 
 [node name="ChatTitle" type="Label" parent="VBoxContainer/MarginContainer2/TopBar"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+text = "新对话"
+label_settings = SubResource("LabelSettings_5v6i3")
 
 [node name="HistoryButton" type="Button" parent="VBoxContainer/MarginContainer2/TopBar"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "查看历史记录"
+theme_override_font_sizes/font_size = 10
 theme_override_styles/focus = SubResource("StyleBoxEmpty_aabuu")
 text = "      "
 icon = ExtResource("2_6rfr6")
+flat = true
 icon_alignment = 1
 expand_icon = true
 
@@ -76,18 +87,54 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "创建新对话"
+theme_override_font_sizes/font_size = 10
 theme_override_styles/focus = SubResource("StyleBoxEmpty_n876e")
 text = "      "
 icon = ExtResource("3_njbgt")
+flat = true
 icon_alignment = 1
 expand_icon = true
 
-[node name="WelcomeMessage" type="Control" parent="VBoxContainer"]
+[node name="MoreButton" type="MenuButton" parent="VBoxContainer/MarginContainer2/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+tooltip_text = "创建新对话"
+theme_override_font_sizes/font_size = 10
+theme_override_styles/focus = SubResource("StyleBoxEmpty_n876e")
+text = "      "
+icon = ExtResource("4_cpi8b")
+icon_alignment = 1
+expand_icon = true
+item_count = 3
+popup/item_0/text = "管理记忆"
+popup/item_0/id = 0
+popup/item_1/text = "帮助"
+popup/item_1/id = 1
+popup/item_2/text = "设置"
+popup/item_2/id = 2
+
+[node name="HistoryContainer" parent="VBoxContainer" instance=ExtResource("5_elhta")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="ArticleContainer" type="Control" parent="VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/WelcomeMessage"]
+[node name="WelcomeMessage" type="Control" parent="VBoxContainer/ArticleContainer"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/ArticleContainer/WelcomeMessage"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -97,13 +144,13 @@ grow_vertical = 2
 theme_override_constants/separation = 20
 alignment = 1
 
-[node name="Label" type="Label" parent="VBoxContainer/WelcomeMessage/VBoxContainer"]
+[node name="Label" type="Label" parent="VBoxContainer/ArticleContainer/WelcomeMessage/VBoxContainer"]
 layout_mode = 2
 text = "α"
 label_settings = SubResource("LabelSettings_2usmi")
 horizontal_alignment = 1
 
-[node name="Label2" type="Label" parent="VBoxContainer/WelcomeMessage/VBoxContainer"]
+[node name="Label2" type="Label" parent="VBoxContainer/ArticleContainer/WelcomeMessage/VBoxContainer"]
 layout_mode = 2
 text = "帮助构建游戏项目
 帮助学习Godot程序
@@ -112,19 +159,24 @@ text = "帮助构建游戏项目
 label_settings = SubResource("LabelSettings_6rfr6")
 horizontal_alignment = 1
 
-[node name="LinkButton" type="LinkButton" parent="VBoxContainer/WelcomeMessage/VBoxContainer"]
+[node name="LinkButton" type="LinkButton" parent="VBoxContainer/ArticleContainer/WelcomeMessage/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.7647059, 0.7647059, 0.7647059, 0.5254902)
 text = "更多内容"
 
-[node name="ChatContainer" type="ScrollContainer" parent="VBoxContainer"]
+[node name="ChatContainer" type="ScrollContainer" parent="VBoxContainer/ArticleContainer"]
 unique_name_in_owner = true
 visible = false
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 size_flags_vertical = 3
 
-[node name="MessageList" type="VBoxContainer" parent="VBoxContainer/ChatContainer"]
+[node name="MessageList" type="VBoxContainer" parent="VBoxContainer/ArticleContainer/ChatContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -285,5 +337,11 @@ tools = [{
 "type": "function"
 }]
 metadata/_custom_type_script = "uid://dlx7bujvsuk11"
+
+[node name="TitleGenerateDeepSeekChat" type="Node" parent="."]
+script = ExtResource("7_5v6i3")
+secret_key = "sk-208101f6f9fd42bbbd0cb45cd064b91a"
+max_tokens = 4096
+metadata/_custom_type_script = "uid://c857yifca6rog"
 
 [node name="Tools" parent="." instance=ExtResource("3_2usmi")]

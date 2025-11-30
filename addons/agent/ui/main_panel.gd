@@ -2,11 +2,18 @@
 extends Control
 
 @onready var deep_seek_chat_stream: DeepSeekChatStream = %DeepSeekChatStream
+@onready var title_generate_deep_seek_chat: DeepSeekChat = $TitleGenerateDeepSeekChat
+
 @onready var message_list: VBoxContainer = %MessageList
 @onready var new_chat_button: Button = %NewChatButton
 @onready var chat_container: ScrollContainer = %ChatContainer
 @onready var welcome_message: Control = %WelcomeMessage
 @onready var input_container: MarginContainer = %InputContainer
+@onready var chat_title: Label = %ChatTitle
+@onready var history_container: Control = %HistoryContainer
+@onready var article_container: Control = %ArticleContainer
+@onready var history_button: Button = %HistoryButton
+@onready var more_button: MenuButton = %MoreButton
 
 @onready var tools: Node = $Tools
 
@@ -19,7 +26,14 @@ var messages: Array[Dictionary] = []
 var current_message_item: AgentChatMessageItem = null
 var current_message: String = ""
 var current_think: String = ""
-
+var current_title = "":
+	set(val):
+		current_title = val
+		chat_title.text = current_title
+var first_chat: bool = true
+var current_id: String = ""
+var current_time: String = ""
+var current_history_item: AgentHistoryContainer.HistoryItem = null
 
 func _ready() -> void:
 	# 展示欢迎语
@@ -35,8 +49,13 @@ func _ready() -> void:
 	deep_seek_chat_stream.response_use_tool.connect(on_response_use_tool)
 
 	new_chat_button.pressed.connect(on_click_new_chat_button)
+	history_button.pressed.connect(on_click_history_button)
 	input_container.send_message.connect(on_input_container_send_message)
 	
+	# 初始化标题生成DeepSeek相关
+	title_generate_deep_seek_chat.secret_key = secret
+	title_generate_deep_seek_chat.use_thinking = false
+	title_generate_deep_seek_chat.generate_finish.connect(on_title_generate_finish)
 	
 func reset_message_info():
 	current_message_item = null
@@ -107,7 +126,7 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 		"Ask":
 			deep_seek_chat_stream.tools = []
 			deep_seek_chat_stream.use_thinking = true
-			deep_seek_chat_stream.max_tokens = 16 * 1024
+			deep_seek_chat_stream.max_tokens = 64 * 1024
 		"Agent":
 			deep_seek_chat_stream.tools = tools.get_tools_list()
 			deep_seek_chat_stream.use_thinking = false
@@ -172,11 +191,20 @@ func on_click_new_chat_button():
 	init_message_list()
 	reset_message_info()
 	
+	first_chat = true
+	current_title = "新对话"
+	current_id = ""
+	current_time = ""
+	current_history_item = null
+	
 	input_container.init()
 	
 	var message_count = message_list.get_child_count()
 	for i in message_count:
 		message_list.get_child(message_count - i - 1).queue_free()
+
+func on_click_history_button():
+	pass
 
 func on_agent_finish(finish_reason: String, total_tokens: float):
 	#print("finish_reason ", finish_reason)
@@ -189,3 +217,47 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 		"content": current_message
 	})
 	reset_message_info()
+	
+	print(messages)
+	
+	if first_chat:
+		print(JSON.stringify(messages))
+		current_history_item = AgentHistoryContainer.HistoryItem.new()
+		current_id = generate_random_string(16)
+		current_time = Time.get_datetime_string_from_system()
+		title_generate_deep_seek_chat.post_message([
+			{
+				"role": "system",
+			"content": """\
+你是一个标题生成专家，你需要根据给你的AI交互的对话内容，生成一个内容总结出的标题，要求不能有符号和emoji，标题应简短易读，清晰明确。
+			"""
+			},
+			{
+				"role": "user",
+				"content": JSON.stringify(messages)
+			}
+		])
+	
+	current_history_item.use_thinking = deep_seek_chat_stream.use_thinking
+	current_history_item.id = current_id
+	current_history_item.message = messages
+	current_history_item.title = current_title
+	current_history_item.time = current_time
+	#history_container.update_history(current_id, current_history_item)
+
+func on_title_generate_finish(message: String, _think_msg: String):
+	current_title = message
+	print("标题是 ", current_title)
+	first_chat = false
+	pass
+
+# 生成随机字符串函数
+func generate_random_string(length: int) -> String:
+	var characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	var result = ""
+	
+	for i in range(length):
+		var random_index = randi() % characters.length()
+		result += characters[random_index]
+	
+	return result

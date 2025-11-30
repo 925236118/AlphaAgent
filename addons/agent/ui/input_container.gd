@@ -220,7 +220,7 @@ func set_usage_label(total_tokens: float, max_content_length: float):
 func update_user_input_placeholder():
 	match get_input_mode():
 		"Ask":
-			user_input.placeholder_text = "输入问题，不能读取项目文件，但可以使用思考和更多上下文。"
+			user_input.placeholder_text = "输入问题，不能读取项目文件，但可以使用思考和更多输出长度。"
 		"Agent":
 			user_input.placeholder_text = "输入问题，或拖拽添加引用。"
 

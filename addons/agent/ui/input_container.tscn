@@ -38,6 +38,7 @@ layout_mode = 2
 
 [node name="InputMenuList" type="ItemList" parent="VBoxContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_xi1dg")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_1ot7o")
@@ -93,6 +94,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "清空输入内容"
+theme_override_font_sizes/font_size = 10
 theme_override_styles/focus = SubResource("StyleBoxEmpty_c8smv")
 text = "      "
 icon = ExtResource("1_viqqn")
@@ -105,6 +107,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "发送"
+theme_override_font_sizes/font_size = 10
 theme_override_styles/focus = SubResource("StyleBoxEmpty_5t7oo")
 text = "      "
 icon = ExtResource("2_xi1dg")

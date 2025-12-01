@@ -109,7 +109,6 @@ func on_visibility_changed():
 		add_history_nodes()
 	else:
 		clear_history_nodes()
-	pass
 
 func on_recovery_history_item(history_item: HistoryItem):
 	recovery.emit(history_item)

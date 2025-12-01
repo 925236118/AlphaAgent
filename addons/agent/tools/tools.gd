@@ -168,7 +168,7 @@ func get_tools_list() -> Array[Dictionary]:
 				}
 			}
 		},
-		
+
 	]
 
 

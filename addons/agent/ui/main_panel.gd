@@ -17,9 +17,21 @@ extends Control
 
 @onready var tools: Node = $Tools
 
+enum MoreButtonIds {
+	Memory,
+	Help,
+	Setting
+}
+
+var help_window: Window = null
+
+const CONFIG = preload("uid://b4bcww0bmnxt0")
+
 const MESSAGE_ITEM = preload("uid://cjytvn2j0yi3s")
 
-var secret = "sk-208101f6f9fd42bbbd0cb45cd064b91a"
+const HELP = preload("uid://b83qwags1ffo8")
+
+var secret = CONFIG.secret_key
 
 var messages: Array[Dictionary] = []
 
@@ -51,6 +63,7 @@ func _ready() -> void:
 	new_chat_button.pressed.connect(on_click_new_chat_button)
 	history_button.pressed.connect(on_click_history_button)
 	input_container.send_message.connect(on_input_container_send_message)
+	input_container.show_help.connect(show_help_window)
 
 	# 初始化标题生成DeepSeek相关
 	title_generate_deep_seek_chat.secret_key = secret
@@ -58,7 +71,7 @@ func _ready() -> void:
 	title_generate_deep_seek_chat.generate_finish.connect(on_title_generate_finish)
 
 	history_container.recovery.connect(on_recovery_history)
-
+	more_button.get_popup().id_pressed.connect(on_more_button_select)
 func reset_message_info():
 	current_message_item = null
 	current_think = ""
@@ -69,52 +82,10 @@ func init_message_list():
 	messages = [
 		{
 			"role": "system",
-			"content": """\
-# 角色
-你是一个Godot开发专家，你精通Godot 4.x版本的各种API。
-我将会让你根据我的需要开发一系列的功能。你需要调用各种工具或者Godot引擎的API完成我的想法。
-
-# 技能
-你可以根据发送给你的内容，返回逻辑代码。并说明逻辑。
-项目以"res://"作为根目录，所有的路径应都为根目录下的绝对路径。操作文件不应该在根目录外。
-
-# 输出
-输出的内容应简短、准确。
-输出的对话内容如果想使用标记，必须使用BBCode格式。你只能使用允许的BBCode标签，不能随便创造不存在的标签。输出列表的时候，**不要**输出前面的项目符号，例如'•'，'1.'，'a.'等。标题可以使用粗体标签和字体大小标签适当提示。BBCode的开始结尾标签应保持严格成对。
-而如果是在markdown文件中，应该使用markdown语法。不应再使用bbcode。
-由于当前的输出要展示在深色背景上，输出文字时应尽量选择浅色颜色，或者浅色背景加深色文字。如非必要，不要添加颜色标签。
-## 允许的BBCode标签
-- 字体大小: font_size 结束标签必须也是font_size
-- 粗体: b
-- 斜体: i
-- 等宽字体: code
-- 居中: center
-- 居左: left
-- 居右: right
-- 颜色字体: color  [color={code/name}]{text}[/color]
-- 背景颜色: bgcolor  [bgcolor={code/name}]{text}[/bgcolor]
-- 无序列表: ul [ul]{items}[/ul]  列表项 {item} 必须以一行一个的形式提供。内部不应该出现例如li等标签
-- 有序（编号）列表: ol  [ol type={type}]{items}[/ol]   {type}参数可以是： 1 - 数字，会尽量使用语言对应的数字系统。a、A - 小写和大写拉丁字母。i、I - 小写和大写罗马数字。 内部不应该出现例如li等标签
-- 链接: url 作为链接标签使用
-## 允许使用的颜色
-- 红色 #ff7085: 用于重要错误信息等
-- 橙色 #ffb373: 用于告警信息等
-- 蓝色 #abc9ff: 用于提示信息、标题等
-- 绿色 #42ffc2: 用于提示成功demg
-- 黄色 #ffeda1: 用于需要用户确认的权限操作等
-- 黑色 #000000: 用于浅色背景的文字颜色
-## 标题规则
-一级标题: font_size=18，粗体
-二级标题: font_size=16，粗体，以大写数字加顿号空格开头，例如(一、 )
-三级标题: font_size=14，粗体，以小写数字加点号空格开头，例如(1. )
-## URL标签使用规则
-一般情况下不应使用url标签。
-如果用户希望输出某些网址，可以按照[url="链接地址"]链接名称[/url]的格式输出、
-# 规则
-如果要修改文件，应该尽可能多的收集信息，可以向用户询问问题以获得用户更多的想法。在最终修改内容前可以让用户确认。
-如果调用工具修改了文件后，应在最后总结位置，将所有修改的文件以URL列表的形式展示出来。
-列表项应保持以下格式：[url={"path": "res://path/to/file_name"}]file_name[/url]，等于号后面的内容应该是一个json字符串，必须包含大括号，如果有多个相同文件名的文件，应输出部分路径作为区分。
-"""
+			"content": CONFIG.system_prompt.format({
+				"project_memory": ''.join(CONFIG.memory.map(func(m): return "-" + m)),
+				"global_memory": "无"
+			})
 		}
 	]
 
@@ -318,3 +289,28 @@ func on_recovery_history(history_item: AgentHistoryContainer.HistoryItem):
 				message_item.used_tools(tool_call_array)
 			else:
 				message_item.update_message_content(message.content)
+
+func on_more_button_select(id: int):
+	match id:
+		MoreButtonIds.Memory:
+			pass
+		MoreButtonIds.Help:
+			show_help_window()
+		MoreButtonIds.Setting:
+			pass
+
+func show_help_window():
+	if help_window:
+		help_window.show()
+	else:
+		help_window = Window.new()
+		var help = HELP.instantiate()
+		help_window.add_child(help)
+		help_window.title = "Alpha 帮助"
+		get_tree().root.add_child(help_window)
+		help_window.popup_centered(Vector2(1152, 648))
+		help_window.close_requested.connect(help_window.hide)
+
+func _exit_tree() -> void:
+	if help_window:
+		help_window.queue_free()

@@ -12,6 +12,8 @@ extends MarginContainer
 const REFERENCE_ITEM = preload("uid://bewckbivwp036")
 
 signal send_message(message: Dictionary, message_content: String)
+signal show_help
+
 
 enum MenuListType {
 	None,
@@ -186,7 +188,7 @@ func on_click_send_message():
 
 	# 检查是否为命令
 	if message_text.begins_with("/"):
-		var command_parts = message_text.split(" ", false)
+		var command_parts = message_text.split(" ", false, 2)
 		var command = command_parts[0]
 		var args = command_parts.slice(1) if command_parts.size() > 1 else []
 
@@ -215,10 +217,16 @@ func handle_command(command: String, args: PackedStringArray):
 			elif args[0] == "project":
 				# 执行memory project操作
 				print("执行memory project命令")
+				var CONFIG : AgentConfig = load("uid://b4bcww0bmnxt0")
+				CONFIG.memory.push_back(args[1])
+				ResourceSaver.save(CONFIG, "uid://b4bcww0bmnxt0")
+			elif args[0] == "global":
+				print("暂时不支持全局记忆")
 			else:
 				print("未知的memory参数: ", args[0])
 		"/help":
-			print("显示帮助")
+			#print("显示帮助")
+			show_help.emit()
 		"/setting":
 			print("显示设置")
 		_:

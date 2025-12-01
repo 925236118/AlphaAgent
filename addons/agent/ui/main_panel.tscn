@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=17 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Script" uid="uid://dlx7bujvsuk11" path="res://addons/agent/scripts/deepseek_chat_stream.gd" id="1_fhbwo"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://dqkrjn0mak6lh" path="res://addons/agent/ui/input_container.tscn" id="4_2dutf"]
 [ext_resource type="Texture2D" uid="uid://bmq6b8c3ud8ig" path="res://addons/agent/icons/menu.svg" id="4_cpi8b"]
 [ext_resource type="PackedScene" uid="uid://d2qy4nnjypt6o" path="res://addons/agent/ui/history_container.tscn" id="5_elhta"]
+[ext_resource type="Texture2D" uid="uid://dkk4u7fmqh515" path="res://addons/agent/icons/alpha.svg" id="6_c8smv"]
 [ext_resource type="Script" path="res://addons/agent/scripts/deepseek_chat.gd" id="7_5v6i3"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_5v6i3"]
@@ -34,7 +35,7 @@ corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 corner_detail = 16
 
-[node name="Agent" type="Control"]
+[node name="Alpha" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -109,10 +110,12 @@ expand_icon = true
 item_count = 3
 popup/item_0/text = "管理记忆"
 popup/item_0/id = 0
+popup/item_0/disabled = true
 popup/item_1/text = "帮助"
 popup/item_1/id = 1
 popup/item_2/text = "设置"
 popup/item_2/id = 2
+popup/item_2/disabled = true
 
 [node name="HistoryContainer" parent="VBoxContainer" instance=ExtResource("5_elhta")]
 unique_name_in_owner = true
@@ -144,7 +147,16 @@ grow_vertical = 2
 theme_override_constants/separation = 20
 alignment = 1
 
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer/ArticleContainer/WelcomeMessage/VBoxContainer"]
+modulate = Color(0, 0, 0, 0.24313726)
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+texture = ExtResource("6_c8smv")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="Label" type="Label" parent="VBoxContainer/ArticleContainer/WelcomeMessage/VBoxContainer"]
+visible = false
 layout_mode = 2
 text = "α"
 label_settings = SubResource("LabelSettings_2usmi")
@@ -164,6 +176,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.7647059, 0.7647059, 0.7647059, 0.5254902)
 text = "更多内容"
+uri = "https://godotvillage.github.io/alpha/"
 
 [node name="ChatContainer" type="ScrollContainer" parent="VBoxContainer/ArticleContainer"]
 unique_name_in_owner = true
@@ -199,7 +212,7 @@ layout_mode = 2
 [node name="DeepSeekChatStream" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("1_fhbwo")
-secret_key = "sk-208101f6f9fd42bbbd0cb45cd064b91a"
+secret_key = "sk-df2912a98b444594aec3de18e5ea2b82"
 temperature = 0.0
 max_tokens = 8192
 tools = [{
@@ -340,7 +353,7 @@ metadata/_custom_type_script = "uid://dlx7bujvsuk11"
 
 [node name="TitleGenerateDeepSeekChat" type="Node" parent="."]
 script = ExtResource("7_5v6i3")
-secret_key = "sk-208101f6f9fd42bbbd0cb45cd064b91a"
+secret_key = "sk-df2912a98b444594aec3de18e5ea2b82"
 max_tokens = 4096
 
 [node name="Tools" parent="." instance=ExtResource("3_2usmi")]

@@ -8,12 +8,16 @@
 content_margin_left = 10.0
 content_margin_right = 10.0
 bg_color = Color(0.1254902, 0.1254902, 0.1254902, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [sub_resource type="LabelSettings" id="LabelSettings_35iu3"]
-font_size = 20
 
 [sub_resource type="LabelSettings" id="LabelSettings_hd88h"]
-font_size = 14
+font_size = 12
+font_color = Color(0.7647059, 0.7647059, 0.7647059, 0.5254902)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_udg46"]
 

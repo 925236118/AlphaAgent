@@ -10,7 +10,7 @@ extends Control
 @onready var welcome_message: Control = %WelcomeMessage
 @onready var input_container: MarginContainer = %InputContainer
 @onready var chat_title: Label = %ChatTitle
-@onready var history_container: Control = %HistoryContainer
+@onready var history_container: AgentHistoryContainer = %HistoryContainer
 @onready var article_container: Control = %ArticleContainer
 @onready var history_button: Button = %HistoryButton
 @onready var more_button: MenuButton = %MoreButton
@@ -26,7 +26,7 @@ var messages: Array[Dictionary] = []
 var current_message_item: AgentChatMessageItem = null
 var current_message: String = ""
 var current_think: String = ""
-var current_title = "":
+var current_title = "新对话":
 	set(val):
 		current_title = val
 		chat_title.text = current_title
@@ -51,12 +51,14 @@ func _ready() -> void:
 	new_chat_button.pressed.connect(on_click_new_chat_button)
 	history_button.pressed.connect(on_click_history_button)
 	input_container.send_message.connect(on_input_container_send_message)
-	
+
 	# 初始化标题生成DeepSeek相关
 	title_generate_deep_seek_chat.secret_key = secret
 	title_generate_deep_seek_chat.use_thinking = false
 	title_generate_deep_seek_chat.generate_finish.connect(on_title_generate_finish)
-	
+
+	history_container.recovery.connect(on_recovery_history)
+
 func reset_message_info():
 	current_message_item = null
 	current_think = ""
@@ -121,7 +123,7 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 	chat_container.show()
 	reset_message_info()
 	messages.push_back(user_message)
-	print(input_container.get_input_mode())
+
 	match input_container.get_input_mode():
 		"Ask":
 			deep_seek_chat_stream.tools = []
@@ -185,26 +187,36 @@ func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 
 	chat_container.scroll_vertical = 100000
 
+	current_history_item.title = current_title
+
+	history_container.update_history(current_id, current_history_item)
+
 func on_click_new_chat_button():
+	clear()
+	history_container.hide()
+	article_container.show()
+
+func clear():
 	welcome_message.show()
 	chat_container.hide()
 	init_message_list()
 	reset_message_info()
-	
+
 	first_chat = true
 	current_title = "新对话"
 	current_id = ""
 	current_time = ""
 	current_history_item = null
-	
+
 	input_container.init()
-	
+
 	var message_count = message_list.get_child_count()
 	for i in message_count:
 		message_list.get_child(message_count - i - 1).queue_free()
 
 func on_click_history_button():
-	pass
+	history_container.visible = not history_container.visible
+	article_container.visible = not article_container.visible
 
 func on_agent_finish(finish_reason: String, total_tokens: float):
 	#print("finish_reason ", finish_reason)
@@ -217,11 +229,11 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 		"content": current_message
 	})
 	reset_message_info()
-	
-	print(messages)
-	
+
+	#print(messages)
+
 	if first_chat:
-		print(JSON.stringify(messages))
+		#print(JSON.stringify(messages))
 		current_history_item = AgentHistoryContainer.HistoryItem.new()
 		current_id = generate_random_string(16)
 		current_time = Time.get_datetime_string_from_system()
@@ -237,27 +249,72 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 				"content": JSON.stringify(messages)
 			}
 		])
-	
+
+	current_history_item.mode = input_container.get_input_mode()
 	current_history_item.use_thinking = deep_seek_chat_stream.use_thinking
 	current_history_item.id = current_id
 	current_history_item.message = messages
 	current_history_item.title = current_title
 	current_history_item.time = current_time
-	#history_container.update_history(current_id, current_history_item)
+
+	history_container.update_history(current_id, current_history_item)
 
 func on_title_generate_finish(message: String, _think_msg: String):
 	current_title = message
-	print("标题是 ", current_title)
+	#print("标题是 ", current_title)
 	first_chat = false
-	pass
+
+	current_history_item.title = current_title
+	history_container.update_history(current_id, current_history_item)
 
 # 生成随机字符串函数
 func generate_random_string(length: int) -> String:
 	var characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	var result = ""
-	
+
 	for i in range(length):
 		var random_index = randi() % characters.length()
 		result += characters[random_index]
-	
+
 	return result
+
+func on_recovery_history(history_item: AgentHistoryContainer.HistoryItem):
+	history_container.hide()
+	article_container.show()
+
+	clear()
+	first_chat = false
+	welcome_message.hide()
+	chat_container.show()
+
+	current_history_item = history_item
+	current_id = history_item.id
+	current_title = history_item.title
+	current_time = history_item.time
+	messages = history_item.message
+	input_container.set_input_mode(history_item.mode)
+
+	for message in messages:
+		if message.role == "system" or message.role == "tool" :
+			continue
+		var message_item = null
+		message_item = MESSAGE_ITEM.instantiate()
+		message_item.show_think = false
+		message_list.add_child(message_item)
+
+		if message.role == "user":
+			message_item.update_user_message_content(message.content)
+		elif message.role == "assistant":
+			if message.has("tool_calls"):
+				var tool_call_array: Array[DeepSeekChatStream.ToolCallsInfo] = []
+				for tool_call in message.tool_calls:
+					var tool_call_info = DeepSeekChatStream.ToolCallsInfo.new()
+					tool_call_info.id = tool_call.get("id")
+					tool_call_info.type = tool_call.get("type")
+					tool_call_info.function = DeepSeekChatStream.ToolCallsInfoFunc.new()
+					tool_call_info.function.arguments = tool_call.get("function").get("arguments")
+					tool_call_info.function.name = tool_call.get("function").get("name")
+					tool_call_array.push_back(tool_call_info)
+				message_item.used_tools(tool_call_array)
+			else:
+				message_item.update_message_content(message.content)

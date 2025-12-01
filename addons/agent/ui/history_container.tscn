@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://d2qy4nnjypt6o"]
+[gd_scene load_steps=3 format=3 uid="uid://d2qy4nnjypt6o"]
 
 [ext_resource type="Script" uid="uid://dmnjsxml82217" path="res://addons/agent/ui/history_container.gd" id="1_hd88h"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_35iu3"]
+font_color = Color(0.7647059, 0.7647059, 0.7647059, 0.5254902)
 
 [node name="HistoryContainer" type="Control"]
 layout_mode = 3
@@ -24,3 +27,30 @@ grow_vertical = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="NoMessageContainer" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="NoMessageContainer"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -48.0
+offset_top = -11.5
+offset_right = 48.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "没有历史记录"
+label_settings = SubResource("LabelSettings_35iu3")
+horizontal_alignment = 1

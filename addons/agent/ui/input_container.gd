@@ -45,13 +45,13 @@ var menu_list = []
 
 func _ready() -> void:
 	update_user_input_placeholder()
-	
+
 	send_button.pressed.connect(on_click_send_message)
 	clear_button.pressed.connect(on_click_clear_button)
-	
+
 	user_input.text_changed.connect(on_user_input_text_changed)
 	input_menu_list.item_selected.connect(on_input_menu_list_item_selected)
-	
+
 	user_input.set_drag_forwarding(
 		Callable(),
 		user_input_can_drop,
@@ -65,7 +65,7 @@ func user_input_can_drop (at_position: Vector2, data: Variant):
 
 ## 将数据拖放到输入框后处理数据
 func user_input_drop_data(at_position: Vector2, data: Variant):
-	print(data)
+	#print(data)
 	var info_list = reference_list.get_children().map(func(node): return node.info)
 	match data.type:
 		"files":
@@ -115,7 +115,7 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 				}
 				reference_list.add_child(reference_item)
 				reference_item.set_label(current_scene.get_file() + "/" + path.split('/')[-1])
-				
+
 				reference_item.set_tooltip(current_scene + "/" + path)
 			pass
 		"script_list_element":
@@ -151,11 +151,22 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 func get_input_mode():
 	return input_mode_select.get_item_text(input_mode_select.get_selected_id())
 
+func set_input_mode(name: String):
+	var id = -1
+	for i in input_mode_select.item_count:
+		if input_mode_select.get_item_text(i) == name:
+			id = input_mode_select.get_item_id(i)
+
+	input_mode_select.select(id)
+
+func set_input_mode_disable(disabled: bool):
+	input_mode_select.disabled = disabled
+
 func init():
 	user_input.text = ""
 	usage_label.text = ""
 	clear_reference_list()
-	input_mode_select.disabled = false
+	set_input_mode_disable(false)
 	input_menu_list.hide()
 
 ## 清空引用列表
@@ -172,20 +183,20 @@ func on_click_clear_button():
 ## 发送信息
 func on_click_send_message():
 	var message_text = user_input.text
-	
+
 	# 检查是否为命令
 	if message_text.begins_with("/"):
 		var command_parts = message_text.split(" ", false)
 		var command = command_parts[0]
 		var args = command_parts.slice(1) if command_parts.size() > 1 else []
-		
+
 		# 处理命令逻辑
 		handle_command(command, args)
 		return
-	
+
 	# 正常消息处理
 	self.disable = true
-	input_mode_select.disabled = true
+	set_input_mode_disable(true)
 	var info_list = reference_list.get_children().map(func(node): return node.info)
 	var info_list_string = JSON.stringify(info_list)
 	send_message.emit({

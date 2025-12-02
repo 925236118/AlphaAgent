@@ -102,8 +102,8 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 			deep_seek_chat_stream.max_tokens = 64 * 1024
 		"Agent":
 			deep_seek_chat_stream.tools = tools.get_tools_list()
-			deep_seek_chat_stream.use_thinking = false
-			deep_seek_chat_stream.max_tokens = 8 * 1024
+			deep_seek_chat_stream.use_thinking = true
+			deep_seek_chat_stream.max_tokens = 64 * 1024
 
 	var user_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
 	user_message_item.show_think = false
@@ -138,6 +138,7 @@ func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 	messages.push_back({
 		"role": "assistant",
 		"content": null,
+		"reasoning_content": current_think,
 		"tool_calls": tool_calls.map(func (tool: DeepSeekChatStream.ToolCallsInfo): return tool.to_dict())
 	})
 
@@ -197,7 +198,8 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 	input_container.set_usage_label(total_tokens, 128)
 	messages.push_back({
 		"role": "assistant",
-		"content": current_message
+		"content": current_message,
+		"reasoning_content": current_think
 	})
 	reset_message_info()
 

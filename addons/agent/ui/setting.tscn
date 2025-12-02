@@ -1,0 +1,31 @@
+[gd_scene load_steps=2 format=3 uid="uid://bxe6hto0vk8fu"]
+
+[ext_resource type="PackedScene" uid="uid://rxdnm1d45nwm" path="res://addons/agent/ui/setting_item.tscn" id="1_iufqm"]
+
+[node name="Setting" type="ScrollContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+
+[node name="SettingPanel" type="MarginContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SettingPanel"]
+layout_mode = 2
+
+[node name="SettingItem" parent="SettingPanel/VBoxContainer" node_paths=PackedStringArray("setting_value_node") instance=ExtResource("1_iufqm")]
+layout_mode = 2
+setting_name = "asdasdasd"
+setting_value_node = NodePath("LineEdit")
+
+[node name="LineEdit" type="LineEdit" parent="SettingPanel/VBoxContainer/SettingItem"]
+layout_mode = 2
+size_flags_horizontal = 3

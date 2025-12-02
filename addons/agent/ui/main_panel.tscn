@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=18 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Script" uid="uid://dlx7bujvsuk11" path="res://addons/agent/scripts/deepseek_chat_stream.gd" id="1_fhbwo"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://d2qy4nnjypt6o" path="res://addons/agent/ui/history_container.tscn" id="5_elhta"]
 [ext_resource type="Texture2D" uid="uid://dkk4u7fmqh515" path="res://addons/agent/icons/alpha.svg" id="6_c8smv"]
 [ext_resource type="Script" path="res://addons/agent/scripts/deepseek_chat.gd" id="7_5v6i3"]
+[ext_resource type="PackedScene" uid="uid://bxe6hto0vk8fu" path="res://addons/agent/ui/setting.tscn" id="8_5t7oo"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_5v6i3"]
 font_color = Color(0.7647059, 0.7647059, 0.7647059, 0.5254902)
@@ -213,18 +214,8 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_5v6i3")
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="Setting" type="ScrollContainer" parent="VBoxContainer"]
-visible = false
+[node name="Setting" parent="VBoxContainer" instance=ExtResource("8_5t7oo")]
 layout_mode = 2
-size_flags_vertical = 3
-
-[node name="SettingPanel" type="MarginContainer" parent="VBoxContainer/Setting"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
 
 [node name="DeepSeekChatStream" type="Node" parent="."]
 unique_name_in_owner = true

@@ -30,7 +30,9 @@ func _on_delete_button_mouse_entered() -> void:
 	button_container.show()
 
 func set_title(title: String):
-	history_message_title.text = title
+	if history_message_title:
+		history_message_title.text = title
 
 func set_time(time: String):
-	history_message_time.text = time
+	if history_message_time:
+		history_message_time.text = time

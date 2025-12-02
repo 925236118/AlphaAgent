@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bewckbivwp036"]
 
-[ext_resource type="Script" uid="uid://cr3yllr6krrdr" path="res://addons/agent/ui/reference_item.gd" id="1_pyu6d"]
+[ext_resource type="Script" uid="uid://cr3yllr6krrdr" path="res://addons/agent/ui/chat/reference_item.gd" id="1_pyu6d"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2usmi"]
 bg_color = Color(0.18359044, 0.18359047, 0.18359032, 1)

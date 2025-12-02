@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://eq8fe48g3uch"]
 
-[ext_resource type="Script" uid="uid://dwggmve0otlal" path="res://addons/agent/ui/history_message_item.gd" id="1_56ktc"]
+[ext_resource type="Script" uid="uid://dwggmve0otlal" path="res://addons/agent/ui/history/history_message_item.gd" id="1_56ktc"]
 [ext_resource type="Texture2D" uid="uid://dj2x0ekvturhe" path="res://addons/agent/icons/recovery.svg" id="2_ai72o"]
 [ext_resource type="Texture2D" uid="uid://bwxx0wr0tfjj8" path="res://addons/agent/icons/delete.svg" id="3_udg46"]
 

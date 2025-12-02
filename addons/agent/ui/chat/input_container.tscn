@@ -1,7 +1,7 @@
 [gd_scene load_steps=12 format=3 uid="uid://dqkrjn0mak6lh"]
 
 [ext_resource type="Texture2D" uid="uid://bwxx0wr0tfjj8" path="res://addons/agent/icons/delete.svg" id="1_viqqn"]
-[ext_resource type="Script" uid="uid://c0gayflg4ovas" path="res://addons/agent/ui/input_container.gd" id="1_xi1dg"]
+[ext_resource type="Script" uid="uid://c0gayflg4ovas" path="res://addons/agent/ui/chat/input_container.gd" id="1_xi1dg"]
 [ext_resource type="Texture2D" uid="uid://dqf82stl4f3bh" path="res://addons/agent/icons/send_message.svg" id="2_xi1dg"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xi1dg"]

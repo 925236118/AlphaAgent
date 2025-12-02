@@ -14,6 +14,8 @@ const REFERENCE_ITEM = preload("uid://bewckbivwp036")
 
 signal send_message(message: Dictionary, message_content: String, use_thinking: bool)
 signal show_help
+signal show_setting
+signal show_memory
 
 
 enum MenuListType {
@@ -61,6 +63,10 @@ func _ready() -> void:
 		user_input_can_drop,
 		user_input_drop_data
 	)
+
+func load_config_setting(key):
+	var config = load("uid://b4bcww0bmnxt0") as AgentConfig
+	return config.settings.get(key)
 
 ## 是否可以将数据拖放到输入框
 func user_input_can_drop (at_position: Vector2, data: Variant):
@@ -207,30 +213,35 @@ func on_click_send_message():
 		"role": "user",
 		"content": "用户输入的内容：" + message_text + "\n引用的内容信息：" + info_list_string
 	}, message_text, use_thinking.button_pressed)
+	
+	if load_config_setting("auto_clear"):
+		init()
 
 ## 处理命令
 func handle_command(command: String, args: PackedStringArray):
-	print("执行命令: ", command, " 参数: ", args)
+	#print("执行命令: ", command, " 参数: ", args)
 	match command:
 		"/memory":
 			if args.size() == 0:
 				# 执行默认memory操作
-				print("执行默认memory命令")
+				show_memory.emit()
 			elif args[0] == "project":
 				# 执行memory project操作
-				print("执行memory project命令")
-				var CONFIG : AgentConfig = load("uid://b4bcww0bmnxt0")
-				CONFIG.memory.push_back(args[1])
-				ResourceSaver.save(CONFIG, "uid://b4bcww0bmnxt0")
+				if args.size() == 2:
+					#print("执行memory project命令")
+					var CONFIG : AgentConfig = load("uid://b4bcww0bmnxt0")
+					CONFIG.memory.push_back(args[1])
+					ResourceSaver.save(CONFIG, "uid://b4bcww0bmnxt0")
+				else:
+					show_memory.emit()
 			elif args[0] == "global":
 				print("暂时不支持全局记忆")
 			else:
-				print("未知的memory参数: ", args[0])
+				show_memory.emit()
 		"/help":
-			#print("显示帮助")
 			show_help.emit()
 		"/setting":
-			print("显示设置")
+			show_setting.emit()
 		_:
 			print("未知命令: ", command)
 
@@ -241,7 +252,7 @@ func set_usage_label(total_tokens: float, max_content_length: float):
 func update_user_input_placeholder():
 	match get_input_mode():
 		"Ask":
-			user_input.placeholder_text = "输入问题，不能读取项目文件，但可以使用思考和更多输出长度。"
+			user_input.placeholder_text = "输入问题，不使用工具，获得更安全的体验。"
 		"Agent":
 			user_input.placeholder_text = "输入问题，或拖拽添加引用。"
 

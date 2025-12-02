@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3 uid="uid://bxe6hto0vk8fu"]
+
+[ext_resource type="Script" uid="uid://dry1n6m67ku3q" path="res://addons/agent/ui/setting/setting.gd" id="1_c2l6f"]
+[ext_resource type="PackedScene" uid="uid://c2ei06dd8phsw" path="res://addons/agent/ui/setting/setting_item_bool.tscn" id="1_ca3bj"]
+
+[node name="SettingContainer" type="ScrollContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+script = ExtResource("1_c2l6f")
+
+[node name="SettingPanel" type="MarginContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="SettingItemsContainer" type="VBoxContainer" parent="SettingPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="AutoClearSetting" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("1_ca3bj")]
+layout_mode = 2
+setting_name = "发送后自动清空"
+setting_key = "auto_clear"

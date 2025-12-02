@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3 uid="uid://bldax4sbp20q2"]
+
+[ext_resource type="PackedScene" uid="uid://rxdnm1d45nwm" path="res://addons/agent/ui/setting/setting_item.tscn" id="1_2uwtn"]
+[ext_resource type="Script" uid="uid://j7gxi1t80mm5" path="res://addons/agent/ui/setting/setting_item_string.gd" id="2_knhem"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_knhem"]
+
+[node name="SettingItemString" instance=ExtResource("1_2uwtn")]
+script = ExtResource("2_knhem")
+
+[node name="LineEdit" type="LineEdit" parent="." index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/focus = SubResource("StyleBoxEmpty_knhem")
+
+[connection signal="text_changed" from="LineEdit" to="." method="_on_line_edit_text_changed"]

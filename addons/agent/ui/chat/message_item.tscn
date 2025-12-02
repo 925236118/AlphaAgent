@@ -1,6 +1,6 @@
 [gd_scene load_steps=17 format=3 uid="uid://cjytvn2j0yi3s"]
 
-[ext_resource type="Script" uid="uid://b2ia356h5kd7m" path="res://addons/agent/ui/message_item.gd" id="1_kn78a"]
+[ext_resource type="Script" uid="uid://b2ia356h5kd7m" path="res://addons/agent/ui/chat/message_item.gd" id="1_kn78a"]
 [ext_resource type="Script" uid="uid://ddyk6f1xy0q5e" path="res://addons/agent/ui/richtext_effects/agent_thinking_text_effect.gd" id="2_q4qcv"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_nnls0"]

@@ -1,5 +1,9 @@
 @tool
+@abstract
+class_name AgentSettingItemBase
 extends HBoxContainer
+
+signal value_changed
 
 @onready var setting_name_label: Label = %SettingNameLabel
 
@@ -9,7 +13,16 @@ extends HBoxContainer
 		if setting_name_label:
 			setting_name_label.text = val
 
-@export var setting_value_node: Control = null
+@export var setting_key: String = ""
 
 func _ready() -> void:
-		setting_name_label.text = setting_name
+	setting_name_label.text = setting_name
+	
+@abstract
+func get_value()
+
+@abstract
+func get_value_type() -> int
+
+@abstract
+func set_value(value)

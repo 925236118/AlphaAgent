@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://c2ei06dd8phsw"]
+
+[ext_resource type="PackedScene" uid="uid://rxdnm1d45nwm" path="res://addons/agent/ui/setting/setting_item.tscn" id="1_hjnk5"]
+[ext_resource type="Script" uid="uid://c42ft0cheqp7a" path="res://addons/agent/ui/setting/setting_item_bool.gd" id="2_td1xy"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_td1xy"]
+
+[node name="SettingItemBool" instance=ExtResource("1_hjnk5")]
+script = ExtResource("2_td1xy")
+
+[node name="CheckButton" type="CheckButton" parent="." index="1"]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_td1xy")
+
+[connection signal="toggled" from="CheckButton" to="." method="_on_check_button_toggled"]

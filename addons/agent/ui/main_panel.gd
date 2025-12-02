@@ -6,16 +6,25 @@ extends Control
 
 @onready var message_list: VBoxContainer = %MessageList
 @onready var new_chat_button: Button = %NewChatButton
-@onready var chat_container: ScrollContainer = %ChatContainer
 @onready var welcome_message: Control = %WelcomeMessage
 @onready var input_container: MarginContainer = %InputContainer
 @onready var chat_title: Label = %ChatTitle
-@onready var history_container: AgentHistoryContainer = %HistoryContainer
-@onready var article_container: Control = %ArticleContainer
 @onready var history_button: Button = %HistoryButton
 @onready var more_button: MenuButton = %MoreButton
+@onready var back_chat_button: Button = %BackChatButton
 
 @onready var tools: Node = $Tools
+@onready var message_container: ScrollContainer = %MessageContainer
+
+@onready var chat_container: VBoxContainer = %ChatContainer
+@onready var history_container: AgentHistoryContainer = %HistoryContainer
+@onready var setting_container: ScrollContainer = %SettingContainer
+
+@onready var container_list = [
+	chat_container,
+	history_container,
+	setting_container
+]
 
 enum MoreButtonIds {
 	Memory,
@@ -48,9 +57,11 @@ var current_time: String = ""
 var current_history_item: AgentHistoryContainer.HistoryItem = null
 
 func _ready() -> void:
+	show_container(chat_container)
+	
 	# 展示欢迎语
 	welcome_message.show()
-	chat_container.hide()
+	message_container.hide()
 	# 初始化AI模型相关信息
 	init_message_list()
 	deep_seek_chat_stream.secret_key = secret
@@ -59,11 +70,13 @@ func _ready() -> void:
 	deep_seek_chat_stream.use_tool.connect(on_use_tool)
 	deep_seek_chat_stream.generate_finish.connect(on_agent_finish)
 	deep_seek_chat_stream.response_use_tool.connect(on_response_use_tool)
-
+	back_chat_button.pressed.connect(on_click_back_chat_button)
 	new_chat_button.pressed.connect(on_click_new_chat_button)
 	history_button.pressed.connect(on_click_history_button)
 	input_container.send_message.connect(on_input_container_send_message)
 	input_container.show_help.connect(show_help_window)
+	input_container.show_setting.connect(on_show_setting)
+	input_container.show_memory.connect(on_show_memory)
 
 	# 初始化标题生成DeepSeek相关
 	title_generate_deep_seek_chat.secret_key = secret
@@ -90,10 +103,10 @@ func init_message_list():
 	]
 
 func on_input_container_send_message(user_message: Dictionary, message_content: String, use_thinking: bool):
+	show_container(chat_container)
 	welcome_message.hide()
-	chat_container.show()
-	history_container.hide()
-	article_container.show()
+	message_container.show()
+	
 	reset_message_info()
 	messages.push_back(user_message)
 
@@ -123,16 +136,16 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 func on_agent_think(think: String):
 	current_think += think
 	current_message_item.update_think_content(current_think)
-	chat_container.scroll_vertical = 100000
+	message_container.scroll_vertical = 100000
 
 func on_agent_message(msg: String):
 	current_message += msg
 	current_message_item.update_message_content(current_message)
-	chat_container.scroll_vertical = 100000
+	message_container.scroll_vertical = 100000
 
 func on_response_use_tool():
 	current_message_item.response_use_tool()
-	chat_container.scroll_vertical = 100000
+	message_container.scroll_vertical = 100000
 
 func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 	current_message_item.used_tools(tool_calls)
@@ -162,20 +175,20 @@ func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 
 	deep_seek_chat_stream.post_message(messages)
 
-	chat_container.scroll_vertical = 100000
-
+	message_container.scroll_vertical = 100000
+	
 	current_history_item.title = current_title
-
+	
 	history_container.update_history(current_id, current_history_item)
 
 func on_click_new_chat_button():
 	clear()
-	history_container.hide()
-	article_container.show()
+	
+	show_container(chat_container)
 
 func clear():
 	welcome_message.show()
-	chat_container.hide()
+	message_container.hide()
 	init_message_list()
 	reset_message_info()
 
@@ -192,24 +205,25 @@ func clear():
 		message_list.get_child(message_count - i - 1).queue_free()
 
 func on_click_history_button():
-	history_container.visible = not history_container.visible
-	article_container.visible = not article_container.visible
+	if history_container.visible:
+		show_container(chat_container)
+	else:
+		show_container(history_container)
 
 func on_agent_finish(finish_reason: String, total_tokens: float):
 	#print("finish_reason ", finish_reason)
 	#print("total_tokens ", total_tokens)
+
+	if finish_reason != "tool_calls":
+		input_container.disable = false
+		messages.push_back({
+			"role": "assistant",
+			"content": current_message,
+			"reasoning_content": current_think
+		})
+		reset_message_info()
+
 	input_container.set_usage_label(total_tokens, 128)
-
-	if finish_reason == "tool_calls":
-		return
-	input_container.disable = false
-	messages.push_back({
-		"role": "assistant",
-		"content": current_message,
-		"reasoning_content": current_think
-	})
-	reset_message_info()
-
 	#print(messages)
 
 	if first_chat:
@@ -243,7 +257,6 @@ func on_title_generate_finish(message: String, _think_msg: String):
 	current_title = message
 	#print("标题是 ", current_title)
 	first_chat = false
-
 	current_history_item.title = current_title
 	history_container.update_history(current_id, current_history_item)
 
@@ -259,13 +272,12 @@ func generate_random_string(length: int) -> String:
 	return result
 
 func on_recovery_history(history_item: AgentHistoryContainer.HistoryItem):
-	history_container.hide()
-	article_container.show()
+	show_container(chat_container)
 
 	clear()
 	first_chat = false
 	welcome_message.hide()
-	chat_container.show()
+	message_container.show()
 
 	current_history_item = history_item
 	current_id = history_item.id
@@ -308,7 +320,7 @@ func on_more_button_select(id: int):
 		MoreButtonIds.Help:
 			show_help_window()
 		MoreButtonIds.Setting:
-			pass
+			show_container(setting_container)
 
 func show_help_window():
 	if help_window:
@@ -322,6 +334,23 @@ func show_help_window():
 		help_window.popup_centered(Vector2(1152, 648))
 		help_window.close_requested.connect(help_window.hide)
 
+func on_show_setting():
+	show_container(setting_container)
+	pass
+	
+func on_show_memory():
+	pass
+
 func _exit_tree() -> void:
 	if help_window:
 		help_window.queue_free()
+
+func show_container(container: Control):
+	back_chat_button.visible = container != chat_container
+	chat_title.visible = container == chat_container
+		
+	for c: Control in container_list:
+		c.visible = container == c
+
+func on_click_back_chat_button():
+	show_container(chat_container)

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://d2qy4nnjypt6o"]
 
-[ext_resource type="Script" uid="uid://dmnjsxml82217" path="res://addons/agent/ui/history_container.gd" id="1_hd88h"]
+[ext_resource type="Script" uid="uid://dmnjsxml82217" path="res://addons/agent/ui/history/history_container.gd" id="1_hd88h"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_35iu3"]
 font_color = Color(0.7647059, 0.7647059, 0.7647059, 0.5254902)

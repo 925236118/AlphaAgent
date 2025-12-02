@@ -84,6 +84,14 @@ popup/item_0/id = 0
 popup/item_1/text = "Ask"
 popup/item_1/id = 1
 
+[node name="UseThinking" type="CheckButton" parent="VBoxContainer/HBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_xi1dg")
+button_pressed = true
+text = "思考"
+flat = true
+
 [node name="UsageLabel" type="Label" parent="VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2

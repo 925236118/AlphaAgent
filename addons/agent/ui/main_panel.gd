@@ -89,7 +89,7 @@ func init_message_list():
 		}
 	]
 
-func on_input_container_send_message(user_message: Dictionary, message_content: String):
+func on_input_container_send_message(user_message: Dictionary, message_content: String, use_thinking: bool):
 	welcome_message.hide()
 	chat_container.show()
 	history_container.hide()
@@ -100,12 +100,14 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 	match input_container.get_input_mode():
 		"Ask":
 			deep_seek_chat_stream.tools = []
-			deep_seek_chat_stream.use_thinking = true
-			deep_seek_chat_stream.max_tokens = 64 * 1024
 		"Agent":
 			deep_seek_chat_stream.tools = tools.get_tools_list()
-			deep_seek_chat_stream.use_thinking = true
-			deep_seek_chat_stream.max_tokens = 64 * 1024
+
+	deep_seek_chat_stream.use_thinking = use_thinking
+	if use_thinking:
+		deep_seek_chat_stream.max_tokens = 64 * 1024
+	else:
+		deep_seek_chat_stream.max_tokens = 8 * 1024
 
 	var user_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
 	user_message_item.show_think = false

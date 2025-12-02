@@ -76,7 +76,7 @@ func get_tools_list() -> Array[Dictionary]:
 				}
 			}
 		},
-		
+
 		# create_folder
 		{
 			"type": "function",
@@ -318,7 +318,7 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 						"file_uid": ResourceUID.path_to_uid(path),
 						"file_content": file_string
 					}
-		
+
 		"create_folder":
 			var json = JSON.parse_string(tool_call.function.arguments)
 			if not json == null and json.has("path"): # 如果有路径就执行
@@ -395,7 +395,7 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 				if has_scene_file and has_script_file:
 					#var scene_file = FileAccess.open(scene_path, FileAccess.READ)
 					#var script_file = FileAccess.open(script_path, FileAccess.READ)
-					#var scene_node = 
+					#var scene_node =
 					var scene_file = ResourceLoader.load(scene_path)
 					var root_node = scene_file.instantiate()
 					var has_script = root_node.get_script()

@@ -117,17 +117,21 @@ popup/item_2/text = "设置"
 popup/item_2/id = 2
 popup/item_2/disabled = true
 
-[node name="HistoryContainer" parent="VBoxContainer" instance=ExtResource("5_elhta")]
+[node name="ChatContainer" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HistoryContainer" parent="VBoxContainer/ChatContainer" instance=ExtResource("5_elhta")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 
-[node name="ArticleContainer" type="Control" parent="VBoxContainer"]
+[node name="ArticleContainer" type="Control" parent="VBoxContainer/ChatContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="WelcomeMessage" type="Control" parent="VBoxContainer/ArticleContainer"]
+[node name="WelcomeMessage" type="Control" parent="VBoxContainer/ChatContainer/ArticleContainer"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -137,7 +141,7 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 3
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/ArticleContainer/WelcomeMessage"]
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/ChatContainer/ArticleContainer/WelcomeMessage"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -147,7 +151,7 @@ grow_vertical = 2
 theme_override_constants/separation = 20
 alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/ArticleContainer/WelcomeMessage/VBoxContainer"]
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer/ChatContainer/ArticleContainer/WelcomeMessage/VBoxContainer"]
 modulate = Color(0, 0, 0, 0.24313726)
 custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
@@ -155,14 +159,14 @@ texture = ExtResource("6_c8smv")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="VBoxContainer/ArticleContainer/WelcomeMessage/VBoxContainer"]
+[node name="Label" type="Label" parent="VBoxContainer/ChatContainer/ArticleContainer/WelcomeMessage/VBoxContainer"]
 visible = false
 layout_mode = 2
 text = "α"
 label_settings = SubResource("LabelSettings_2usmi")
 horizontal_alignment = 1
 
-[node name="Label2" type="Label" parent="VBoxContainer/ArticleContainer/WelcomeMessage/VBoxContainer"]
+[node name="Label2" type="Label" parent="VBoxContainer/ChatContainer/ArticleContainer/WelcomeMessage/VBoxContainer"]
 layout_mode = 2
 text = "帮助构建游戏项目
 帮助学习Godot程序
@@ -171,14 +175,14 @@ text = "帮助构建游戏项目
 label_settings = SubResource("LabelSettings_6rfr6")
 horizontal_alignment = 1
 
-[node name="LinkButton" type="LinkButton" parent="VBoxContainer/ArticleContainer/WelcomeMessage/VBoxContainer"]
+[node name="LinkButton" type="LinkButton" parent="VBoxContainer/ChatContainer/ArticleContainer/WelcomeMessage/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.7647059, 0.7647059, 0.7647059, 0.5254902)
 text = "更多内容"
 uri = "https://godotvillage.github.io/alpha/"
 
-[node name="ChatContainer" type="ScrollContainer" parent="VBoxContainer/ArticleContainer"]
+[node name="ChatContainer" type="ScrollContainer" parent="VBoxContainer/ChatContainer/ArticleContainer"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
@@ -189,25 +193,38 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 3
 
-[node name="MessageList" type="VBoxContainer" parent="VBoxContainer/ArticleContainer/ChatContainer"]
+[node name="MessageList" type="VBoxContainer" parent="VBoxContainer/ChatContainer/ArticleContainer/ChatContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/ChatContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 10
 
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/MarginContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/ChatContainer/MarginContainer"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_5v6i3")
 
-[node name="InputContainer" parent="VBoxContainer/MarginContainer/PanelContainer" instance=ExtResource("4_2dutf")]
+[node name="InputContainer" parent="VBoxContainer/ChatContainer/MarginContainer/PanelContainer" instance=ExtResource("4_2dutf")]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="Setting" type="ScrollContainer" parent="VBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SettingPanel" type="MarginContainer" parent="VBoxContainer/Setting"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
 
 [node name="DeepSeekChatStream" type="Node" parent="."]
 unique_name_in_owner = true

@@ -8,10 +8,11 @@ extends MarginContainer
 @onready var reference_list: HFlowContainer = %ReferenceList
 @onready var input_mode_select: OptionButton = %InputModeSelect
 @onready var input_menu_list: ItemList = %InputMenuList
+@onready var use_thinking: CheckButton = %UseThinking
 
 const REFERENCE_ITEM = preload("uid://bewckbivwp036")
 
-signal send_message(message: Dictionary, message_content: String)
+signal send_message(message: Dictionary, message_content: String, use_thinking: bool)
 signal show_help
 
 
@@ -205,7 +206,7 @@ func on_click_send_message():
 	send_message.emit({
 		"role": "user",
 		"content": "用户输入的内容：" + message_text + "\n引用的内容信息：" + info_list_string
-	}, message_text)
+	}, message_text, use_thinking.button_pressed)
 
 ## 处理命令
 func handle_command(command: String, args: PackedStringArray):

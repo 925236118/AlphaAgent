@@ -92,6 +92,8 @@ func init_message_list():
 func on_input_container_send_message(user_message: Dictionary, message_content: String):
 	welcome_message.hide()
 	chat_container.show()
+	history_container.hide()
+	article_container.show()
 	reset_message_info()
 	messages.push_back(user_message)
 
@@ -133,7 +135,6 @@ func on_response_use_tool():
 func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 	current_message_item.used_tools(tool_calls)
 
-	reset_message_info()
 	# 存储调用工具信息
 	messages.push_back({
 		"role": "assistant",
@@ -141,6 +142,8 @@ func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 		"reasoning_content": current_think,
 		"tool_calls": tool_calls.map(func (tool: DeepSeekChatStream.ToolCallsInfo): return tool.to_dict())
 	})
+
+	reset_message_info()
 
 	for tool in tool_calls:
 		#print(tool.id)
@@ -193,9 +196,11 @@ func on_click_history_button():
 func on_agent_finish(finish_reason: String, total_tokens: float):
 	#print("finish_reason ", finish_reason)
 	#print("total_tokens ", total_tokens)
-	if finish_reason != "tool_calls":
-		input_container.disable = true
 	input_container.set_usage_label(total_tokens, 128)
+
+	if finish_reason == "tool_calls":
+		return
+	input_container.disable = false
 	messages.push_back({
 		"role": "assistant",
 		"content": current_message,
@@ -288,8 +293,10 @@ func on_recovery_history(history_item: AgentHistoryContainer.HistoryItem):
 					tool_call_info.function.arguments = tool_call.get("function").get("arguments")
 					tool_call_info.function.name = tool_call.get("function").get("name")
 					tool_call_array.push_back(tool_call_info)
+				message_item.update_think_content(message.reasoning_content, false)
 				message_item.used_tools(tool_call_array)
 			else:
+				message_item.update_think_content(message.reasoning_content, false)
 				message_item.update_message_content(message.content)
 
 func on_more_button_select(id: int):

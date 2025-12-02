@@ -40,8 +40,9 @@ var command_list = [
 var disable: bool = false:
 	set(value):
 		disable = value
-		user_input.editable = value
-		send_button.disabled = not value
+		user_input.editable = not value
+		clear_button.disabled = value
+		send_button.disabled = value
 
 var menu_list = []
 

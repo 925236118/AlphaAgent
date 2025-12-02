@@ -34,10 +34,13 @@ func _process(delta: float) -> void:
 		think_time += delta
 		thinking_time_label.text = "%.1f s" % think_time
 
-func update_think_content(text: String):
-	thinking = true
+func update_think_content(text: String, start_timer: bool = true):
+	thinking = start_timer
 	think_container.show()
 	think_content.text = text
+	if not thinking:
+		thinking_label.text = "思考了"
+
 
 func update_message_content(text: String):
 	thinking = false

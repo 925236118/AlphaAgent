@@ -94,7 +94,13 @@ func update_history(id: String, item: HistoryItem):
 func clear_history_nodes():
 	var item_count = items_container.get_child_count()
 	for i in item_count:
-		items_container.get_child(item_count - i - 1).queue_free()
+		var history_item = items_container.get_child(item_count - i - 1)
+		history_item.queue_free()
+		for sig in history_item.get_signal_connection_list("recovery"):
+			history_item.disconnect("recovery", sig.callable)
+		for sig in history_item.get_signal_connection_list("delete"):
+			history_item.disconnect("delete", sig.callable)
+
 
 func add_history_nodes():
 	if history_list.size() > 0:

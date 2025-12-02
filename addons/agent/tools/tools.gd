@@ -76,28 +76,7 @@ func get_tools_list() -> Array[Dictionary]:
 				}
 			}
 		},
-		# write_file
-		{
-			"type": "function",
-			"function": {
-				"name": "write_file",
-				"description": "写入文件内容。文件格式应为资源文件(.tres)或者脚本文件(.gd)、Godot着色器(.gdshader)、场景文件(.tscn)、文本文件(.txt或.md)、CSV文件(.csv)",
-				"parameters": {
-					"type": "object",
-					"properties": {
-						"path": {
-							"type": "string",
-							"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
-						},
-						"content": {
-							"type": "string",
-							"description": "需要写入的文件内容。"
-						}
-					},
-					"required": ["path", "content"]
-				}
-			}
-		},
+		
 		# create_folder
 		{
 			"type": "function",
@@ -151,7 +130,7 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "add_script_to_scene",
-				"description": "将一个脚本挂在到场景节点上",
+				"description": "将一个脚本加载到节点上，如果需要为节点挂载脚本，应优先使用本工具",
 				"parameters": {
 					"type": "object",
 					"properties": {
@@ -165,6 +144,46 @@ func get_tools_list() -> Array[Dictionary]:
 						}
 					},
 					"required": ["scene_path","script_path"]
+				}
+			}
+		},
+		# sep_script_to_scene
+		{
+			"type": "function",
+			"function": {
+				"name": "sep_script_to_scene",
+				"description": "将一个节点上的脚本分离，如果需要为节点分离脚本，应优先使用本工具",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"scene_path": {
+							"type": "string",
+							"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+						},
+					},
+					"required": ["scene_path","script_path"]
+				}
+			}
+		},
+		# write_file
+		{
+			"type": "function",
+			"function": {
+				"name": "write_file",
+				"description": "写入文件内容。文件格式应为资源文件(.tres)或者脚本文件(.gd)、Godot着色器(.gdshader)、场景文件(.tscn)、文本文件(.txt或.md)、CSV文件(.csv)，当明确提及创建或修改文件时再调用该工具",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"path": {
+							"type": "string",
+							"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+						},
+						"content": {
+							"type": "string",
+							"description": "需要写入的文件内容。"
+						}
+					},
+					"required": ["path", "content"]
 				}
 			}
 		},
@@ -299,34 +318,7 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 						"file_uid": ResourceUID.path_to_uid(path),
 						"file_content": file_string
 					}
-		"write_file":
-			var json = JSON.parse_string(tool_call.function.arguments)
-			if not json == null and json.has("path") and json.has("content"):
-				var path: String = json.path
-				var content = json.content
-				# var is_new_file = not FileAccess.file_exists(path)
-				var file = FileAccess.open(path, FileAccess.WRITE)
-				if not file == null:
-					file.store_string(content)
-					file.close()
-
-					EditorInterface.get_resource_filesystem().update_file(path)
-
-					EditorInterface.get_script_editor().notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
-
-					if path.get_file().get_extension() == "tscn":
-						EditorInterface.reload_scene_from_path(path)
-
-					result = {
-						"file_path": path,
-						"file_uid": ResourceUID.path_to_uid(path),
-						"file_content": FileAccess.get_file_as_string(path),
-						"open_error": FileAccess.get_open_error()
-					}
-				else:
-					result = {
-						"open_error": FileAccess.get_open_error()
-					}
+		
 		"create_folder":
 			var json = JSON.parse_string(tool_call.function.arguments)
 			if not json == null and json.has("path"): # 如果有路径就执行
@@ -398,26 +390,34 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 			if not json == null and json.has("scene_path") and json.has("script_path"):
 				var scene_path = json.scene_path
 				var script_path = json.script_path
-				var has_scene_file = DirAccess.dir_exists_absolute(scene_path)
-				var has_script_path = DirAccess.dir_exists_absolute(script_path)
-				if has_scene_file and has_script_path:
-					var scene_file = FileAccess.open(scene_path, FileAccess.WRITE)
-					var script_file = FileAccess.open(script_path, FileAccess.WRITE)
-					var has_script = scene_file.get_script()
+				var has_scene_file = FileAccess.file_exists(scene_path)
+				var has_script_file = FileAccess.file_exists(script_path)
+				if has_scene_file and has_script_file:
+					#var scene_file = FileAccess.open(scene_path, FileAccess.READ)
+					#var script_file = FileAccess.open(script_path, FileAccess.READ)
+					#var scene_node = 
+					var scene_file = ResourceLoader.load(scene_path)
+					var root_node = scene_file.instantiate()
+					var has_script = root_node.get_script()
+					var script_file = ResourceLoader.load(script_path)
+					var script = script_file.new()
 					if has_script == null:
-						scene_file.set_script(script_file)
-						var scene_class = scene_file.get_class()
-						var script_class = script_file.get_instance_base_type()
-						var is_same_class:bool = false
-						result = {
-							"scene_class":scene_class,
-							"script_class":script_class,
-						}
-						if scene_class == script_class:
-							is_same_class = true
-							result["success"] = "脚本加载成功"
+						if root_node is PackedScene and script is GDScript:
+							scene_file.set_script(script_file)
+							var scene_class = scene_file.get_class()
+							var script_class = script_file.get_instance_base_type()
+							var is_same_class:bool = false
+							result = {
+								"scene_class":scene_class,
+								"script_class":script_class,
+							}
+							if scene_class == script_class:
+								is_same_class = true
+								result["success"] = "脚本加载成功"
+							else:
+								result["error"] = "场景节点类型与脚本继承类型不符"
 						else:
-							result["error"] = "场景节点类型与脚本继承类型不符"
+							result["error"] = "文件非场景节点和脚本的关系"
 					else:
 						result = {
 							"error":"该场景节点已挂载脚本"
@@ -427,13 +427,61 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 						result = {
 							"error":"场景文件不存在，询问是否需要新建该场景"
 						}
-					if not has_script_path:
+					if not has_script_file:
 						result = {
 							"error":"脚本文件不存在，询问是否需要新建该脚本"
 						}
 				EditorInterface.get_resource_filesystem().scan()
+		"sep_script_to_scene":
+			var json = JSON.parse_string(tool_call.function.arguments)
+			if not json == null and json.has("scene_path"):
+				var scene_path = json.scene_path
+				var has_scene_file = FileAccess.file_exists(scene_path)
+				if has_scene_file:
+					var scene_file = ResourceLoader.load(scene_path)
+					var root_node = scene_file.instantiate()
+					var has_script = root_node.get_script()
+					if has_script != null and root_node is PackedScene:
+						scene_file.set_script(null)
+					else:
+						result = {
+							"error":"场景文件并未挂在脚本"
+						}
+				else:
+					if not has_scene_file:
+						result = {
+							"error":"场景文件不存在，询问是否需要新建该场景"
+						}
 
+				EditorInterface.get_resource_filesystem().scan()
+		"write_file":
+			var json = JSON.parse_string(tool_call.function.arguments)
+			if not json == null and json.has("path") and json.has("content"):
+				var path: String = json.path
+				var content = json.content
+				# var is_new_file = not FileAccess.file_exists(path)
+				var file = FileAccess.open(path, FileAccess.WRITE)
+				if not file == null:
+					file.store_string(content)
+					file.close()
 
+					EditorInterface.get_resource_filesystem().update_file(path)
+
+					EditorInterface.get_script_editor().notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
+
+					if path.get_file().get_extension() == "tscn":
+						EditorInterface.reload_scene_from_path(path)
+
+					result = {
+						"file_path": path,
+						"file_uid": ResourceUID.path_to_uid(path),
+						"file_content": FileAccess.get_file_as_string(path),
+						"open_error": FileAccess.get_open_error()
+					}
+				else:
+					result = {
+						"open_error": FileAccess.get_open_error()
+					}
 
 		_:
 			result = {

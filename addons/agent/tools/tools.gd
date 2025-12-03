@@ -5,10 +5,11 @@ extends Node
 
 func test():
 	var tool = DeepSeekChatStream.ToolCallsInfo.new()
-	tool.function.name = "get_image_info"
+	tool.function.name = "get_project_info"
 	tool.function.arguments = JSON.stringify({"image_path": "res://icon.svg"})
 	#var image = load("res://icon.svg")
 	print(use_tool(tool))
+	print(ProjectSettings.get_setting("input"))
 	pass
 
 
@@ -20,7 +21,7 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "get_project_info",
-				"description": "获取当前的Godot引擎信息。包含Godot版本，CPU型号、CPU 架构、内存信息、显卡信息、设备型号、当前系统时间等，还有当前项目的一些信息，例如项目名称、项目版本、项目描述、项目运行主场景、游戏运行窗口信息、全局的物理信息、全局的渲染设置、主题信息等。",
+				"description": "获取当前的Godot引擎信息。包含Godot版本，CPU型号、CPU 架构、内存信息、显卡信息、设备型号、当前系统时间等，还有当前项目的一些信息，例如项目名称、项目版本、项目描述、项目运行主场景、游戏运行窗口信息、全局的物理信息、全局的渲染设置、主题信息等。还有自动加载和输入映射，需要从project.godot中读取。",
 				"parameters": {
 					"type": "object",
 					"properties": {},
@@ -201,6 +202,28 @@ func get_tools_list() -> Array[Dictionary]:
 				}
 			}
 		},
+		# set_singleton
+		{
+			"type": "function",
+			"function": {
+				"name": "set_singleton",
+				"description": "设置或删除项目自动加载脚本或场景",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"name": {
+							"type": "string",
+							"description": "需要设置的自动加载名称，需要以大驼峰的方式命名。一般可以和脚本或场景文件同名。",
+						},
+						"path": {
+							"type": "string",
+							"description": "需要设置为自动加载的脚本或场景路径，必须是以res://开头的绝对路径。如果为空时则会删除该自动加载",
+						},
+					},
+					"required": ["name"]
+				}
+			}
+		}
 	]
 
 
@@ -231,6 +254,8 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 					"project_version": ProjectSettings.get_setting("application/config/version"),
 					"project_description": ProjectSettings.get_setting("application/config/description"),
 					"main_scene": ProjectSettings.get_setting("application/run/main_scene"),
+					"features": ProjectSettings.get_setting("config/features"),
+					"project.godot": FileAccess.get_file_as_string("res://project.godot"),
 					"window": {
 						"viewport_width": ProjectSettings.get_setting("display/window/size/viewport_width"),
 						"viewport_height": ProjectSettings.get_setting("display/window/size/viewport_height"),
@@ -511,6 +536,25 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 					"image_format_name": image.data.format,
 					"data_size": image.get_data_size()
 				}
+
+		"set_singleton":
+			var json = JSON.parse_string(tool_call.function.arguments)
+			if not json == null and json.has("name"):
+				var singleton_name = json.name
+				var singleton_path = json.get("path", "")
+				if singleton_path:
+					AlphaAgentPlugin.instance.add_autoload_singleton(singleton_name, singleton_path)
+					result = {
+						"name": singleton_name,
+						"path": singleton_path,
+						"success": "添加自动加载成功"
+					}
+				else:
+					AlphaAgentPlugin.instance.remove_autoload_singleton(singleton_name)
+					result = {
+						"name": singleton_name,
+						"success": "删除自动加载成功"
+					}
 		_:
 			result = {
 				"error": "错误的function.name"

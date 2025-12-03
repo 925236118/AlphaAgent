@@ -1,5 +1,8 @@
 @tool
+class_name AlphaAgentPlugin
 extends EditorPlugin
+
+static var instance: AlphaAgentPlugin = null
 
 const MAIN_PANEL = preload("uid://baqbjml8ahgng")
 
@@ -32,8 +35,10 @@ func _enter_tree() -> void:
 	#init_completions_settings()
 	main_panel = MAIN_PANEL.instantiate()
 	add_control_to_dock(EditorPlugin.DOCK_SLOT_RIGHT_UL, main_panel)
+	instance = self
 
 func _exit_tree() -> void:
 	#erase_completions_settings()
 	remove_control_from_docks(main_panel)
 	main_panel.queue_free()
+	instance = null

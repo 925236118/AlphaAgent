@@ -4,17 +4,13 @@ extends Node
 @export_tool_button("测试") var test_action = test
 
 func test():
-	#print(EditorInterface.get_editor_main_screen())
 	var tool = DeepSeekChatStream.ToolCallsInfo.new()
 	tool.function.name = "get_image_info"
 	tool.function.arguments = JSON.stringify({"image_path": "res://icon.svg"})
 	#var image = load("res://icon.svg")
 	print(use_tool(tool))
-	#print(image)
+	pass
 
-	#var node = EditorInterface.get_editor_main_screen()
-#
-	#print(node.get_children())
 
 
 func get_tools_list() -> Array[Dictionary]:
@@ -505,12 +501,14 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 				var image_path := json.image_path as String
 				var texture := load(image_path) as Texture2D
 				var image = texture.get_image() as Image
-				return {
-					"image_file_type": image_path.get_extension(),
+				result = {
+					"uid": ResourceUID.path_to_uid(image_path),
 					"image_path": image_path,
+					"image_file_type": image_path.get_extension(),
 					"image_width": image.get_width(),
 					"image_height": image.get_height(),
 					"image_format": image.get_format(),
+					"image_format_name": image.data.format,
 					"data_size": image.get_data_size()
 				}
 		_:

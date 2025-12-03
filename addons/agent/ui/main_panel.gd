@@ -290,13 +290,14 @@ func on_recovery_history(history_item: AgentHistoryContainer.HistoryItem):
 	messages = history_item.message
 	input_container.set_input_mode(history_item.mode)
 
+	var message_item = null
 	for message in messages:
-		if message.role == "system" or message.role == "tool" :
+		if message.role == "system" :
 			continue
-		var message_item = null
-		message_item = MESSAGE_ITEM.instantiate()
-		message_item.show_think = false
-		message_list.add_child(message_item)
+		if message.role != "tool":
+			message_item = MESSAGE_ITEM.instantiate()
+			message_item.show_think = false
+			message_list.add_child(message_item)
 
 		if message.role == "user":
 			message_item.update_user_message_content(message.content)
@@ -316,6 +317,8 @@ func on_recovery_history(history_item: AgentHistoryContainer.HistoryItem):
 			else:
 				message_item.update_think_content(message.reasoning_content, false)
 				message_item.update_message_content(message.content)
+		elif message.role == "tool":
+			message_item.update_used_tool_result(message.tool_call_id, message.content)
 
 func on_more_button_select(id: int):
 	match id:

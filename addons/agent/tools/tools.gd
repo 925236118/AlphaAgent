@@ -5,11 +5,12 @@ extends Node
 
 func test():
 	var tool = DeepSeekChatStream.ToolCallsInfo.new()
-	tool.function.name = "get_project_info"
-	tool.function.arguments = JSON.stringify({"image_path": "res://icon.svg"})
+	tool.function.name = "get_project_file_list"
+	tool.function.arguments = JSON.stringify({"start_path": "res://addons", "interation": -1})
 	#var image = load("res://icon.svg")
-	print(use_tool(tool))
-	print(ProjectSettings.get_setting("input"))
+	print(await use_tool(tool))
+	#print(ProjectSettings.get_setting("input"))
+	#var process_id = OS.create_instance(["--headless", "--script", "res://game.gd"])
 	pass
 
 
@@ -47,10 +48,19 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "get_project_file_list",
-				"description": "获取当前项目中所有文件以及其UID列表。",
+				"description": "获取当前项目中所有文件以及其UID列表。尽量不要使用全量读取目录",
 				"parameters": {
 					"type": "object",
-					"properties": {},
+					"properties": {
+						"start_path": {
+							"type": "string",
+							"description": "可以指定读取的目录，必须是以res://开头的绝对路径。只会返回这个目录下的文件和目录",
+						},
+						"interation": {
+							"type": "number",
+							"description": "迭代的次数，只有start_path参数有值时才会生效。如果返回1，就只会查询一层文件。默认为-1，查询全部层级",
+						}
+					},
 					"required": []
 				}
 			}
@@ -167,7 +177,8 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "write_file",
-				"description": "写入文件内容。文件格式应为资源文件(.tres)或者脚本文件(.gd)、Godot着色器(.gdshader)、场景文件(.tscn)、文本文件(.txt或.md)、CSV文件(.csv)，当明确提及创建或修改文件时再调用该工具",
+				#"description": "写入文件内容。文件格式应为资源文件(.tres)或者脚本文件(.gd)、Godot着色器(.gdshader)、场景文件(.tscn)、文本文件(.txt或.md)、CSV文件(.csv)，当明确提及创建或修改文件时再调用该工具",
+				"description": "全量替换写入文件内容。文件格式应为资源文件(.tres)或者脚本文件(.gd)、Godot着色器(.gdshader)、场景文件(.tscn)、文本文件(.txt或.md)、CSV文件(.csv)，当明确提及创建或修改文件时再调用该工具。",
 				"parameters": {
 					"type": "object",
 					"properties": {
@@ -223,7 +234,57 @@ func get_tools_list() -> Array[Dictionary]:
 					"required": ["name"]
 				}
 			}
-		}
+		},
+		# check_script_error
+		{
+			"type": "function",
+			"function": {
+				"name": "check_script_error",
+				"description": "使用Godot脚本引擎检查脚本中的语法错误，只能检查gd脚本。",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"path": {
+							"type": "string",
+							"description": "需要检查的脚本路径，必须是以res://开头的绝对路径。",
+						},
+					},
+					"required": ["name"]
+				}
+			}
+		},
+		# open_resource
+		{
+			"type": "function",
+			"function": {
+				"name": "open_resource",
+				"description": "使用Godot编辑器立刻打开或切换到对应资源，资源应是场景文件（.tscn）或脚本文件（.gd）。",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"path": {
+							"type": "string",
+							"description": "需要打开的资源路径，必须是以res://开头的绝对路径。",
+						},
+						"type": {
+							"type": "string",
+							"enum": ["scene", "script"],
+							"description": "打开的类型",
+						},
+						"line": {
+							"type": "number",
+							"enum": ["scene", "script"],
+							"description": "如果打开的是脚本，可以指定行号， 默认是-1",
+						},
+						"column": {
+							"type": "number",
+							"description": "如果打开的是脚本，可以指定列号，默认是0",
+						},
+					},
+					"required": ["name", "type"]
+				}
+			}
+		},
 	]
 
 
@@ -306,12 +367,26 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 				},
 			}
 		"get_project_file_list":
-			var start_dir = "res://"
+			var json = JSON.parse_string(tool_call.function.arguments)
+
+			var start_path := json.get("start_path", "res://") as String
+			if not start_path.ends_with("/"):
+				start_path += "/"
+
+			var interation := int(json.get("interation", -1))
+
 			var ignore_files = [".godot", "*.uid", "addons"]
-			var queue = [start_dir]
+			var queue = [{
+				"path": start_path,
+				"interation": interation
+			}]
 			var file_list = []
 			while queue.size():
-				var current_dir = queue.pop_front()
+				var current_item = queue.pop_front()
+				var current_interation = current_item.interation
+				var current_dir = current_item.path
+				if current_interation == 0:
+					continue
 				var dir = DirAccess.open(current_dir)
 				if dir:
 					dir.list_dir_begin()
@@ -325,18 +400,26 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 						if match_result:
 							if dir.current_is_dir():
 								#print("发现目录：" + current_dir + file_name + '/')
-								queue.push_back(current_dir + file_name + '/')
+								file_list.push_back({
+									"path": current_dir + file_name,
+									"type": "directory"
+								})
+								queue.push_back({
+									"path": current_dir + file_name + '/',
+									"interation": current_interation - 1
+								})
 							else:
-								file_list.push_back(current_dir + file_name)
+								file_list.push_back({
+									"path": current_dir + file_name,
+									"uid": ResourceUID.path_to_uid(current_dir + file_name),
+									"type": "file"
+								})
 								#print("发现文件" + current_dir + file_name)
 						file_name = dir.get_next()
 				else:
 					print("尝试访问路径时出错。")
 			result = {
-				"list": file_list.map(func (file_path: String): return {
-					"path": file_path,
-					"uid": ResourceUID.path_to_uid(file_path)
-				})
+				"list": file_list
 			}
 		"read_file":
 			var json = JSON.parse_string(tool_call.function.arguments)
@@ -555,6 +638,50 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 						"name": singleton_name,
 						"success": "删除自动加载成功"
 					}
+		"check_script_error":
+			var json = JSON.parse_string(tool_call.function.arguments)
+			if not json == null and json.has("path"):
+				var log_file_path = "res://.alpha/check_script.temp"
+				var path = json.path
+				if FileAccess.file_exists(log_file_path):
+					DirAccess.remove_absolute(log_file_path)
+
+				var instance_pid = OS.create_instance(["--head-less", "--script", path, "--check-only", "--log-file", log_file_path])
+
+				await get_tree().create_timer(3.0).timeout
+				OS.kill(instance_pid)
+
+				var script_check_result = FileAccess.get_file_as_string(log_file_path)
+
+				DirAccess.remove_absolute(log_file_path)
+				result = {
+					"script_path": path,
+					"script_check_result": script_check_result
+				}
+		"open_resource":
+			var json = JSON.parse_string(tool_call.function.arguments)
+			if not json == null and json.has("path") and json.has("type"):
+				var path = json.path
+				var type = json.type
+				match type:
+					"scene":
+						EditorInterface.open_scene_from_path(path)
+						result = {
+							"success": "打开成功"
+						}
+					"script":
+						var resource = load(path)
+						var line = json.get('line', -1)
+						var column = json.get('column', 0)
+						EditorInterface.edit_script(resource, line, column)
+						result = {
+							"success": "打开成功"
+						}
+					_:
+						result = {
+							"error": "错误的type类型"
+						}
+
 		_:
 			result = {
 				"error": "错误的function.name"

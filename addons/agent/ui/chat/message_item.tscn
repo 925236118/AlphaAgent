@@ -118,6 +118,7 @@ layout_mode = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
+focus_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxEmpty_fsx2h")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_u11mo")
 theme_override_styles/background = SubResource("StyleBoxEmpty_dfcb6")
@@ -125,6 +126,7 @@ theme_override_styles/fill = SubResource("StyleBoxEmpty_njs72")
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
+selection_enabled = true
 
 [node name="UserMessageContainer" type="VBoxContainer" parent="VBoxContainer/ContentContainer"]
 unique_name_in_owner = true

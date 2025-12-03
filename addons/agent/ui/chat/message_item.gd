@@ -19,9 +19,12 @@ extends MarginContainer
 
 @export var show_think: bool = false
 
+const USE_TOOL_ITEM = preload("uid://b7p6nfdynggrc")
+
 var thinking: bool = false
 
 var think_time: float = 0.0
+var use_tool_list: Dictionary[String, Control] = {}
 
 func _ready() -> void:
 	expand_button.toggled.connect(_on_expand_button_toggled)
@@ -71,14 +74,15 @@ func response_use_tool():
 func used_tools(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 	wait_using_tool.hide()
 	for tool in tool_calls:
-		var panel = PanelContainer.new()
-		var stylebox = StyleBoxFlat.new()
-		stylebox.bg_color = Color("#202020")
-		panel.add_theme_stylebox_override("panel", stylebox)
-		var label = Label.new()
-		panel.add_child(label)
-		use_tool_container.add_child(panel)
-		label.text = "调用工具 " + tool.function.name
+		var use_tool_item = USE_TOOL_ITEM.instantiate()
+		use_tool_container.add_child(use_tool_item)
+		use_tool_item.update_title("调用工具 " + tool.function.name)
+		use_tool_item.id = tool.id
+		use_tool_item.update_request(tool.function.arguments)
+		use_tool_list[tool.id] = use_tool_item
+
+func update_used_tool_result(id: String, result: String):
+	use_tool_list.get(id).update_response(result)
 
 func on_click_rich_text_url(meta):
 	var meta_string = str(meta)

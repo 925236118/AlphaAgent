@@ -5,7 +5,7 @@ extends ScrollContainer
 @onready var CONFIG = load("uid://b4bcww0bmnxt0")
 
 func _ready() -> void:
-	print('CONFIG.settings ',CONFIG.settings)
+	#print('CONFIG.settings ',CONFIG.settings)
 	read_settings()
 	init_sinals()
 

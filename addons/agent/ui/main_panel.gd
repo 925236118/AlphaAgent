@@ -58,7 +58,7 @@ var current_history_item: AgentHistoryContainer.HistoryItem = null
 
 func _ready() -> void:
 	show_container(chat_container)
-	
+
 	# 展示欢迎语
 	welcome_message.show()
 	message_container.hide()
@@ -106,7 +106,7 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 	show_container(chat_container)
 	welcome_message.hide()
 	message_container.show()
-	
+
 	reset_message_info()
 	messages.push_back(user_message)
 
@@ -158,15 +158,19 @@ func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 		"tool_calls": tool_calls.map(func (tool: DeepSeekChatStream.ToolCallsInfo): return tool.to_dict())
 	})
 
-	reset_message_info()
 
 	for tool in tool_calls:
 		#print(tool.id)
+		var content = await tools.use_tool(tool)
 		messages.push_back({
 			"role": "tool",
 			"tool_call_id": tool.id,
-			"content": await tools.use_tool(tool)
+			"content": content
 		})
+
+		current_message_item.update_used_tool_result(tool.id, content)
+
+	reset_message_info()
 
 	await get_tree().create_timer(0.5).timeout
 	current_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
@@ -176,14 +180,14 @@ func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 	deep_seek_chat_stream.post_message(messages)
 
 	message_container.scroll_vertical = 100000
-	
+
 	current_history_item.title = current_title
-	
+
 	history_container.update_history(current_id, current_history_item)
 
 func on_click_new_chat_button():
 	clear()
-	
+
 	show_container(chat_container)
 
 func clear():
@@ -337,7 +341,7 @@ func show_help_window():
 func on_show_setting():
 	show_container(setting_container)
 	pass
-	
+
 func on_show_memory():
 	pass
 
@@ -348,7 +352,7 @@ func _exit_tree() -> void:
 func show_container(container: Control):
 	back_chat_button.visible = container != chat_container
 	chat_title.visible = container == chat_container
-		
+
 	for c: Control in container_list:
 		c.visible = container == c
 

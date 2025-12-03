@@ -1,0 +1,83 @@
+[gd_scene load_steps=8 format=3 uid="uid://b7p6nfdynggrc"]
+
+[ext_resource type="Script" uid="uid://dn6fte72bh5ht" path="res://addons/agent/ui/chat/use_tool_item.gd" id="1_dv7ai"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hv0vw"]
+bg_color = Color(0.1254902, 0.1254902, 0.1254902, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0ht4p"]
+content_margin_left = 5.0
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_dv7ai"]
+font_size = 12
+font_color = Color(1, 1, 1, 0.5294118)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6vtcw"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dv7ai"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_u1psc"]
+
+[node name="UseToolItem" type="PanelContainer"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 23.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hv0vw")
+script = ExtResource("1_dv7ai")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="TitleLabel" type="Button" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_0ht4p")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_0ht4p")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_0ht4p")
+theme_override_styles/hover_pressed = SubResource("StyleBoxEmpty_0ht4p")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_0ht4p")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_0ht4p")
+flat = true
+alignment = 0
+
+[node name="DetailContainer" type="VBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/DetailContainer"]
+layout_mode = 2
+text = "请求工具参数"
+label_settings = SubResource("LabelSettings_dv7ai")
+
+[node name="ToolRequest" type="TextEdit" parent="VBoxContainer/DetailContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_6vtcw")
+theme_override_styles/read_only = SubResource("StyleBoxEmpty_dv7ai")
+editable = false
+context_menu_enabled = false
+emoji_menu_enabled = false
+scroll_fit_content_height = true
+
+[node name="Label2" type="Label" parent="VBoxContainer/DetailContainer"]
+layout_mode = 2
+text = "返回工具结果"
+label_settings = SubResource("LabelSettings_dv7ai")
+
+[node name="ToolResponse" type="TextEdit" parent="VBoxContainer/DetailContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_6vtcw")
+theme_override_styles/read_only = SubResource("StyleBoxEmpty_u1psc")
+editable = false
+context_menu_enabled = false
+emoji_menu_enabled = false
+scroll_fit_content_height = true
+
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]
+[connection signal="pressed" from="VBoxContainer/TitleLabel" to="." method="_on_title_label_pressed"]

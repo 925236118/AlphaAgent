@@ -213,7 +213,7 @@ func on_click_send_message():
 		"role": "user",
 		"content": "用户输入的内容：" + message_text + "\n引用的内容信息：" + info_list_string
 	}, message_text, use_thinking.button_pressed)
-	
+
 	if load_config_setting("auto_clear"):
 		init()
 

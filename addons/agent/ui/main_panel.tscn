@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=18 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Script" uid="uid://dlx7bujvsuk11" path="res://addons/agent/scripts/deepseek_chat_stream.gd" id="1_fhbwo"]
@@ -10,7 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://bmq6b8c3ud8ig" path="res://addons/agent/icons/menu.svg" id="4_cpi8b"]
 [ext_resource type="PackedScene" uid="uid://d2qy4nnjypt6o" path="res://addons/agent/ui/history/history_container.tscn" id="5_elhta"]
 [ext_resource type="Texture2D" uid="uid://dkk4u7fmqh515" path="res://addons/agent/icons/alpha.svg" id="6_c8smv"]
-[ext_resource type="Script" uid="uid://c857yifca6rog" path="res://addons/agent/scripts/deepseek_chat.gd" id="7_5v6i3"]
+[ext_resource type="Script" path="res://addons/agent/scripts/deepseek_chat.gd" id="7_5v6i3"]
 [ext_resource type="PackedScene" uid="uid://bxe6hto0vk8fu" path="res://addons/agent/ui/setting/setting.tscn" id="8_5t7oo"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_5v6i3"]
@@ -19,10 +19,6 @@ font_color = Color(0.7647059, 0.7647059, 0.7647059, 0.5254902)
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_aabuu"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_n876e"]
-
-[sub_resource type="LabelSettings" id="LabelSettings_2usmi"]
-font_size = 128
-font_color = Color(0, 0, 0, 0.24313726)
 
 [sub_resource type="LabelSettings" id="LabelSettings_6rfr6"]
 font_color = Color(0.7666196, 0.76661956, 0.76661956, 0.5254902)
@@ -101,6 +97,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "查看历史记录"
+mouse_default_cursor_shape = 2
 theme_override_font_sizes/font_size = 10
 theme_override_styles/focus = SubResource("StyleBoxEmpty_aabuu")
 text = "      "
@@ -114,6 +111,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "创建新对话"
+mouse_default_cursor_shape = 2
 theme_override_font_sizes/font_size = 10
 theme_override_styles/focus = SubResource("StyleBoxEmpty_n876e")
 text = "      "
@@ -127,6 +125,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "创建新对话"
+mouse_default_cursor_shape = 2
 theme_override_font_sizes/font_size = 10
 theme_override_styles/focus = SubResource("StyleBoxEmpty_n876e")
 text = "      "
@@ -177,7 +176,7 @@ grow_vertical = 2
 theme_override_constants/separation = 20
 alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/Containers/ChatContainer/WelcomeMessage/VBoxContainer"]
+[node name="AlphaLogo" type="TextureRect" parent="VBoxContainer/Containers/ChatContainer/WelcomeMessage/VBoxContainer"]
 modulate = Color(0, 0, 0, 0.24313726)
 custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
@@ -185,23 +184,17 @@ texture = ExtResource("6_c8smv")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="VBoxContainer/Containers/ChatContainer/WelcomeMessage/VBoxContainer"]
-visible = false
-layout_mode = 2
-text = "α"
-label_settings = SubResource("LabelSettings_2usmi")
-horizontal_alignment = 1
-
-[node name="Label2" type="Label" parent="VBoxContainer/Containers/ChatContainer/WelcomeMessage/VBoxContainer"]
+[node name="Description" type="Label" parent="VBoxContainer/Containers/ChatContainer/WelcomeMessage/VBoxContainer"]
 layout_mode = 2
 text = "帮助构建游戏项目
 帮助学习Godot程序
 帮助梳理已有功能
+
 在下方输入内容开始"
 label_settings = SubResource("LabelSettings_6rfr6")
 horizontal_alignment = 1
 
-[node name="LinkButton" type="LinkButton" parent="VBoxContainer/Containers/ChatContainer/WelcomeMessage/VBoxContainer"]
+[node name="MoreLink" type="LinkButton" parent="VBoxContainer/Containers/ChatContainer/WelcomeMessage/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.7647059, 0.7647059, 0.7647059, 0.5254902)

@@ -225,6 +225,7 @@ func handle_command(command: String, args: PackedStringArray):
 			if args.size() == 0:
 				# 执行默认memory操作
 				show_memory.emit()
+				init()
 			elif args[0] == "project":
 				# 执行memory project操作
 				if args.size() == 2:
@@ -234,14 +235,18 @@ func handle_command(command: String, args: PackedStringArray):
 					ResourceSaver.save(CONFIG, "uid://b4bcww0bmnxt0")
 				else:
 					show_memory.emit()
+					init()
 			elif args[0] == "global":
 				print("暂时不支持全局记忆")
 			else:
 				show_memory.emit()
+				init()
 		"/help":
 			show_help.emit()
+			init()
 		"/setting":
 			show_setting.emit()
+			init()
 		_:
 			print("未知命令: ", command)
 

@@ -34,13 +34,12 @@ enum MoreButtonIds {
 
 var help_window: Window = null
 
-const CONFIG = preload("uid://b4bcww0bmnxt0")
+@onready var CONFIG = preload("uid://b4bcww0bmnxt0")
 
 const MESSAGE_ITEM = preload("uid://cjytvn2j0yi3s")
 
 const HELP = preload("uid://b83qwags1ffo8")
 
-var secret = CONFIG.secret_key
 
 var messages: Array[Dictionary] = []
 
@@ -64,7 +63,7 @@ func _ready() -> void:
 	message_container.hide()
 	# 初始化AI模型相关信息
 	init_message_list()
-	deep_seek_chat_stream.secret_key = secret
+	deep_seek_chat_stream.secret_key = CONFIG.secret_key
 	deep_seek_chat_stream.think.connect(on_agent_think)
 	deep_seek_chat_stream.message.connect(on_agent_message)
 	deep_seek_chat_stream.use_tool.connect(on_use_tool)
@@ -79,7 +78,7 @@ func _ready() -> void:
 	input_container.show_memory.connect(on_show_memory)
 
 	# 初始化标题生成DeepSeek相关
-	title_generate_deep_seek_chat.secret_key = secret
+	title_generate_deep_seek_chat.secret_key = CONFIG.secret_key
 	title_generate_deep_seek_chat.use_thinking = false
 	title_generate_deep_seek_chat.generate_finish.connect(on_title_generate_finish)
 
@@ -92,6 +91,7 @@ func reset_message_info():
 
 # 初始化消息列表，添加系统提示词
 func init_message_list():
+	CONFIG = load("uid://b4bcww0bmnxt0")
 	messages = [
 		{
 			"role": "system",
@@ -103,6 +103,9 @@ func init_message_list():
 	]
 
 func on_input_container_send_message(user_message: Dictionary, message_content: String, use_thinking: bool):
+	if first_chat:
+		init_message_list()
+
 	show_container(chat_container)
 	welcome_message.hide()
 	message_container.show()
@@ -193,7 +196,6 @@ func on_click_new_chat_button():
 func clear():
 	welcome_message.show()
 	message_container.hide()
-	init_message_list()
 	reset_message_info()
 
 	first_chat = true

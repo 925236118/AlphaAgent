@@ -10,7 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://bmq6b8c3ud8ig" path="res://addons/agent/icons/menu.svg" id="4_cpi8b"]
 [ext_resource type="PackedScene" uid="uid://d2qy4nnjypt6o" path="res://addons/agent/ui/history/history_container.tscn" id="5_elhta"]
 [ext_resource type="Texture2D" uid="uid://dkk4u7fmqh515" path="res://addons/agent/icons/alpha.svg" id="6_c8smv"]
-[ext_resource type="Script" path="res://addons/agent/scripts/deepseek_chat.gd" id="7_5v6i3"]
+[ext_resource type="Script" uid="uid://c857yifca6rog" path="res://addons/agent/scripts/deepseek_chat.gd" id="7_5v6i3"]
 [ext_resource type="PackedScene" uid="uid://bxe6hto0vk8fu" path="res://addons/agent/ui/setting/setting.tscn" id="8_5t7oo"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_5v6i3"]

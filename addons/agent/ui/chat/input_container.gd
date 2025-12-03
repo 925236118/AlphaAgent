@@ -64,10 +64,6 @@ func _ready() -> void:
 		user_input_drop_data
 	)
 
-func load_config_setting(key):
-	var config = load("uid://b4bcww0bmnxt0") as AgentConfig
-	return config.settings.get(key)
-
 ## 是否可以将数据拖放到输入框
 func user_input_can_drop (at_position: Vector2, data: Variant):
 	var allow_types = ['files', "files_and_dirs", 'nodes', 'script_list_element', 'shader_list_element']
@@ -91,6 +87,8 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 				reference_list.add_child(reference_item)
 				reference_item.set_label(file.get_file())
 				reference_item.set_tooltip(file)
+				if AlphaAgentPlugin.global_setting.auto_add_file_ref:
+					user_input.insert_text_at_caret(file.get_file() + " ")
 		"files_and_dirs":
 			var file_info_list = info_list.filter(func(info): return info.type == "file")
 			for file: String in data.files:
@@ -104,6 +102,8 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 				reference_list.add_child(reference_item)
 				reference_item.set_label(file if file.ends_with("/") else file.get_file())
 				reference_item.set_tooltip(file)
+				if AlphaAgentPlugin.global_setting.auto_add_file_ref:
+					user_input.insert_text_at_caret(file if file.ends_with("/") else file.get_file() + " ")
 		"nodes":
 			var node_info_list = info_list.filter(func(info): return info.type == "node")
 			var root_node = EditorInterface.get_edited_scene_root()
@@ -127,6 +127,8 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 				reference_item.set_label(current_scene.get_file() + "/" + path.split('/')[-1])
 
 				reference_item.set_tooltip(current_scene + "/" + path)
+				if AlphaAgentPlugin.global_setting.auto_add_file_ref:
+					user_input.insert_text_at_caret(current_scene.get_file() + "/" + path.split('/')[-1] + " ")
 			pass
 		"script_list_element":
 			var script = EditorInterface.get_script_editor().get_current_script()
@@ -153,6 +155,9 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 			reference_list.add_child(reference_item)
 			reference_item.set_label(file.get_file())
 			reference_item.set_tooltip(file)
+			
+			if AlphaAgentPlugin.global_setting.auto_add_file_ref:
+				user_input.insert_text_at_caret(file.get_file() + " ")
 		"shader_list_element":
 			print("暂时不支持拖拽shader，请从文件系统中拖入。")
 			#var shader_editor =
@@ -214,7 +219,7 @@ func on_click_send_message():
 		"content": "用户输入的内容：" + message_text + "\n引用的内容信息：" + info_list_string
 	}, message_text, use_thinking.button_pressed)
 
-	if load_config_setting("auto_clear"):
+	if AlphaAgentPlugin.global_setting.auto_clear:
 		init()
 
 ## 处理命令

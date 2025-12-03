@@ -43,7 +43,10 @@ func update_think_content(text: String, start_timer: bool = true):
 	think_content.text = text
 	if not thinking:
 		thinking_label.text = "思考了"
-
+	if AlphaAgentPlugin.global_setting.auto_expand_think:
+		expand_button.button_pressed = true
+		expand_button.text = " ▲ "
+		think_content.visible = true
 
 func update_message_content(text: String):
 	thinking = false

@@ -641,7 +641,7 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 		"check_script_error":
 			var json = JSON.parse_string(tool_call.function.arguments)
 			if not json == null and json.has("path"):
-				var log_file_path = "res://.alpha/check_script.temp"
+				var log_file_path = AlphaAgentPlugin.project_alpha_dir + "check_script.temp"
 				var path = json.path
 				if FileAccess.file_exists(log_file_path):
 					DirAccess.remove_absolute(log_file_path)

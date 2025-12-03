@@ -63,7 +63,7 @@ func _ready() -> void:
 	message_container.hide()
 	# 初始化AI模型相关信息
 	init_message_list()
-	deep_seek_chat_stream.secret_key = CONFIG.secret_key
+	deep_seek_chat_stream.secret_key = AlphaAgentPlugin.global_setting.secret_key
 	deep_seek_chat_stream.think.connect(on_agent_think)
 	deep_seek_chat_stream.message.connect(on_agent_message)
 	deep_seek_chat_stream.use_tool.connect(on_use_tool)
@@ -78,7 +78,7 @@ func _ready() -> void:
 	input_container.show_memory.connect(on_show_memory)
 
 	# 初始化标题生成DeepSeek相关
-	title_generate_deep_seek_chat.secret_key = CONFIG.secret_key
+	title_generate_deep_seek_chat.secret_key = AlphaAgentPlugin.global_setting.secret_key
 	title_generate_deep_seek_chat.use_thinking = false
 	title_generate_deep_seek_chat.generate_finish.connect(on_title_generate_finish)
 

@@ -9,8 +9,8 @@ signal recovery(history_item: HistoryItem)
 
 const HISTORY_MESSAGE_ITEM = preload("uid://eq8fe48g3uch")
 
-var history_file_dir = "res://.alpha/"
-var history_file_path = "res://.alpha/history.json"
+@onready var project_alpha_dir = AlphaAgentPlugin.project_alpha_dir
+@onready var history_file_path = project_alpha_dir + "history.json"
 
 class HistoryItem:
 	var id: String = ""
@@ -51,8 +51,8 @@ func check_history_file():
 		read_history_file()
 	else:
 		history_list = []
-		if not DirAccess.dir_exists_absolute(history_file_dir):
-			DirAccess.make_dir_absolute(history_file_dir)
+		if not DirAccess.dir_exists_absolute(project_alpha_dir):
+			DirAccess.make_dir_absolute(project_alpha_dir)
 	update_file_content()
 
 func update_file_content():

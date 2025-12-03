@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://bxe6hto0vk8fu"]
+[gd_scene load_steps=4 format=3 uid="uid://bxe6hto0vk8fu"]
 
 [ext_resource type="Script" uid="uid://dry1n6m67ku3q" path="res://addons/agent/ui/setting/setting.gd" id="1_c2l6f"]
 [ext_resource type="PackedScene" uid="uid://c2ei06dd8phsw" path="res://addons/agent/ui/setting/setting_item_bool.tscn" id="1_ca3bj"]
+[ext_resource type="PackedScene" uid="uid://bldax4sbp20q2" path="res://addons/agent/ui/setting/setting_item_string.tscn" id="3_c2l6f"]
 
 [node name="SettingContainer" type="ScrollContainer"]
 anchors_preset = 15
@@ -28,3 +29,18 @@ layout_mode = 2
 layout_mode = 2
 setting_name = "发送后自动清空"
 setting_key = "auto_clear"
+
+[node name="AutoExpandThinkSetting" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("1_ca3bj")]
+layout_mode = 2
+setting_name = "自动展示思考内容"
+setting_key = "auto_expand_think"
+
+[node name="AutoAddFileRefSetting" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("1_ca3bj")]
+layout_mode = 2
+setting_name = "自动添加引用的文件名称"
+setting_key = "auto_add_file_ref"
+
+[node name="SecretKeySetting" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("3_c2l6f")]
+layout_mode = 2
+setting_name = "DeepSeek密钥"
+setting_key = "secret_key"

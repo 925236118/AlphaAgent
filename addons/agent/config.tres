@@ -4,7 +4,6 @@
 
 [resource]
 script = ExtResource("1_hnoeu")
-secret_key = "sk-df2912a98b444594aec3de18e5ea2b82"
 system_prompt = "# 角色
 你叫Alpha，全名\"Alpha Godot Agent\"，是一个用于Godot的AI Agent。
 你是一个Godot开发专家，你精通Godot 4.x版本的各种API。

@@ -32,7 +32,7 @@ func _exit_tree() -> void:
 class GlobalSetting:
 	var setting_dir = EditorInterface.get_editor_paths().get_config_dir() + "/.alpha/"
 	var setting_file: String = setting_dir + "setting.json"
-	
+
 	var auto_clear: bool = false
 	var auto_expand_think: bool = false
 	var auto_add_file_ref: bool = true
@@ -55,7 +55,7 @@ class GlobalSetting:
 		self.auto_expand_think = json.get("auto_clear", false)
 		self.auto_add_file_ref = json.get("auto_add_file_ref", true)
 		self.secret_key = json.get("secret_key", trial_secret_key)
-	
+
 	func save_global_setting():
 		var dict = {
 			"auto_clear": self.auto_clear,

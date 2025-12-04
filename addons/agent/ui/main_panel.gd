@@ -69,6 +69,10 @@ func _ready() -> void:
 	deep_seek_chat_stream.use_tool.connect(on_use_tool)
 	deep_seek_chat_stream.generate_finish.connect(on_agent_finish)
 	deep_seek_chat_stream.response_use_tool.connect(on_response_use_tool)
+	deep_seek_chat_stream.error.connect(on_generate_error)
+
+
+
 	back_chat_button.pressed.connect(on_click_back_chat_button)
 	new_chat_button.pressed.connect(on_click_new_chat_button)
 	history_button.pressed.connect(on_click_history_button)
@@ -135,6 +139,7 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 	message_list.add_child(current_message_item)
 
 	deep_seek_chat_stream.post_message(messages)
+	message_container.scroll_vertical = 100000
 
 func on_agent_think(think: String):
 	current_think += think
@@ -187,6 +192,13 @@ func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 	current_history_item.title = current_title
 
 	history_container.update_history(current_id, current_history_item)
+
+func on_generate_error(error_info: Dictionary):
+	printerr("发生错误")
+	printerr(error_info.error_msg)
+	printerr(error_info.data)
+	current_message_item.update_think_content(current_think, false)
+	input_container.disable = false
 
 func on_click_new_chat_button():
 	clear()

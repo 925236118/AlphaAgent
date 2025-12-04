@@ -33,8 +33,12 @@ signal generate_finish(finish_reason: String, total_tokens: float)
 signal use_tool(tool_calls: Array[ToolCallsInfo])
 ## 正在返回使用工具请求
 signal response_use_tool
+## 失败
+signal error(error_info: Dictionary)
 
 var tool_calls: Array[ToolCallsInfo] = []
+
+const base_url = "https://api.deepseek.com"
 
 class ToolCallsInfo:
 	var id: String = ""
@@ -93,10 +97,15 @@ func post_message(messages: Array[Dictionary]):
 
 	if print_log: print("请求消息数据体: ", request_body)
 
-	var connect_err = http_client.connect_to_host("https://api.deepseek.com")
+	var connect_err = http_client.connect_to_host(base_url)
 	generatting = true
 	if connect_err != OK:
 		push_error("连接服务器失败: " + error_string(connect_err))
+
+		error.emit({
+			"error_msg": "连接服务器失败: " + error_string(connect_err),
+			"data": base_url
+		})
 		return
 	while http_client.get_status() == HTTPClient.STATUS_CONNECTING or http_client.get_status() == HTTPClient.STATUS_RESOLVING:
 		http_client.poll()
@@ -107,6 +116,11 @@ func post_message(messages: Array[Dictionary]):
 	var err = http_client.request(HTTPClient.METHOD_POST, "/chat/completions", headers, request_body)
 	if err != OK:
 		push_error("请求发送失败: " + error_string(err))
+
+		error.emit({
+			"error_msg": "请求发送失败: " + error_string(err),
+			"data": request_body
+		})
 		return
 	if print_log: print("发送请求成功")
 	while http_client.get_status() == HTTPClient.STATUS_REQUESTING:
@@ -141,6 +155,11 @@ func post_message(messages: Array[Dictionary]):
 						if parse_err != OK:
 							push_error("JSON解析错误: " + json.get_error_message())
 							push_error(data_string)
+
+							error.emit({
+								"error_msg": "JSON解析错误: " + json.get_error_message(),
+								"data": data_string
+							})
 							return
 
 						var data = json.get_data()
@@ -180,6 +199,10 @@ func post_message(messages: Array[Dictionary]):
 							generatting = false
 							print(data)
 							push_error("无效的响应结构")
+							error.emit({
+								"error_msg": "无效的响应结构",
+								"data": data
+							})
 ## 中断请求
 func close():
 	generatting = false

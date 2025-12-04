@@ -5,8 +5,8 @@ extends Node
 
 func test():
 	var tool = DeepSeekChatStream.ToolCallsInfo.new()
-	tool.function.name = "get_project_file_list"
-	tool.function.arguments = JSON.stringify({"start_path": "res://addons", "interation": -1})
+	tool.function.name = "update_script_file_content"
+	tool.function.arguments = JSON.stringify({"script_path": "res://game.gd", "content": "# test_text", "line": 0, "delete_line_count": 0})
 	#var image = load("res://icon.svg")
 	print(await use_tool(tool))
 	#print(ProjectSettings.get_setting("input"))
@@ -178,7 +178,7 @@ func get_tools_list() -> Array[Dictionary]:
 			"function": {
 				"name": "write_file",
 				#"description": "写入文件内容。文件格式应为资源文件(.tres)或者脚本文件(.gd)、Godot着色器(.gdshader)、场景文件(.tscn)、文本文件(.txt或.md)、CSV文件(.csv)，当明确提及创建或修改文件时再调用该工具",
-				"description": "全量替换写入文件内容。文件格式应为资源文件(.tres)或者脚本文件(.gd)、Godot着色器(.gdshader)、场景文件(.tscn)、文本文件(.txt或.md)、CSV文件(.csv)，当明确提及创建或修改文件时再调用该工具。",
+				"description": "全量替换写入文件内容。文件格式应为资源文件(.tres)、Godot着色器(.gdshader)、文本文件(.txt或.md)、CSV文件(.csv)，当明确提及创建或修改文件时再调用该工具。不应使用本工具处理脚本和场景文件。",
 				"parameters": {
 					"type": "object",
 					"properties": {
@@ -273,7 +273,6 @@ func get_tools_list() -> Array[Dictionary]:
 						},
 						"line": {
 							"type": "number",
-							"enum": ["scene", "script"],
 							"description": "如果打开的是脚本，可以指定行号， 默认是-1",
 						},
 						"column": {
@@ -282,6 +281,36 @@ func get_tools_list() -> Array[Dictionary]:
 						},
 					},
 					"required": ["name", "type"]
+				}
+			}
+		},
+		# update_script_file_content
+		{
+			"type": "function",
+			"function": {
+				"name": "update_script_file_content",
+				"description": "直接调用编辑器接口更新脚本文件的内容。根据行号和删除的行数量，在对应位置删除若干行后插入内容。如果不删除，则会在对应行之前添加一行内容。可以使用本工具添加、删除、替换文件中的行内容。文件内容是以\n换行的字符串。",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"script_path": {
+							"type": "string",
+							"description": "需要打开的资源路径，必须是以res://开头的绝对路径。",
+						},
+						"content": {
+							"type": "string",
+							"description": "需要写入的文件内容。",
+						},
+						"line": {
+							"type": "number",
+							"description": "可以指定行号， 默认是0。",
+						},
+						"delete_line_count": {
+							"type": "number",
+							"description": "需要删除的行的数量，默认是0，为0表示不删除。",
+						}
+					},
+					"required": ["script_path", "content", "line", "delete_line_count"]
 				}
 			}
 		},
@@ -681,9 +710,44 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 						result = {
 							"error": "错误的type类型"
 						}
+		"update_script_file_content":
+			var json = JSON.parse_string(tool_call.function.arguments)
+
+			if not json == null and json.has("script_path") and json.has("content") and json.has("line") and json.has("delete_line_count"):
+				var script_path = json.script_path
+				var content = json.content
+				var line = json.line
+				var delete_line_count = json.delete_line_count
+				var resource: Script = load(script_path)
+
+				EditorInterface.set_main_screen_editor("Script")
+				EditorInterface.edit_script(resource)
+
+				var editor: CodeEdit = EditorInterface.get_script_editor().get_current_editor().get_base_editor()
+				for i in delete_line_count:
+					editor.remove_line_at(line)
+				editor.insert_line_at(line, content)
+
+				await get_tree().process_frame
+				var save_input_key := InputEventKey.new()
+				save_input_key.pressed = true
+				save_input_key.keycode = KEY_S
+				save_input_key.alt_pressed = true
+				save_input_key.command_or_control_autoremap = true
+
+				EditorInterface.get_base_control().get_viewport().push_input(save_input_key)
+
+				result = {
+					"file_content": editor.text,
+					"success": "更新成功"
+				}
 
 		_:
 			result = {
 				"error": "错误的function.name"
 			}
+	if result == {}:
+		result = {
+			"error": "调用失败。请检查参数是否正确。"
+		}
 	return JSON.stringify(result)

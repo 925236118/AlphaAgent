@@ -155,7 +155,7 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 			reference_list.add_child(reference_item)
 			reference_item.set_label(file.get_file())
 			reference_item.set_tooltip(file)
-			
+
 			if AlphaAgentPlugin.global_setting.auto_add_file_ref:
 				user_input.insert_text_at_caret(file.get_file() + " ")
 		"shader_list_element":

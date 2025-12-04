@@ -127,4 +127,5 @@ flat = true
 icon_alignment = 1
 expand_icon = true
 
+[connection signal="gui_input" from="VBoxContainer/UserInput" to="." method="_on_user_input_gui_input"]
 [connection signal="item_selected" from="VBoxContainer/HBoxContainer/HBoxContainer/InputModeSelect" to="." method="_on_input_mode_select_item_selected"]

@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://jbwyo7x0ce47"]
+
+[ext_resource type="PackedScene" uid="uid://rxdnm1d45nwm" path="res://addons/agent/ui/setting/setting_item.tscn" id="1_tg4ga"]
+[ext_resource type="Script" uid="uid://cr2wla4xw1a2r" path="res://addons/agent/ui/setting/setting_item_option.gd" id="2_ybuls"]
+
+[node name="SettingItemOption" instance=ExtResource("1_tg4ga")]
+script = ExtResource("2_ybuls")
+
+[node name="OptionButton" type="OptionButton" parent="." index="1"]
+layout_mode = 2
+item_count = 1
+popup/item_0/id = 0
+
+[connection signal="item_selected" from="OptionButton" to="." method="_on_option_button_item_selected"]

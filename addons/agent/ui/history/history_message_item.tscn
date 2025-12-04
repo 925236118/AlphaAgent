@@ -78,6 +78,8 @@ expand_icon = true
 [connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]
 [connection signal="mouse_entered" from="HBoxContainer/ButtonContainer/RecoveryButton" to="." method="_on_recovery_button_mouse_entered"]
+[connection signal="mouse_exited" from="HBoxContainer/ButtonContainer/RecoveryButton" to="." method="_on_recovery_button_mouse_exited"]
 [connection signal="pressed" from="HBoxContainer/ButtonContainer/RecoveryButton" to="." method="_on_recovery_button_pressed"]
 [connection signal="mouse_entered" from="HBoxContainer/ButtonContainer/DeleteButton" to="." method="_on_delete_button_mouse_entered"]
+[connection signal="mouse_exited" from="HBoxContainer/ButtonContainer/DeleteButton" to="." method="_on_delete_button_mouse_exited"]
 [connection signal="pressed" from="HBoxContainer/ButtonContainer/DeleteButton" to="." method="_on_delete_button_pressed"]

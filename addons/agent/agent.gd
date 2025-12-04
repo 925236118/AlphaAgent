@@ -20,7 +20,7 @@ func _disable_plugin() -> void:
 
 func _enter_tree() -> void:
 	main_panel = MAIN_PANEL.instantiate()
-	add_control_to_dock(EditorPlugin.DOCK_SLOT_RIGHT_UL, main_panel)
+	add_control_to_dock(EditorPlugin.DOCK_SLOT_RIGHT_UR, main_panel)
 	instance = self
 
 func _exit_tree() -> void:
@@ -28,6 +28,11 @@ func _exit_tree() -> void:
 	main_panel.queue_free()
 	instance = null
 
+enum SendShotcut {
+	None,
+	Enter,
+	CtrlEnter
+}
 
 class GlobalSetting:
 	var setting_dir = EditorInterface.get_editor_paths().get_config_dir() + "/.alpha/"
@@ -37,6 +42,7 @@ class GlobalSetting:
 	var auto_expand_think: bool = false
 	var auto_add_file_ref: bool = true
 	var secret_key: String = ""
+	var send_shortcut: SendShotcut = SendShotcut.None
 
 	func load_global_setting():
 
@@ -55,6 +61,7 @@ class GlobalSetting:
 		self.auto_expand_think = json.get("auto_clear", false)
 		self.auto_add_file_ref = json.get("auto_add_file_ref", true)
 		self.secret_key = json.get("secret_key", trial_secret_key)
+		self.send_shortcut = json.get("send_shortcut", SendShotcut.Enter)
 
 	func save_global_setting():
 		var dict = {
@@ -62,6 +69,7 @@ class GlobalSetting:
 			"auto_expand_think": self.auto_expand_think,
 			"secret_key": self.secret_key,
 			"auto_add_file_ref": self.auto_add_file_ref,
+			"send_shortcut": self.send_shortcut,
 		}
 		var file = FileAccess.open(setting_file, FileAccess.WRITE)
 		file.store_string(JSON.stringify(dict))

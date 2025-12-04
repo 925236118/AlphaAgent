@@ -295,3 +295,25 @@ func on_input_menu_list_item_selected(index: int):
 			user_input.text = menu_list[index].command
 			input_menu_list.hide()
 			input_menu_list.clear()
+
+func _on_user_input_gui_input(event: InputEvent) -> void:
+	var send_shortcut = AlphaAgentPlugin.global_setting.send_shortcut
+	if send_shortcut == AlphaAgentPlugin.SendShotcut.None:
+		return
+	elif send_shortcut == AlphaAgentPlugin.SendShotcut.Enter:
+		if event is InputEventKey:
+			if event.keycode == KEY_ENTER and \
+				not event.alt_pressed and \
+				not event.shift_pressed and \
+				not event.ctrl_pressed and \
+				not event.meta_pressed and \
+			event.pressed:
+				on_click_send_message()
+	elif send_shortcut == AlphaAgentPlugin.SendShotcut.CtrlEnter:
+		if event is InputEventKey:
+			if event.is_command_or_control_pressed() and \
+				not event.alt_pressed and \
+				not event.shift_pressed and \
+				event.keycode == KEY_ENTER and \
+				event.pressed:
+				on_click_send_message()

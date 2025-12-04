@@ -36,3 +36,9 @@ func set_title(title: String):
 func set_time(time: String):
 	if history_message_time:
 		history_message_time.text = time
+
+func _on_recovery_button_mouse_exited() -> void:
+	button_container.hide()
+
+func _on_delete_button_mouse_exited() -> void:
+	button_container.hide()

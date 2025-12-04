@@ -17,7 +17,7 @@ signal value_changed
 
 func _ready() -> void:
 	setting_name_label.text = setting_name
-	
+
 @abstract
 func get_value()
 

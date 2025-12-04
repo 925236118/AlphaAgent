@@ -20,7 +20,7 @@ func _disable_plugin() -> void:
 
 func _enter_tree() -> void:
 	main_panel = MAIN_PANEL.instantiate()
-	add_control_to_dock(EditorPlugin.DOCK_SLOT_RIGHT_UR, main_panel)
+	add_control_to_dock(EditorPlugin.DOCK_SLOT_RIGHT_UL, main_panel)
 	instance = self
 
 func _exit_tree() -> void:

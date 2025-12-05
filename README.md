@@ -63,3 +63,7 @@
 
 ## 主题色
 Godot图标蓝 `#478cbf`
+
+## 反馈
+如果您有任何问题或建议，请通过以下链接填写反馈：
+[填写反馈](https://ai.feishu.cn/share/base/form/shrcncDRFhpbbhOqR9AMBKMOuBe)

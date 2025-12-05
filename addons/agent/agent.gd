@@ -37,12 +37,14 @@ enum SendShotcut {
 class GlobalSetting:
 	var setting_dir = EditorInterface.get_editor_paths().get_config_dir() + "/.alpha/"
 	var setting_file: String = setting_dir + "setting.json"
+	var models_file: String = setting_dir + "models.json"
 
 	var auto_clear: bool = false
 	var auto_expand_think: bool = false
 	var auto_add_file_ref: bool = true
 	var secret_key: String = ""
 	var send_shortcut: SendShotcut = SendShotcut.None
+	var model_manager: ModelConfig.ModelManager = null
 
 	func load_global_setting():
 
@@ -62,6 +64,9 @@ class GlobalSetting:
 		self.auto_add_file_ref = json.get("auto_add_file_ref", true)
 		self.secret_key = json.get("secret_key", trial_secret_key)
 		self.send_shortcut = json.get("send_shortcut", SendShotcut.Enter)
+		
+		# 初始化模型管理器
+		model_manager = ModelConfig.ModelManager.new(models_file)
 
 	func save_global_setting():
 		var dict = {

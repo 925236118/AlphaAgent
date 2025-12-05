@@ -3,6 +3,26 @@
 ## 项目概述
 这是一个基于 Godot 4.5.1 的 AI 代理开发项目，我作为 Godot 开发专家，可以协助您完成各种 Godot 相关的开发任务。
 
+## ✨ 最新更新：多模型支持
+
+### 🎉 新功能
+AlphaAgent 现在支持多个 AI 模型！不再局限于 DeepSeek，可以使用：
+- OpenAI (GPT-3.5, GPT-4, GPT-4-turbo 等)
+- DeepSeek (Chat / Reasoner)
+- 所有兼容 OpenAI API 的服务
+- 本地模型（Ollama, LM Studio 等）
+
+### 🚀 快速开始
+1. 点击插件界面的 **"Manage Models..."** 按钮
+2. 点击 **"添加模型"** 
+3. 填写模型配置（API 地址、密钥、模型 ID）
+4. 保存后即可在模型选择器中切换使用
+
+### 📖 详细文档
+- [快速开始指南](docs/quick-start-zh.md) - 5分钟上手
+- [多模型支持文档](docs/multi-model-support.md) - 完整功能说明
+- [更新说明](MULTI_MODEL_UPDATE.md) - 技术实现细节
+
 ## 我能做什么
 
 ### 项目信息获取

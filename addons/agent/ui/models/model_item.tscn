@@ -1,0 +1,60 @@
+[gd_scene load_steps=2 format=3 uid="uid://cxvx8nny1rkft"]
+
+[ext_resource type="Script" path="res://addons/agent/ui/models/model_item.gd" id="1_jytwi"]
+
+[node name="ModelItem" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 60)
+offset_right = 400.0
+offset_bottom = 60.0
+script = ExtResource("1_jytwi")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 5
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="InfoContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TopRow" type="HBoxContainer" parent="MarginContainer/HBoxContainer/InfoContainer"]
+layout_mode = 2
+
+[node name="ModelNameLabel" type="Label" parent="MarginContainer/HBoxContainer/InfoContainer/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "模型名称"
+theme_override_font_sizes/font_size = 14
+
+[node name="CurrentIndicator" type="Label" parent="MarginContainer/HBoxContainer/InfoContainer/TopRow"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 12
+text = "  ✓ 当前使用"
+
+[node name="ModelInfoLabel" type="Label" parent="MarginContainer/HBoxContainer/InfoContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 11
+text = "模型信息"
+
+[node name="ButtonContainer" type="HBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="EditButton" type="Button" parent="MarginContainer/HBoxContainer/ButtonContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "编辑"
+
+[node name="DeleteButton" type="Button" parent="MarginContainer/HBoxContainer/ButtonContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "删除"

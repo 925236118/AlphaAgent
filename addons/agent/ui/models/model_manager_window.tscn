@@ -1,0 +1,177 @@
+[gd_scene load_steps=3 format=3 uid="uid://dr7g6mrkb8u3e"]
+
+[ext_resource type="Script" path="res://addons/agent/ui/models/model_manager_window.gd" id="1_ww8v3"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_overlay"]
+bg_color = Color(0, 0, 0, 0.7)
+
+[node name="ModelManagerWindow" type="Window"]
+title = "管理模型"
+initial_position = 2
+size = Vector2i(600, 500)
+script = ExtResource("1_ww8v3")
+
+[node name="MainContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TopBar" type="HBoxContainer" parent="MainContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/VBoxContainer/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "已配置的模型"
+
+[node name="AddModelButton" type="Button" parent="MainContainer/VBoxContainer/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "添加模型"
+
+[node name="HSeparator" type="HSeparator" parent="MainContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ModelList" type="VBoxContainer" parent="MainContainer/VBoxContainer/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="EditPanel" type="Panel" parent="."]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_overlay")
+
+[node name="MarginContainer" type="MarginContainer" parent="EditPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="EditPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="EditPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "编辑模型配置"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="EditPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="EditPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="FormContainer" type="VBoxContainer" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="ModelNameLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+layout_mode = 2
+text = "模型名称："
+
+[node name="ModelNameEdit" type="LineEdit" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "例如: GPT-4, Claude, DeepSeek"
+
+[node name="ApiBaseLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+layout_mode = 2
+text = "API 基础 URL："
+
+[node name="ApiBaseEdit" type="LineEdit" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "例如: https://api.openai.com"
+
+[node name="ApiKeyLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+layout_mode = 2
+text = "API Key："
+
+[node name="ApiKeyEdit" type="LineEdit" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "输入你的API密钥"
+secret = true
+
+[node name="ModelIdLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+layout_mode = 2
+text = "模型ID："
+
+[node name="ModelIdEdit" type="LineEdit" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "例如: gpt-4, deepseek-chat"
+
+[node name="MaxTokensLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+layout_mode = 2
+text = "最大 Tokens："
+
+[node name="MaxTokensEdit" type="SpinBox" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 1024.0
+max_value = 131072.0
+value = 8192.0
+step = 1024.0
+
+[node name="ProviderLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+layout_mode = 2
+text = "提供商类型："
+
+[node name="ProviderOption" type="OptionButton" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ThinkingLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+layout_mode = 2
+text = "支持 Thinking："
+
+[node name="ThinkingCheckBox" type="CheckBox" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="EditPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ButtonContainer" type="HBoxContainer" parent="EditPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="CancelButton" type="Button" parent="EditPanel/MarginContainer/VBoxContainer/ButtonContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "取消"
+
+[node name="SaveButton" type="Button" parent="EditPanel/MarginContainer/VBoxContainer/ButtonContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "保存"

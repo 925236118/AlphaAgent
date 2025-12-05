@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=22 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Script" uid="uid://dlx7bujvsuk11" path="res://addons/agent/scripts/deepseek_chat_stream.gd" id="1_fhbwo"]
@@ -12,6 +12,10 @@
 [ext_resource type="Texture2D" uid="uid://dkk4u7fmqh515" path="res://addons/agent/icons/alpha.svg" id="6_c8smv"]
 [ext_resource type="Script" path="res://addons/agent/scripts/deepseek_chat.gd" id="7_5v6i3"]
 [ext_resource type="PackedScene" uid="uid://bxe6hto0vk8fu" path="res://addons/agent/ui/setting/setting.tscn" id="8_5t7oo"]
+[ext_resource type="Script" path="res://addons/agent/scripts/openai_chat_stream.gd" id="13_openai_stream"]
+[ext_resource type="Script" path="res://addons/agent/scripts/openai_chat.gd" id="14_openai_chat"]
+[ext_resource type="Script" path="res://addons/agent/scripts/ollama_chat_stream.gd" id="15_ollama_stream"]
+[ext_resource type="Script" path="res://addons/agent/scripts/ollama_chat.gd" id="16_ollama_chat"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_5v6i3"]
 font_color = Color(0.7647059, 0.7647059, 0.7647059, 0.5254902)
@@ -384,5 +388,17 @@ metadata/_custom_type_script = "uid://dlx7bujvsuk11"
 script = ExtResource("7_5v6i3")
 secret_key = "sk-df2912a98b444594aec3de18e5ea2b82"
 max_tokens = 4096
+
+[node name="OpenAIChatStream" type="Node" parent="."]
+script = ExtResource("13_openai_stream")
+
+[node name="TitleGenerateOpenAIChat" type="Node" parent="."]
+script = ExtResource("14_openai_chat")
+
+[node name="OllamaChatStream" type="Node" parent="."]
+script = ExtResource("15_ollama_stream")
+
+[node name="TitleGenerateOllamaChat" type="Node" parent="."]
+script = ExtResource("16_ollama_chat")
 
 [node name="Tools" parent="." instance=ExtResource("3_2usmi")]

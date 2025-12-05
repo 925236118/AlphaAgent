@@ -38,6 +38,10 @@ func _process(delta: float) -> void:
 		thinking_time_label.text = "%.1f s" % think_time
 
 func update_think_content(text: String, start_timer: bool = true):
+	# 只有在 show_think 为 true 时才更新 thinking 内容
+	if not show_think:
+		return
+	
 	thinking = start_timer
 	think_container.show()
 	think_content.text = text

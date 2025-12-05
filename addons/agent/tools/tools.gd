@@ -4,7 +4,7 @@ extends Node
 @export_tool_button("测试") var test_action = test
 
 func test():
-	var tool = DeepSeekChatStream.ToolCallsInfo.new()
+	var tool = OpenAIChatStream.ToolCallsInfo.new()
 	tool.function.name = "update_script_file_content"
 	tool.function.arguments = JSON.stringify({"script_path": "res://game.gd", "content": "# test_text", "line": 0, "delete_line_count": 0})
 	#var image = load("res://icon.svg")
@@ -317,7 +317,7 @@ func get_tools_list() -> Array[Dictionary]:
 	]
 
 
-func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
+func use_tool(tool_call):
 	var result = {}
 	match tool_call.function.name:
 		"get_project_info":

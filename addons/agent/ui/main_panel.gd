@@ -1,10 +1,7 @@
 @tool
 extends Control
 
-@onready var deep_seek_chat_stream: DeepSeekChatStream = %DeepSeekChatStream
-@onready var title_generate_deep_seek_chat: DeepSeekChat = $TitleGenerateDeepSeekChat
-
-# 新增：通用OpenAI客户端
+# OpenAI 兼容客户端（支持 OpenAI, DeepSeek 等）
 @onready var openai_chat_stream: OpenAIChatStream = $OpenAIChatStream
 @onready var title_generate_openai_chat: OpenAIChat = $TitleGenerateOpenAIChat
 
@@ -93,21 +90,8 @@ func _ready() -> void:
 	ollama_chat_stream.response_use_tool.connect(on_response_use_tool)
 	ollama_chat_stream.error.connect(on_generate_error)
 
-	
-	# 初始化DeepSeek客户端（向后兼容）
-	deep_seek_chat_stream.secret_key = AlphaAgentPlugin.global_setting.secret_key
-	deep_seek_chat_stream.think.connect(on_agent_think)
-	deep_seek_chat_stream.message.connect(on_agent_message)
-	deep_seek_chat_stream.use_tool.connect(on_use_tool)
-	deep_seek_chat_stream.generate_finish.connect(on_agent_finish)
-	deep_seek_chat_stream.response_use_tool.connect(on_response_use_tool)
-	deep_seek_chat_stream.error.connect(on_generate_error)
-
 	# 初始化标题生成客户端
 	title_generate_openai_chat.generate_finish.connect(on_title_generate_finish)
-	title_generate_deep_seek_chat.secret_key = AlphaAgentPlugin.global_setting.secret_key
-	title_generate_deep_seek_chat.use_thinking = false
-	title_generate_deep_seek_chat.generate_finish.connect(on_title_generate_finish)
 	title_generate_ollama_chat.generate_finish.connect(on_title_generate_finish)
 	
 	# 初始化模型选择
@@ -147,23 +131,18 @@ func _init_model_selector():
 func _switch_to_current_model():
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if model_manager == null:
-		current_chat_stream = deep_seek_chat_stream
-		current_title_chat = title_generate_deep_seek_chat
+		current_chat_stream = openai_chat_stream
+		current_title_chat = title_generate_openai_chat
 		return
 	
 	var model = model_manager.get_current_model()
 	if model == null:
-		current_chat_stream = deep_seek_chat_stream
-		current_title_chat = title_generate_deep_seek_chat
+		current_chat_stream = openai_chat_stream
+		current_title_chat = title_generate_openai_chat
 		return
 	
 	# 根据模型配置切换客户端
-	if model.provider == "deepseek":
-		current_chat_stream = deep_seek_chat_stream
-		current_title_chat = title_generate_deep_seek_chat
-		deep_seek_chat_stream.secret_key = model.api_key
-		title_generate_deep_seek_chat.secret_key = model.api_key
-	elif model.provider == "ollama":
+	if model.provider == "ollama":
 		# 使用 Ollama 客户端
 		current_chat_stream = ollama_chat_stream
 		current_title_chat = title_generate_ollama_chat
@@ -175,7 +154,7 @@ func _switch_to_current_model():
 		title_generate_ollama_chat.model_name = model.model_name
 		title_generate_ollama_chat.max_tokens = model.max_tokens
 	else:
-		# OpenAI 及其他兼容提供商
+		# OpenAI 及其他兼容提供商（包括 DeepSeek）
 		current_chat_stream = openai_chat_stream
 		current_title_chat = title_generate_openai_chat
 		openai_chat_stream.api_base = model.api_base
@@ -485,12 +464,21 @@ func on_recovery_history(history_item: AgentHistoryContainer.HistoryItem):
 			message_item.update_user_message_content(message.content)
 		elif message.role == "assistant":
 			if message.has("tool_calls"):
-				var tool_call_array: Array[DeepSeekChatStream.ToolCallsInfo] = []
+				var tool_call_array: Array = []
 				for tool_call in message.tool_calls:
-					var tool_call_info = DeepSeekChatStream.ToolCallsInfo.new()
+					# 根据当前 chat_stream 类型创建对应的 ToolCallsInfo
+					var tool_call_info
+					if current_chat_stream is OpenAIChatStream:
+						tool_call_info = OpenAIChatStream.ToolCallsInfo.new()
+						tool_call_info.function = OpenAIChatStream.ToolCallsInfoFunc.new()
+					elif current_chat_stream is OllamaChatStream:
+						tool_call_info = OllamaChatStream.ToolCallsInfo.new()
+						tool_call_info.function = OllamaChatStream.ToolCallsInfoFunc.new()
+					else:
+						continue
+					
 					tool_call_info.id = tool_call.get("id")
 					tool_call_info.type = tool_call.get("type")
-					tool_call_info.function = DeepSeekChatStream.ToolCallsInfoFunc.new()
 					tool_call_info.function.arguments = tool_call.get("function").get("arguments")
 					tool_call_info.function.name = tool_call.get("function").get("name")
 					tool_call_array.push_back(tool_call_info)

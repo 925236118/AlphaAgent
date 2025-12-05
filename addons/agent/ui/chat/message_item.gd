@@ -78,7 +78,7 @@ func response_use_tool():
 	]
 	wait_using_tool_rich_text_label.text = "[agent_thinking freq=5.0 span=5.0] %s [/agent_thinking]" % wait_placeholder_text.pick_random()
 
-func used_tools(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
+func used_tools(tool_calls: Array):
 	wait_using_tool.hide()
 	for tool in tool_calls:
 		var use_tool_item = USE_TOOL_ITEM.instantiate()

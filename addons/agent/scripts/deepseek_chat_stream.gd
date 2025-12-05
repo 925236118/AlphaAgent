@@ -77,9 +77,9 @@ func post_message(messages: Array[Dictionary]):
 		"Content-Type: application/json"
 	]
 
-	var request_body = JSON.stringify({
+	var request_body = {
 		"messages": messages,
-		"model": "deepseek-reasoner" if use_thinking else "deepseek-chat",
+		"model": "deepseek-chat",
 		"frequency_penalty": frequency_penalty,
 		"max_tokens": max_tokens,
 		"presence_penalty": presence_penalty,
@@ -87,15 +87,17 @@ func post_message(messages: Array[Dictionary]):
 			"type": "text"
 		},
 		"stream": true,
-		"stream_options": null,
 		"temperature": temperature,
-		"top_p": 1,
-		"tools": null if tools.size() == 0 else tools,
-		"logprobs": false,
-		"top_logprobs": null
-	})
+		"top_p": 1
+	}
+	
+	# 只在有工具时添加 tools 参数
+	if tools.size() > 0:
+		request_body["tools"] = tools
+	
+	var request_json = JSON.stringify(request_body)
 
-	if print_log: print("请求消息数据体: ", request_body)
+	if print_log: print("请求消息数据体: ", request_json)
 
 	var connect_err = http_client.connect_to_host(base_url)
 	generatting = true
@@ -113,7 +115,7 @@ func post_message(messages: Array[Dictionary]):
 		await get_tree().process_frame
 	if print_log: print("链接服务器成功")
 	# 发送POST请求
-	var err = http_client.request(HTTPClient.METHOD_POST, "/chat/completions", headers, request_body)
+	var err = http_client.request(HTTPClient.METHOD_POST, "/chat/completions", headers, request_json)
 	if err != OK:
 		push_error("请求发送失败: " + error_string(err))
 
@@ -184,8 +186,10 @@ func post_message(messages: Array[Dictionary]):
 								else:
 									tool_calls[-1].function.arguments += req_tool_calls[0].get("function", {"arguments": ""}).get("arguments")
 							elif use_thinking and delta.has("reasoning_content") and delta.get("reasoning_content") != null:
+								# 注意：deepseek-chat 不支持 reasoning_content
+								# 如果看到这个输出，说明模型配置可能有问题
 								think.emit(delta["reasoning_content"])
-							else:
+							elif delta.has("content") and delta.get("content") != null:
 								message.emit(delta["content"])
 
 							# 处理结束逻辑

@@ -82,7 +82,7 @@ class ModelManager:
 		var deepseek = ModelInfo.new()
 		deepseek.name = "DeepSeek Chat"
 		deepseek.api_base = "https://api.deepseek.com"
-		deepseek.api_key = "sk-df2912a98b444594aec3de18e5ea2b82"  # 默认试用key
+		deepseek.api_key = ""  # 用户需要自己配置
 		deepseek.model_name = "deepseek-chat"
 		deepseek.supports_thinking = false
 		deepseek.supports_tools = true
@@ -90,17 +90,8 @@ class ModelManager:
 		deepseek.provider = "deepseek"
 		models.append(deepseek)
 		
-		# 添加DeepSeek Reasoner模型
-		var reasoner = ModelInfo.new()
-		reasoner.name = "DeepSeek Reasoner"
-		reasoner.api_base = "https://api.deepseek.com"
-		reasoner.api_key = "sk-df2912a98b444594aec3de18e5ea2b82"
-		reasoner.model_name = "deepseek-reasoner"
-		reasoner.supports_thinking = true
-		reasoner.supports_tools = true
-		reasoner.max_tokens = 65536
-		reasoner.provider = "deepseek"
-		models.append(reasoner)
+		# 注意：deepseek-reasoner 已被弃用，请使用 deepseek-chat
+		# 如需推理功能，请等待官方发布 deepseek-r1 或类似模型
 		
 		current_model_id = deepseek.id
 		save_models()

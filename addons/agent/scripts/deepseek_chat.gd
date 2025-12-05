@@ -41,9 +41,9 @@ func post_message(messages: Array[Dictionary]):
 		"Content-Type: application/json"
 	]
 
-	var request_body = JSON.stringify({
+	var request_body = {
 		"messages": messages,
-		"model": "deepseek-reasoner" if use_thinking else "deepseek-chat",
+		"model": "deepseek-chat",
 		"frequency_penalty": frequency_penalty,
 		"max_tokens": max_tokens,
 		"presence_penalty": presence_penalty,
@@ -51,19 +51,21 @@ func post_message(messages: Array[Dictionary]):
 			"type": response_format
 		},
 		"stream": false,
-		"stream_options": null,
 		"temperature": temperature,
-		"top_p": 1,
-		"tools": null,
-		"tool_choice": "none",
-		"logprobs": false,
-		"top_logprobs": null
-	})
+		"top_p": 1
+	}
+	
+	# 只在非空时添加 tools 参数
+	# 注意：DeepSeek API 不支持 tool_choice 参数
+	if false:  # 暂时禁用 tools，因为可能与 reasoner 模式冲突
+		request_body["tools"] = null
+	
+	var request_json = JSON.stringify(request_body)
 	if not http_request.request_completed.is_connected(_http_request_completed):
 		http_request.request_completed.connect(_http_request_completed)
 
 	# 发送POST请求
-	var err = http_request.request( "https://api.deepseek.com/chat/completions", headers, HTTPClient.METHOD_POST, request_body)
+	var err = http_request.request( "https://api.deepseek.com/chat/completions", headers, HTTPClient.METHOD_POST, request_json)
 	generatting = true
 	if err != OK:
 		push_error("请求发送失败: " + str(err))

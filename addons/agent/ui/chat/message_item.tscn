@@ -159,10 +159,29 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_kn78a")
 [node name="RichTextLabel" type="RichTextLabel" parent="VBoxContainer/WaitUsingTool"]
 layout_mode = 2
 bbcode_enabled = true
-text = "[agent_thinking freq=5.0 span=5.0]程序员正在喝茶[/agent_thinking]"
+text = "[agent_thinking freq=5.0 span=5.0]测试文本[/agent_thinking]"
 fit_content = true
 custom_effects = [SubResource("RichTextEffect_q4qcv")]
 
 [node name="UseToolContainer" type="VBoxContainer" parent="VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="ErrorMessageContainer" type="VBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="ErrorMessageLabel" type="RichTextLabel" parent="VBoxContainer/ErrorMessageContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+bbcode_enabled = true
+text = "[color=red]%s[/color]"
+fit_content = true
+
+[node name="StopMessage" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "对话已停止"
+horizontal_alignment = 1

@@ -66,12 +66,10 @@ func _ready() -> void:
 	deep_seek_chat_stream.secret_key = AlphaAgentPlugin.global_setting.secret_key
 	deep_seek_chat_stream.think.connect(on_agent_think)
 	deep_seek_chat_stream.message.connect(on_agent_message)
-	deep_seek_chat_stream.use_tool.connect(on_use_tool)
 	deep_seek_chat_stream.generate_finish.connect(on_agent_finish)
 	deep_seek_chat_stream.response_use_tool.connect(on_response_use_tool)
+	deep_seek_chat_stream.use_tool.connect(on_use_tool)
 	deep_seek_chat_stream.error.connect(on_generate_error)
-
-
 
 	back_chat_button.pressed.connect(on_click_back_chat_button)
 	new_chat_button.pressed.connect(on_click_new_chat_button)
@@ -80,6 +78,7 @@ func _ready() -> void:
 	input_container.show_help.connect(show_help_window)
 	input_container.show_setting.connect(on_show_setting)
 	input_container.show_memory.connect(on_show_memory)
+	input_container.stop_chat.connect(on_stop_chat)
 
 	# 初始化标题生成DeepSeek相关
 	title_generate_deep_seek_chat.secret_key = AlphaAgentPlugin.global_setting.secret_key
@@ -151,8 +150,8 @@ func on_agent_message(msg: String):
 	current_message_item.update_message_content(current_message)
 	message_container.scroll_vertical = 100000
 
-func on_response_use_tool():
-	current_message_item.response_use_tool()
+func on_response_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
+	current_message_item.response_use_tool(tool_calls)
 	message_container.scroll_vertical = 100000
 
 func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
@@ -194,11 +193,13 @@ func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 	history_container.update_history(current_id, current_history_item)
 
 func on_generate_error(error_info: Dictionary):
-	printerr("发生错误")
-	printerr(error_info.error_msg)
+	#printerr("发生错误")
+	#printerr(error_info.error_msg)
 	printerr(error_info.data)
-	current_message_item.update_think_content(current_think, false)
+	#current_message_item.update_think_content(current_think, false)
+	current_message_item.update_error_message(error_info.error_msg, error_info.data)
 	input_container.disable = false
+	input_container.switch_button_to("Send")
 
 func on_click_new_chat_button():
 	clear()
@@ -234,6 +235,7 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 
 	if finish_reason != "tool_calls":
 		input_container.disable = false
+		input_container.switch_button_to("Send")
 		messages.push_back({
 			"role": "assistant",
 			"content": current_message,
@@ -375,3 +377,11 @@ func show_container(container: Control):
 
 func on_click_back_chat_button():
 	show_container(chat_container)
+
+func on_stop_chat():
+	deep_seek_chat_stream.close()
+	input_container.disable = false
+	input_container.switch_button_to("Send")
+	current_message_item.update_stop_message()
+	reset_message_info()
+	pass

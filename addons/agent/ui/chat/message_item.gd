@@ -9,6 +9,7 @@ extends MarginContainer
 @onready var message_content: RichTextLabel = %MessageContent
 @onready var user_message_container: VBoxContainer = %UserMessageContainer
 @onready var user_message_content: RichTextLabel = %UserMessageContent
+@onready var error_message_container: VBoxContainer = %ErrorMessageContainer
 
 @onready var thinking_time_label: Label = %ThinkingTimeLabel
 @onready var thinking_label: Label = %ThinkingLabel
@@ -16,6 +17,9 @@ extends MarginContainer
 @onready var use_tool_container: VBoxContainer = %UseToolContainer
 @onready var wait_using_tool: PanelContainer = %WaitUsingTool
 @onready var wait_using_tool_rich_text_label: RichTextLabel = %WaitUsingTool/RichTextLabel
+@onready var error_message_label: RichTextLabel = %ErrorMessageLabel
+@onready var stop_message: Label = %StopMessage
+
 
 @export var show_think: bool = false
 
@@ -66,12 +70,13 @@ func _on_expand_button_toggled(toggled_on: bool) -> void:
 	expand_button.text = " ▲ " if toggled_on else " ▼ "
 	think_content.visible = toggled_on
 
-func response_use_tool():
+func response_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 	wait_using_tool.show()
 
 	var wait_placeholder_text = [
 		" 正在等待 Agent 调用工具，请耐心等待 "
 	]
+
 	wait_using_tool_rich_text_label.text = "[agent_thinking freq=5.0 span=5.0] %s [/agent_thinking]" % wait_placeholder_text.pick_random()
 
 func used_tools(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
@@ -99,3 +104,18 @@ func on_click_rich_text_url(meta):
 		OS.shell_open(meta_string)
 	else:
 		print("不支持的跳转方式，您可以复制链接后自行跳转： ", meta)
+
+func update_error_message(error_content: String, detail: String):
+	thinking = false
+	use_tool_container.hide()
+	wait_using_tool.hide()
+	think_content.hide()
+	message_container.hide()
+	user_message_container.hide()
+	
+	error_message_container.show()
+	error_message_label.text = "[color=red]错误：" + error_content + "[/color]\n" + detail
+
+func update_stop_message():
+	stop_message.show()
+	thinking = false

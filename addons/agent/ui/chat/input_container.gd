@@ -9,14 +9,15 @@ extends MarginContainer
 @onready var input_mode_select: OptionButton = %InputModeSelect
 @onready var input_menu_list: ItemList = %InputMenuList
 @onready var use_thinking: CheckButton = %UseThinking
+@onready var stop_button: Button = %StopButton
 
 const REFERENCE_ITEM = preload("uid://bewckbivwp036")
 
 signal send_message(message: Dictionary, message_content: String, use_thinking: bool)
+signal stop_chat
 signal show_help
 signal show_setting
 signal show_memory
-
 
 enum MenuListType {
 	None,
@@ -54,6 +55,7 @@ func _ready() -> void:
 
 	send_button.pressed.connect(on_click_send_message)
 	clear_button.pressed.connect(on_click_clear_button)
+	stop_button.pressed.connect(on_click_stop_button)
 
 	user_input.text_changed.connect(on_user_input_text_changed)
 	input_menu_list.item_selected.connect(on_input_menu_list_item_selected)
@@ -182,6 +184,7 @@ func init():
 	usage_label.text = ""
 	clear_reference_list()
 	set_input_mode_disable(false)
+	switch_button_to("Send")
 	input_menu_list.hide()
 
 ## 清空引用列表
@@ -211,6 +214,7 @@ func on_click_send_message():
 
 	# 正常消息处理
 	self.disable = true
+	switch_button_to("Stop")
 	set_input_mode_disable(true)
 	var info_list = reference_list.get_children().map(func(node): return node.info)
 	var info_list_string = JSON.stringify(info_list)
@@ -317,3 +321,14 @@ func _on_user_input_gui_input(event: InputEvent) -> void:
 				event.keycode == KEY_ENTER and \
 				event.pressed:
 				on_click_send_message()
+
+func switch_button_to(button_name: String):
+	if button_name == "Send":
+		send_button.show()
+		stop_button.hide()
+	else:
+		send_button.hide()
+		stop_button.show()
+
+func on_click_stop_button():
+	stop_chat.emit()

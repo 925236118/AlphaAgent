@@ -32,7 +32,7 @@ signal generate_finish(finish_reason: String, total_tokens: float)
 ## 使用工具
 signal use_tool(tool_calls: Array[ToolCallsInfo])
 ## 正在返回使用工具请求
-signal response_use_tool
+signal response_use_tool(tool_calls: Array[ToolCallsInfo])
 ## 失败
 signal error(error_info: Dictionary)
 
@@ -180,9 +180,11 @@ func post_message(messages: Array[Dictionary]):
 
 									tool_calls.push_back(tool_call_info)
 									# 接下来要调用工具，需要展示
-									response_use_tool.emit()
+									response_use_tool.emit(tool_calls)
 								else:
 									tool_calls[-1].function.arguments += req_tool_calls[0].get("function", {"arguments": ""}).get("arguments")
+									# 接下来要调用工具，需要展示
+									response_use_tool.emit(tool_calls)
 							elif use_thinking and delta.has("reasoning_content") and delta.get("reasoning_content") != null:
 								think.emit(delta["reasoning_content"])
 							else:
@@ -203,6 +205,18 @@ func post_message(messages: Array[Dictionary]):
 								"error_msg": "无效的响应结构",
 								"data": data
 							})
+					else:
+						var json = JSON.new()
+						var parse_err = json.parse(data_string)
+						
+						if parse_err == OK:
+							generatting = false
+							push_error("无效的响应结构")
+							error.emit({
+								"error_msg": "无效的响应结构",
+								"data": data_string
+							})
+						
 ## 中断请求
 func close():
 	generatting = false

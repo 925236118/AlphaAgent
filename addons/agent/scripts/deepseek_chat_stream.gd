@@ -199,24 +199,20 @@ func post_message(messages: Array[Dictionary]):
 								generate_finish.emit(choices[0].get("finish_reason"), usage["total_tokens"])
 						else:
 							generatting = false
-							print(data)
-							push_error("无效的响应结构")
+							#print(data)
+							#push_error("无效的响应结构")
 							error.emit({
 								"error_msg": "无效的响应结构",
 								"data": data
 							})
 					else:
-						var json = JSON.new()
-						var parse_err = json.parse(data_string)
-						
-						if parse_err == OK:
+						if not data_string == "":
 							generatting = false
-							push_error("无效的响应结构")
 							error.emit({
-								"error_msg": "无效的响应结构",
+								"error_msg": "AI模型服务报错",
 								"data": data_string
 							})
-						
+
 ## 中断请求
 func close():
 	generatting = false

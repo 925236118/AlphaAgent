@@ -19,11 +19,13 @@ extends Control
 @onready var chat_container: VBoxContainer = %ChatContainer
 @onready var history_container: AgentHistoryContainer = %HistoryContainer
 @onready var setting_container: ScrollContainer = %SettingContainer
+@onready var memory_container: VBoxContainer = %MemoryContainer
 
 @onready var container_list = [
 	chat_container,
 	history_container,
-	setting_container
+	setting_container,
+	memory_container
 ]
 
 enum MoreButtonIds {
@@ -39,7 +41,6 @@ var help_window: Window = null
 const MESSAGE_ITEM = preload("uid://cjytvn2j0yi3s")
 
 const HELP = preload("uid://b83qwags1ffo8")
-
 
 var messages: Array[Dictionary] = []
 
@@ -62,7 +63,7 @@ func _ready() -> void:
 	welcome_message.show()
 	message_container.hide()
 	# 初始化AI模型相关信息
-	init_message_list()
+	#init_message_list()
 	deep_seek_chat_stream.secret_key = AlphaAgentPlugin.global_setting.secret_key
 	deep_seek_chat_stream.think.connect(on_agent_think)
 	deep_seek_chat_stream.message.connect(on_agent_message)
@@ -95,12 +96,13 @@ func reset_message_info():
 # 初始化消息列表，添加系统提示词
 func init_message_list():
 	CONFIG = load("uid://b4bcww0bmnxt0")
+	
 	messages = [
 		{
 			"role": "system",
 			"content": CONFIG.system_prompt.format({
-				"project_memory": ''.join(CONFIG.memory.map(func(m): return "-" + m)),
-				"global_memory": "无"
+				"project_memory": ''.join(AlphaAgentPlugin.instance.project_memory.map(func(m): return "-" + m + "\n")),
+				"global_memory": ''.join(AlphaAgentPlugin.instance.global_memory.map(func(m): return "-" + m + "\n"))
 			})
 		}
 	]
@@ -339,7 +341,7 @@ func on_recovery_history(history_item: AgentHistoryContainer.HistoryItem):
 func on_more_button_select(id: int):
 	match id:
 		MoreButtonIds.Memory:
-			pass
+			show_container(memory_container)
 		MoreButtonIds.Help:
 			show_help_window()
 		MoreButtonIds.Setting:

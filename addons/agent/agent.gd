@@ -8,8 +8,6 @@ const project_alpha_dir: String = "res://.alpha/"
 
 const MAIN_PANEL = preload("uid://baqbjml8ahgng")
 
-const trial_secret_key = "sk-df2912a98b444594aec3de18e5ea2b82"
-
 var main_panel = null
 
 func _enable_plugin() -> void:
@@ -60,7 +58,7 @@ class GlobalSetting:
 		self.auto_clear = json.get("auto_clear", false)
 		self.auto_expand_think = json.get("auto_clear", false)
 		self.auto_add_file_ref = json.get("auto_add_file_ref", true)
-		self.secret_key = json.get("secret_key", trial_secret_key)
+		self.secret_key = json.get("secret_key", "")
 		self.send_shortcut = json.get("send_shortcut", SendShotcut.Enter)
 
 	func save_global_setting():
@@ -76,3 +74,6 @@ class GlobalSetting:
 		file.close()
 
 static var global_setting := GlobalSetting.new()
+
+static var project_memory: Array[String] = []
+static var global_memory: Array[String] = []

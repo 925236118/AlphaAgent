@@ -1,0 +1,34 @@
+[gd_scene load_steps=2 format=3 uid="uid://cr2sav6by4tal"]
+
+[ext_resource type="Script" uid="uid://bbtkl1gjy6vnx" path="res://addons/agent/ui/memory/memory_item.gd" id="1_n2hbk"]
+
+[node name="MemoryItem" type="HBoxContainer"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 31.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+script = ExtResource("1_n2hbk")
+
+[node name="TextEdit" type="TextEdit" parent="."]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "asdasd"
+
+[node name="FinishEditButton" type="Button" parent="."]
+visible = false
+layout_mode = 2
+text = "完成"
+
+[node name="EditButton" type="Button" parent="."]
+layout_mode = 2
+text = "编辑"
+
+[node name="RemoveButton" type="Button" parent="."]
+layout_mode = 2
+text = " 删除 "

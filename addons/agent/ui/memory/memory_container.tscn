@@ -1,0 +1,65 @@
+[gd_scene load_steps=2 format=3 uid="uid://b66g7g3ydkkeb"]
+
+[ext_resource type="Script" uid="uid://cm8oxvgviolv5" path="res://addons/agent/ui/memory/memory_container.gd" id="1_81aon"]
+
+[node name="MemoryContainer" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_81aon")
+
+[node name="GlobalMemoryContainer" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GlobalMemoryContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GlobalMemoryContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "全局记忆"
+
+[node name="AddGlobalMemory" type="Button" parent="GlobalMemoryContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " + "
+
+[node name="ScrollContainer" type="ScrollContainer" parent="GlobalMemoryContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="GlobalMemoryItemContainer" type="VBoxContainer" parent="GlobalMemoryContainer/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ProjectMemoryContainer" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ProjectMemoryContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ProjectMemoryContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "项目记忆"
+
+[node name="AddProjectMemory" type="Button" parent="ProjectMemoryContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " + "
+
+[node name="ScrollContainer" type="ScrollContainer" parent="ProjectMemoryContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ProjectMemoryItemContainer" type="VBoxContainer" parent="ProjectMemoryContainer/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3

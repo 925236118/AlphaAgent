@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3 uid="uid://58ryyxbn0dby"]
+
+[sub_resource type="Gradient" id="Gradient_n876e"]
+offsets = PackedFloat32Array(0.8349328, 0.8560461)
+colors = PackedColorArray(7.460266e-07, 0.65024686, 0.029163, 1, 0, 0.6509804, 0.02745098, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_1ot7o"]
+gradient = SubResource("Gradient_n876e")
+width = 24
+height = 24
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.6495727, 0.3846154)
+
+[node name="PlanItem" type="HBoxContainer"]
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 2
+texture = SubResource("GradientTexture2D_1ot7o")
+expand_mode = 2
+stretch_mode = 2
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "asd"

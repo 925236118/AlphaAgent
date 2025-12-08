@@ -58,7 +58,7 @@ var current_history_item: AgentHistoryContainer.HistoryItem = null
 
 func _ready() -> void:
 	show_container(chat_container)
-
+	AlphaAgentPlugin.instance.update_plan_list.connect(on_update_plan_list)
 	# 展示欢迎语
 	welcome_message.show()
 	message_container.hide()
@@ -386,4 +386,8 @@ func on_stop_chat():
 	input_container.switch_button_to("Send")
 	current_message_item.update_stop_message()
 	reset_message_info()
+	pass
+
+func on_update_plan_list(plan_list: Array[AlphaAgentPlugin.PlanItem]):
+	
 	pass

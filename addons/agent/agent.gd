@@ -10,6 +10,22 @@ const MAIN_PANEL = preload("uid://baqbjml8ahgng")
 
 var main_panel = null
 
+enum PlanState {
+	Plan,
+	Active,
+	Finish
+}
+
+class PlanItem:
+	var name: String = ""
+	var state: PlanState = PlanState.Plan
+	func _init(name: String, state: PlanState) -> void:
+		self.name = name
+		self.state = state
+
+
+signal update_plan_list(plan_list)
+
 func _enable_plugin() -> void:
 	pass
 
@@ -17,9 +33,9 @@ func _disable_plugin() -> void:
 	pass
 
 func _enter_tree() -> void:
+	instance = self
 	main_panel = MAIN_PANEL.instantiate()
 	add_control_to_dock(EditorPlugin.DOCK_SLOT_RIGHT_UL, main_panel)
-	instance = self
 
 func _exit_tree() -> void:
 	remove_control_from_docks(main_panel)

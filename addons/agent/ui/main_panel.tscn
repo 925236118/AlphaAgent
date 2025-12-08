@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=23 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Script" uid="uid://dlx7bujvsuk11" path="res://addons/agent/scripts/deepseek_chat_stream.gd" id="1_fhbwo"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://d2qy4nnjypt6o" path="res://addons/agent/ui/history/history_container.tscn" id="5_elhta"]
 [ext_resource type="Script" uid="uid://c857yifca6rog" path="res://addons/agent/scripts/deepseek_chat.gd" id="7_5v6i3"]
 [ext_resource type="Texture2D" uid="uid://bfeehv7cn64ie" path="res://addons/agent/icons/newicon/icon_monochrome_light.svg" id="7_aabuu"]
+[ext_resource type="PackedScene" uid="uid://fycl6xlfw8r5" path="res://addons/agent/ui/plan/plan_list.tscn" id="8_1ot7o"]
 [ext_resource type="PackedScene" uid="uid://bxe6hto0vk8fu" path="res://addons/agent/ui/setting/setting.tscn" id="8_5t7oo"]
 [ext_resource type="PackedScene" uid="uid://b66g7g3ydkkeb" path="res://addons/agent/ui/memory/memory_container.tscn" id="10_n876e"]
 
@@ -260,7 +261,14 @@ layout_mode = 2
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_5v6i3")
 
-[node name="InputContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/MarginContainer/PanelContainer" instance=ExtResource("4_2dutf")]
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/MarginContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="PlanList" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/MarginContainer/PanelContainer/VBoxContainer" instance=ExtResource("8_1ot7o")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="InputContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/MarginContainer/PanelContainer/VBoxContainer" instance=ExtResource("4_2dutf")]
 unique_name_in_owner = true
 layout_mode = 2
 
@@ -315,6 +323,7 @@ script = ExtResource("1_fhbwo")
 secret_key = "sk-2bbba30b7abd4760b4bb90e68ff607c8"
 temperature = 0.0
 max_tokens = 8192
+print_log = true
 tools = [{
 "function": {
 "description": "获取当前的Godot引擎信息。包含Godot版本，CPU型号、CPU 架构、内存信息、显卡信息、设备型号、当前系统时间等，还有当前项目的一些信息，例如项目名称、项目版本、项目描述、项目运行主场景、游戏运行窗口信息、全局的物理信息、全局的渲染设置、主题信息等。",

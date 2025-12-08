@@ -17,6 +17,43 @@ func test():
 
 func get_tools_list() -> Array[Dictionary]:
 	return [
+#region 生成相关
+		# update_plan_list
+		{
+			"type": "function",
+			"function": {
+				"name": "update_plan_list",
+				"description": "对于用户给出的复杂的任务，可以拆分成多段执行的，需要使用本工具对任务拆分成若干个阶段。还可以更新当前已有的阶段任务状态。",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"tasks": {
+							"type": "array",
+							"description": "拆分后的阶段任务项，数量在5到10个之间。按照执行顺序排序。列表中应只有一个任务为active状态。",
+							"items": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string",
+										"description": "要执行的阶段任务名称。",
+									},
+									"state": {
+										"type": "string",
+										"enum": ["plan", "active", "finish"],
+										"description": "该阶段的当前状态。"
+									}
+								},
+								"required": ["name", "state"]
+							}
+						},
+					},
+					"required": ["tasks"]
+				}
+			}
+		},
+		
+#endregion
+#region 查询
 		# get_project_info
 		{
 			"type": "function",
@@ -65,43 +102,6 @@ func get_tools_list() -> Array[Dictionary]:
 				}
 			}
 		},
-		# read_file
-		{
-			"type": "function",
-			"function": {
-				"name": "read_file",
-				"description": "读取文件内容。",
-				"parameters": {
-					"type": "object",
-					"properties": {
-						"path": {
-							"type": "string",
-							"description": "需要读取的文件目录，必须是以res://开头的绝对路径。",
-						}
-					},
-					"required": ["path"]
-				}
-			}
-		},
-
-		# create_folder
-		{
-			"type": "function",
-			"function": {
-				"name": "create_folder",
-				"description": "创建文件夹。在给定的目录下创建一个指定称的空的文件夹。如果不给名称就叫新建文件夹，有重复的就后缀写上（数字），每次创建的文件夹应存在上级。",
-				"parameters": {
-					"type": "object",
-					"properties": {
-						"path": {
-							"type": "string",
-							"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
-						}
-					},
-					"required": ["path"]
-				}
-			}
-		},
 		# get_class_doc
 		{
 			"type": "function",
@@ -132,6 +132,87 @@ func get_tools_list() -> Array[Dictionary]:
 				}
 			}
 		},
+		# get_image_info
+		{
+			"type": "function",
+			"function": {
+				"name": "get_image_info",
+				"description": "获取图片文件信息，可以获得图片的格式、大小、uid等信息",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"image_path": {
+							"type": "string",
+							"description": "需要读取的图片文件目录，必须是以res://开头的绝对路径。",
+						},
+					},
+					"required": ["image_path"]
+				}
+			}
+		},
+#endregion
+#region 文件操作
+		# read_file
+		{
+			"type": "function",
+			"function": {
+				"name": "read_file",
+				"description": "读取文件内容。",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"path": {
+							"type": "string",
+							"description": "需要读取的文件目录，必须是以res://开头的绝对路径。",
+						}
+					},
+					"required": ["path"]
+				}
+			}
+		},
+		# create_folder
+		{
+			"type": "function",
+			"function": {
+				"name": "create_folder",
+				"description": "创建文件夹。在给定的目录下创建一个指定称的空的文件夹。如果不给名称就叫新建文件夹，有重复的就后缀写上（数字），每次创建的文件夹应存在上级。",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"path": {
+							"type": "string",
+							"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+						}
+					},
+					"required": ["path"]
+				}
+			}
+		},
+		# write_file
+		{
+			"type": "function",
+			"function": {
+				"name": "write_file",
+				#"description": "写入文件内容。文件格式应为资源文件(.tres)或者脚本文件(.gd)、Godot着色器(.gdshader)、场景文件(.tscn)、文本文件(.txt或.md)、CSV文件(.csv)，当明确提及创建或修改文件时再调用该工具",
+				"description": "全量替换写入文件内容。文件格式应为资源文件(.tres)、Godot着色器(.gdshader)、文本文件(.txt或.md)、CSV文件(.csv)，当明确提及创建或修改文件时再调用该工具。不应使用本工具处理脚本和场景文件。",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"path": {
+							"type": "string",
+							"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+						},
+						"content": {
+							"type": "string",
+							"description": "需要写入的文件内容。"
+						}
+					},
+					"required": ["path", "content"]
+				}
+			}
+		},
+#endregion
+#region 场景操作
 		# add_script_to_scene
 		{
 			"type": "function",
@@ -172,69 +253,8 @@ func get_tools_list() -> Array[Dictionary]:
 				}
 			}
 		},
-		# write_file
-		{
-			"type": "function",
-			"function": {
-				"name": "write_file",
-				#"description": "写入文件内容。文件格式应为资源文件(.tres)或者脚本文件(.gd)、Godot着色器(.gdshader)、场景文件(.tscn)、文本文件(.txt或.md)、CSV文件(.csv)，当明确提及创建或修改文件时再调用该工具",
-				"description": "全量替换写入文件内容。文件格式应为资源文件(.tres)、Godot着色器(.gdshader)、文本文件(.txt或.md)、CSV文件(.csv)，当明确提及创建或修改文件时再调用该工具。不应使用本工具处理脚本和场景文件。",
-				"parameters": {
-					"type": "object",
-					"properties": {
-						"path": {
-							"type": "string",
-							"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
-						},
-						"content": {
-							"type": "string",
-							"description": "需要写入的文件内容。"
-						}
-					},
-					"required": ["path", "content"]
-				}
-			}
-		},
-		# get_image_info
-		{
-			"type": "function",
-			"function": {
-				"name": "get_image_info",
-				"description": "获取图片文件信息，可以获得图片的格式、大小、uid等信息",
-				"parameters": {
-					"type": "object",
-					"properties": {
-						"image_path": {
-							"type": "string",
-							"description": "需要读取的图片文件目录，必须是以res://开头的绝对路径。",
-						},
-					},
-					"required": ["image_path"]
-				}
-			}
-		},
-		# set_singleton
-		{
-			"type": "function",
-			"function": {
-				"name": "set_singleton",
-				"description": "设置或删除项目自动加载脚本或场景",
-				"parameters": {
-					"type": "object",
-					"properties": {
-						"name": {
-							"type": "string",
-							"description": "需要设置的自动加载名称，需要以大驼峰的方式命名。一般可以和脚本或场景文件同名。",
-						},
-						"path": {
-							"type": "string",
-							"description": "需要设置为自动加载的脚本或场景路径，必须是以res://开头的绝对路径。如果为空时则会删除该自动加载",
-						},
-					},
-					"required": ["name"]
-				}
-			}
-		},
+#endregion
+#region 调试
 		# check_script_error
 		{
 			"type": "function",
@@ -253,6 +273,8 @@ func get_tools_list() -> Array[Dictionary]:
 				}
 			}
 		},
+#endregion
+#region 编辑器操作
 		# open_resource
 		{
 			"type": "function",
@@ -314,6 +336,31 @@ func get_tools_list() -> Array[Dictionary]:
 				}
 			}
 		},
+#endregion
+#region 配置
+		# set_singleton
+		{
+			"type": "function",
+			"function": {
+				"name": "set_singleton",
+				"description": "设置或删除项目自动加载脚本或场景",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"name": {
+							"type": "string",
+							"description": "需要设置的自动加载名称，需要以大驼峰的方式命名。一般可以和脚本或场景文件同名。",
+						},
+						"path": {
+							"type": "string",
+							"description": "需要设置为自动加载的脚本或场景路径，必须是以res://开头的绝对路径。如果为空时则会删除该自动加载",
+						},
+					},
+					"required": ["name"]
+				}
+			}
+		},
+#endregion
 	]
 
 
@@ -742,6 +789,26 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 					"success": "更新成功"
 				}
 
+		"update_plan_list":
+			var json = JSON.parse_string(tool_call.function.arguments)
+			if not json == null and json.has("tasks"):
+				print(755)
+				var tasks = json.get("tasks")
+				var list: Array[AlphaAgentPlugin.PlanItem] = []
+				for t: Dictionary in tasks:
+					var task_name = t.get("name", "")
+					var task_state = t.get("state", "plan")
+					var plan_state: AlphaAgentPlugin.PlanState
+					match task_state:
+						"plan":
+							plan_state = AlphaAgentPlugin.PlanState.Plan
+						"active":
+							plan_state = AlphaAgentPlugin.PlanState.Active
+						"finish":
+							plan_state = AlphaAgentPlugin.PlanState.Finish
+					list.push_back(AlphaAgentPlugin.PlanItem.new(task_name, plan_state))
+				AlphaAgentPlugin.instance.update_plan_list.emit(list)
+				
 		_:
 			result = {
 				"error": "错误的function.name"

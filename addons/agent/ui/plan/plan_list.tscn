@@ -1,0 +1,27 @@
+[gd_scene load_steps=2 format=3 uid="uid://fycl6xlfw8r5"]
+
+[ext_resource type="PackedScene" uid="uid://58ryyxbn0dby" path="res://addons/agent/ui/plan/plan_item.tscn" id="1_8cy4d"]
+
+[node name="PlanList" type="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="ExpandButton" type="Button" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "正在执行任务 1 / 7"
+flat = true
+alignment = 0
+
+[node name="PlanItemContainer" type="VBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="PlanItem" parent="VBoxContainer/PlanItemContainer" instance=ExtResource("1_8cy4d")]
+layout_mode = 2

@@ -51,18 +51,19 @@ func add_memory_nodes():
 		var item = MEMORY_ITEM.instantiate()
 		global_memory_item_container.add_child(item)
 		item.set_text(global_memory)
-		item.remove.connect(on_remove_global_memory.bind(i, item))
-		item.save.connect(on_save_global_memory.bind(i))
+		item.remove.connect(on_remove_global_memory.bind(item))
+		item.save.connect(on_save_global_memory.bind(item))
 		
 	for i in AlphaAgentPlugin.instance.project_memory.size():
 		var project_memory = AlphaAgentPlugin.instance.project_memory[i]
 		var item = MEMORY_ITEM.instantiate()
 		project_memory_item_container.add_child(item)
 		item.set_text(project_memory)
-		item.remove.connect(on_remove_project_memory.bind(i, item))
-		item.save.connect(on_save_project_memory.bind(i))
+		item.remove.connect(on_remove_project_memory.bind(item))
+		item.save.connect(on_save_project_memory.bind(item))
 
-func on_remove_global_memory(index: int, node: Control):
+func on_remove_global_memory(node: Control):
+	var index = node.get_index()
 	AlphaAgentPlugin.instance.global_memory.remove_at(index)
 	node.queue_free()
 	save_global_memory_file()
@@ -72,7 +73,8 @@ func save_global_memory_file():
 	file.store_string(JSON.stringify(AlphaAgentPlugin.instance.global_memory))
 	file.close()
 
-func on_remove_project_memory(index: int, node: Control):
+func on_remove_project_memory(node: Control):
+	var index = node.get_index()
 	AlphaAgentPlugin.instance.project_memory.remove_at(index)
 	node.queue_free()
 	save_project_memory_file()
@@ -82,11 +84,13 @@ func save_project_memory_file():
 	CONFIG.memory = AlphaAgentPlugin.instance.project_memory
 	ResourceSaver.save(CONFIG, "uid://b4bcww0bmnxt0")
 
-func on_save_global_memory(content, index):
+func on_save_global_memory(content, item: Control):
+	var index = item.get_index()
 	AlphaAgentPlugin.instance.global_memory[index] = content
 	save_global_memory_file()
 	
-func on_save_project_memory(content, index):
+func on_save_project_memory(content, item: Control):
+	var index = item.get_index()
 	AlphaAgentPlugin.instance.project_memory[index] = content
 	save_project_memory_file()
 
@@ -104,8 +108,8 @@ func on_add_global_memory():
 	AlphaAgentPlugin.instance.global_memory.push_back("")
 	item.set_text("")
 	item.set_state(AgentMemoryItem.State.Edit)
-	item.remove.connect(on_remove_global_memory.bind(item.get_index(), item))
-	item.save.connect(on_save_global_memory.bind(item.get_index()))
+	item.remove.connect(on_remove_global_memory.bind(item))
+	item.save.connect(on_save_global_memory.bind(item))
 
 func on_add_project_memory():
 	var item = MEMORY_ITEM.instantiate()
@@ -113,5 +117,5 @@ func on_add_project_memory():
 	AlphaAgentPlugin.instance.project_memory.push_back("")
 	item.set_text("")
 	item.set_state(AgentMemoryItem.State.Edit)
-	item.remove.connect(on_remove_project_memory.bind(item.get_index(), item))
-	item.save.connect(on_save_project_memory.bind(item.get_index()))
+	item.remove.connect(on_remove_project_memory.bind(item))
+	item.save.connect(on_save_project_memory.bind(item))

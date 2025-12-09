@@ -1,6 +1,20 @@
 @tool
 extends ScrollContainer
-@onready var setting_items_container: VBoxContainer = %SettingItemsContainer
+
+@onready var auto_clear_setting: BoxContainer = $SettingPanel/SettingItemsContainer/AutoClearSetting
+@onready var auto_expand_think_setting: BoxContainer = $SettingPanel/SettingItemsContainer/AutoExpandThinkSetting
+@onready var auto_add_file_ref_setting: BoxContainer = $SettingPanel/SettingItemsContainer/AutoAddFileRefSetting
+@onready var send_shot_cut: BoxContainer = $SettingPanel/SettingItemsContainer/SendShotCut
+@onready var secret_key_setting: BoxContainer = $SettingPanel/SettingItemsContainer/SecretKeySetting
+
+# 添加新节点后需要在这里注册
+@onready var setting_item_nodes = [
+	auto_clear_setting,
+	auto_expand_think_setting,
+	auto_add_file_ref_setting,
+	send_shot_cut,
+	secret_key_setting
+]
 
 func _ready() -> void:
 	AlphaAgentPlugin.global_setting.load_global_setting()
@@ -8,14 +22,12 @@ func _ready() -> void:
 	init_signals()
 
 func init_item_values():
-	var setting_items = setting_items_container.get_children()
-	for setting_item in setting_items:
+	for setting_item in setting_item_nodes:
 		if setting_item is AgentSettingItemBase:
 			setting_item.set_value(AlphaAgentPlugin.global_setting[setting_item.setting_key])
 
 func init_signals():
-	var setting_items = setting_items_container.get_children()
-	for setting_item in setting_items:
+	for setting_item in setting_item_nodes:
 		if setting_item is AgentSettingItemBase:
 			setting_item.value_changed.connect(save_settings.bind(setting_item))
 

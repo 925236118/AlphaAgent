@@ -1,9 +1,12 @@
-[gd_scene load_steps=5 format=3 uid="uid://bxe6hto0vk8fu"]
+[gd_scene load_steps=6 format=3 uid="uid://bxe6hto0vk8fu"]
 
 [ext_resource type="Script" uid="uid://dry1n6m67ku3q" path="res://addons/agent/ui/setting/setting.gd" id="1_c2l6f"]
 [ext_resource type="PackedScene" uid="uid://c2ei06dd8phsw" path="res://addons/agent/ui/setting/setting_item_bool.tscn" id="1_ca3bj"]
 [ext_resource type="PackedScene" uid="uid://bldax4sbp20q2" path="res://addons/agent/ui/setting/setting_item_string.tscn" id="3_c2l6f"]
 [ext_resource type="PackedScene" uid="uid://jbwyo7x0ce47" path="res://addons/agent/ui/setting/setting_item_option.tscn" id="4_83qt4"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_83qt4"]
+font_size = 20
 
 [node name="SettingContainer" type="ScrollContainer"]
 anchors_preset = 15
@@ -26,6 +29,15 @@ theme_override_constants/margin_bottom = 10
 unique_name_in_owner = true
 layout_mode = 2
 
+[node name="MarginContainer" type="MarginContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+theme_override_constants/margin_bottom = 12
+
+[node name="Label" type="Label" parent="SettingPanel/SettingItemsContainer/MarginContainer"]
+layout_mode = 2
+text = "对话设置"
+label_settings = SubResource("LabelSettings_83qt4")
+
 [node name="AutoClearSetting" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("1_ca3bj")]
 layout_mode = 2
 setting_name = "发送后自动清空"
@@ -41,20 +53,15 @@ layout_mode = 2
 setting_name = "自动添加引用的文件名称"
 setting_key = "auto_add_file_ref"
 
-[node name="SecretKeySetting" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("3_c2l6f")]
-layout_mode = 2
-setting_name = "DeepSeek密钥"
-setting_key = "secret_key"
-
-[node name="SettingItemOption" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("4_83qt4")]
+[node name="SendShotCut" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("4_83qt4")]
 layout_mode = 2
 setting_name = "输入框发送快捷键"
 setting_key = "send_shortcut"
 
-[node name="SettingNameLabel" parent="SettingPanel/SettingItemsContainer/SettingItemOption" index="0"]
+[node name="SettingNameLabel" parent="SettingPanel/SettingItemsContainer/SendShotCut" index="0"]
 text = "输入框发送快捷键"
 
-[node name="OptionButton" parent="SettingPanel/SettingItemsContainer/SettingItemOption" index="1"]
+[node name="OptionButton" parent="SettingPanel/SettingItemsContainer/SendShotCut" index="1"]
 selected = 1
 item_count = 3
 popup/item_0/text = "不使用快捷键"
@@ -63,4 +70,22 @@ popup/item_1/id = 1
 popup/item_2/text = "Ctrl + Enter"
 popup/item_2/id = 2
 
-[editable path="SettingPanel/SettingItemsContainer/SettingItemOption"]
+[node name="HSeparator" type="HSeparator" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MarginContainer2" type="MarginContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+theme_override_constants/margin_bottom = 12
+
+[node name="Label" type="Label" parent="SettingPanel/SettingItemsContainer/MarginContainer2"]
+layout_mode = 2
+text = "模型设置"
+label_settings = SubResource("LabelSettings_83qt4")
+
+[node name="SecretKeySetting" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("3_c2l6f")]
+layout_mode = 2
+setting_name = "DeepSeek密钥"
+setting_key = "secret_key"
+
+[editable path="SettingPanel/SettingItemsContainer/SendShotCut"]

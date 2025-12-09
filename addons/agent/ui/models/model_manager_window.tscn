@@ -1,11 +1,12 @@
 [gd_scene load_steps=3 format=3 uid="uid://dr7g6mrkb8u3e"]
 
-[ext_resource type="Script" path="res://addons/agent/ui/models/model_manager_window.gd" id="1_ww8v3"]
+[ext_resource type="Script" uid="uid://cw7dsan8l0cfv" path="res://addons/agent/ui/models/model_manager_window.gd" id="1_ww8v3"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_overlay"]
 bg_color = Color(0, 0, 0, 0.7)
 
 [node name="ModelManagerWindow" type="Window"]
+oversampling_override = 1.0
 title = "管理模型"
 initial_position = 2
 size = Vector2i(600, 500)
@@ -140,8 +141,8 @@ unique_name_in_owner = true
 layout_mode = 2
 min_value = 1024.0
 max_value = 131072.0
-value = 8192.0
 step = 1024.0
+value = 8192.0
 
 [node name="ProviderLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
 layout_mode = 2
@@ -150,6 +151,14 @@ text = "提供商类型："
 [node name="ProviderOption" type="OptionButton" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+selected = 0
+item_count = 3
+popup/item_0/text = "OpenAI"
+popup/item_0/id = 0
+popup/item_1/text = "DeepSeek"
+popup/item_1/id = 1
+popup/item_2/text = "Ollama"
+popup/item_2/id = 2
 
 [node name="ThinkingLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
 layout_mode = 2

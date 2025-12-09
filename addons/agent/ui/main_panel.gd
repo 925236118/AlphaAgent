@@ -52,7 +52,7 @@ const MESSAGE_ITEM = preload("uid://cjytvn2j0yi3s")
 
 const HELP = preload("uid://b83qwags1ffo8")
 
-const MODEL_MANAGER = preload("res://addons/agent/ui/models/model_manager_window.tscn")
+const MODEL_MANAGER = preload("uid://dr7g6mrkb8u3e")
 
 var messages: Array[Dictionary] = []
 

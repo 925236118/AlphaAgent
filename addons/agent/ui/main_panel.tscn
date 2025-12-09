@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=27 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Texture2D" uid="uid://dd5t0pwniqnr1" path="res://addons/agent/icons/history.svg" id="2_6rfr6"]
@@ -8,15 +8,15 @@
 [ext_resource type="PackedScene" uid="uid://dqkrjn0mak6lh" path="res://addons/agent/ui/chat/input_container.tscn" id="4_2dutf"]
 [ext_resource type="Texture2D" uid="uid://bmq6b8c3ud8ig" path="res://addons/agent/icons/menu.svg" id="4_cpi8b"]
 [ext_resource type="PackedScene" uid="uid://d2qy4nnjypt6o" path="res://addons/agent/ui/history/history_container.tscn" id="5_elhta"]
-[ext_resource type="Texture2D" uid="uid://bfeehv7cn64ie" path="res://addons/agent/icons/newicon/icon_monochrome_light.svg" id="7_aabuu"]
 [ext_resource type="Texture2D" uid="uid://bj7vdrhq42fmp" path="res://addons/agent/icons/newicon/icon_setting1.svg" id="6_cq37x"]
 [ext_resource type="Texture2D" uid="uid://7cvkbex7yjot" path="res://addons/agent/icons/newicon/Icon_help.svg" id="6_wlmmt"]
+[ext_resource type="Texture2D" uid="uid://bfeehv7cn64ie" path="res://addons/agent/icons/newicon/icon_monochrome_light.svg" id="7_aabuu"]
 [ext_resource type="PackedScene" uid="uid://fycl6xlfw8r5" path="res://addons/agent/ui/plan/plan_list.tscn" id="8_1ot7o"]
 [ext_resource type="PackedScene" uid="uid://bxe6hto0vk8fu" path="res://addons/agent/ui/setting/setting.tscn" id="8_5t7oo"]
 [ext_resource type="PackedScene" uid="uid://b66g7g3ydkkeb" path="res://addons/agent/ui/memory/memory_container.tscn" id="10_n876e"]
 [ext_resource type="Script" path="res://addons/agent/scripts/openai_chat_stream.gd" id="13_wlmmt"]
 [ext_resource type="Script" path="res://addons/agent/scripts/openai_chat.gd" id="14_q7ex6"]
-[ext_resource type="Script" uid="uid://cyh2gqd0jea8s" path="res://addons/agent/scripts/ollama_chat_stream.gd" id="15_cd0et"]
+[ext_resource type="Script" path="res://addons/agent/scripts/ollama_chat_stream.gd" id="15_cd0et"]
 [ext_resource type="Script" path="res://addons/agent/scripts/ollama_chat.gd" id="16_i5act"]
 
 [sub_resource type="Theme" id="Theme_aabuu"]
@@ -353,7 +353,6 @@ script = ExtResource("14_q7ex6")
 [node name="OllamaChatStream" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("15_cd0et")
-metadata/_custom_type_script = "uid://cyh2gqd0jea8s"
 
 [node name="TitleGenerateOllamaChat" type="Node" parent="."]
 unique_name_in_owner = true

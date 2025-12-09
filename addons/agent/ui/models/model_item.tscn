@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cxvx8nny1rkft"]
 
-[ext_resource type="Script" path="res://addons/agent/ui/models/model_item.gd" id="1_jytwi"]
+[ext_resource type="Script" uid="uid://8qvrgmfm6w2c" path="res://addons/agent/ui/models/model_item.gd" id="1_jytwi"]
 
 [node name="ModelItem" type="PanelContainer"]
 custom_minimum_size = Vector2(0, 60)
@@ -28,8 +28,8 @@ layout_mode = 2
 [node name="ModelNameLabel" type="Label" parent="MarginContainer/HBoxContainer/InfoContainer/TopRow"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "模型名称"
 theme_override_font_sizes/font_size = 14
+text = "模型名称"
 
 [node name="CurrentIndicator" type="Label" parent="MarginContainer/HBoxContainer/InfoContainer/TopRow"]
 unique_name_in_owner = true

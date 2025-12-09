@@ -1,7 +1,6 @@
 [gd_scene load_steps=23 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
-[ext_resource type="Script" uid="uid://dlx7bujvsuk11" path="res://addons/agent/scripts/deepseek_chat_stream.gd" id="1_fhbwo"]
 [ext_resource type="Texture2D" uid="uid://dd5t0pwniqnr1" path="res://addons/agent/icons/history.svg" id="2_6rfr6"]
 [ext_resource type="Texture2D" uid="uid://d3tqc8rlqan2t" path="res://addons/agent/icons/back.svg" id="2_aabuu"]
 [ext_resource type="PackedScene" uid="uid://cq2jo5hlpns6j" path="res://addons/agent/tools/tools.tscn" id="3_2usmi"]
@@ -28,6 +27,12 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 corner_detail = 12
+[ext_resource type="Texture2D" uid="uid://dkk4u7fmqh515" path="res://addons/agent/icons/alpha.svg" id="6_c8smv"]
+[ext_resource type="PackedScene" uid="uid://bxe6hto0vk8fu" path="res://addons/agent/ui/setting/setting.tscn" id="8_5t7oo"]
+[ext_resource type="Script" path="res://addons/agent/scripts/openai_chat_stream.gd" id="13_openai_stream"]
+[ext_resource type="Script" path="res://addons/agent/scripts/openai_chat.gd" id="14_openai_chat"]
+[ext_resource type="Script" path="res://addons/agent/scripts/ollama_chat_stream.gd" id="15_ollama_stream"]
+[ext_resource type="Script" path="res://addons/agent/scripts/ollama_chat.gd" id="16_ollama_chat"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_5v6i3"]
 font_color = Color(0.7647059, 0.7647059, 0.7647059, 0.5254902)
@@ -325,6 +330,8 @@ script = ExtResource("1_fhbwo")
 secret_key = "sk-63105427768d4e2e9eceff921502cf90"
 temperature = 0.0
 max_tokens = 8192
+[node name="OpenAIChatStream" type="Node" parent="."]
+script = ExtResource("13_openai_stream")
 tools = [{
 "function": {
 "description": "获取当前的Godot引擎信息。包含Godot版本，CPU型号、CPU 架构、内存信息、显卡信息、设备型号、当前系统时间等，还有当前项目的一些信息，例如项目名称、项目版本、项目描述、项目运行主场景、游戏运行窗口信息、全局的物理信息、全局的渲染设置、主题信息等。",
@@ -459,11 +466,152 @@ tools = [{
 },
 "type": "function"
 }]
-metadata/_custom_type_script = "uid://dlx7bujvsuk11"
 
 [node name="TitleGenerateDeepSeekChat" type="Node" parent="."]
 script = ExtResource("7_5v6i3")
 secret_key = "sk-63105427768d4e2e9eceff921502cf90"
 max_tokens = 4096
+[node name="TitleGenerateOpenAIChat" type="Node" parent="."]
+script = ExtResource("14_openai_chat")
+
+[node name="OllamaChatStream" type="Node" parent="."]
+script = ExtResource("15_ollama_stream")
+tools = [{
+"function": {
+"description": "获取当前的Godot引擎信息。包含Godot版本，CPU型号、CPU 架构、内存信息、显卡信息、设备型号、当前系统时间等，还有当前项目的一些信息，例如项目名称、项目版本、项目描述、项目运行主场景、游戏运行窗口信息、全局的物理信息、全局的渲染设置、主题信息等。",
+"name": "get_project_info",
+"parameters": {
+"properties": {},
+"required": [],
+"type": "object"
+}
+},
+"type": "function"
+}, {
+"function": {
+"description": "获取当前编辑器打开的场景信息和编辑器中打开和编辑的脚本相关信息。",
+"name": "get_editor_info",
+"parameters": {
+"properties": {},
+"required": [],
+"type": "object"
+}
+},
+"type": "function"
+}, {
+"function": {
+"description": "获取当前项目中所有文件以及其UID列表。",
+"name": "get_project_file_list",
+"parameters": {
+"properties": {},
+"required": [],
+"type": "object"
+}
+},
+"type": "function"
+}, {
+"function": {
+"description": "读取文件内容。",
+"name": "read_file",
+"parameters": {
+"properties": {
+"path": {
+"description": "需要读取的文件目录，必须是以res://开头的绝对路径。",
+"type": "string"
+}
+},
+"required": ["path"],
+"type": "object"
+}
+},
+"type": "function"
+}, {
+"function": {
+"description": "写入文件内容。文件格式应为资源文件(.tres)或者脚本文件(.gd)、Godot着色器(.gdshader)、场景文件(.tscn)、文本文件(.txt或.md)、CSV文件(.csv)",
+"name": "write_file",
+"parameters": {
+"properties": {
+"content": {
+"description": "需要写入的文件内容。",
+"type": "string"
+},
+"path": {
+"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+"type": "string"
+}
+},
+"required": ["path", "content"],
+"type": "object"
+}
+},
+"type": "function"
+}, {
+"function": {
+"description": "创建文件夹。在给定的目录下创建一个指定称的空的文件夹。如果不给名称就叫新建文件夹，有重复的就后缀写上（数字），每次创建的文件夹应存在上级。",
+"name": "create_folder",
+"parameters": {
+"properties": {
+"path": {
+"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+"type": "string"
+}
+},
+"required": ["path"],
+"type": "object"
+}
+},
+"type": "function"
+}, {
+"function": {
+"description": "获得Godot原生的类的文档，文档中包含这个类的属性、方法以及参数和返回值、信号、枚举常量、父类、派生类等信息。直接查询为请求信息的列表。可以单独查询某些数据。",
+"name": "get_class_doc",
+"parameters": {
+"properties": {
+"class_name": {
+"description": "需要查询的类名",
+"type": "string"
+},
+"enums": {
+"description": "需要查询的枚举列表",
+"type": "array"
+},
+"properties": {
+"description": "需要查询的属性名列表",
+"type": "array"
+},
+"signals": {
+"description": "需要查询的信号名列表",
+"type": "array"
+}
+},
+"required": ["class_name"],
+"type": "object"
+}
+},
+"type": "function"
+}, {
+"function": {
+"description": "将一个脚本挂在到场景节点上",
+"name": "add_script_to_scene",
+"parameters": {
+"properties": {
+"scene_path": {
+"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+"type": "string"
+},
+"script_path": {
+"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+"type": "string"
+}
+},
+"required": ["scene_path", "script_path"],
+"type": "object"
+}
+},
+"type": "function"
+}]
+
+[node name="TitleGenerateOllamaChat" type="Node" parent="."]
+script = ExtResource("16_ollama_chat")
 
 [node name="Tools" parent="." instance=ExtResource("3_2usmi")]

@@ -394,7 +394,7 @@ func get_tools_list() -> Array[Dictionary]:
 	]
 
 
-func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
+func use_tool(tool_call):
 	var result = {}
 	match tool_call.function.name:
 		"get_project_info":

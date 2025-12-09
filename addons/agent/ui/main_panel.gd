@@ -1,8 +1,13 @@
 @tool
 extends Control
 
-@onready var deep_seek_chat_stream: DeepSeekChatStream = %DeepSeekChatStream
-@onready var title_generate_deep_seek_chat: DeepSeekChat = $TitleGenerateDeepSeekChat
+# OpenAI 兼容客户端（支持 OpenAI, DeepSeek 等）
+@onready var openai_chat_stream: OpenAIChatStream = $OpenAIChatStream
+@onready var title_generate_openai_chat: OpenAIChat = $TitleGenerateOpenAIChat
+
+# 新增：Ollama客户端
+@onready var ollama_chat_stream: OllamaChatStream = $OllamaChatStream
+@onready var title_generate_ollama_chat: OllamaChat = $TitleGenerateOllamaChat
 
 @onready var message_list: VBoxContainer = %MessageList
 @onready var new_chat_button: Button = %NewChatButton
@@ -36,12 +41,15 @@ enum MoreButtonIds {
 }
 
 var help_window: Window = null
+var model_manager_window: Window = null
 
 @onready var CONFIG = preload("uid://b4bcww0bmnxt0")
 
 const MESSAGE_ITEM = preload("uid://cjytvn2j0yi3s")
 
 const HELP = preload("uid://b83qwags1ffo8")
+
+const MODEL_MANAGER = preload("res://addons/agent/ui/models/model_manager_window.tscn")
 
 var messages: Array[Dictionary] = []
 
@@ -57,21 +65,43 @@ var current_id: String = ""
 var current_time: String = ""
 var current_history_item: AgentHistoryContainer.HistoryItem = null
 
+# 当前使用的聊天流客户端
+var current_chat_stream = null
+var current_title_chat = null
+
 func _ready() -> void:
 	show_container(chat_container)
 	AlphaAgentPlugin.instance.update_plan_list.connect(on_update_plan_list)
 	# 展示欢迎语
 	welcome_message.show()
 	message_container.hide()
+	
 	# 初始化AI模型相关信息
-	#init_message_list()
-	deep_seek_chat_stream.secret_key = AlphaAgentPlugin.global_setting.secret_key
-	deep_seek_chat_stream.think.connect(on_agent_think)
-	deep_seek_chat_stream.message.connect(on_agent_message)
-	deep_seek_chat_stream.generate_finish.connect(on_agent_finish)
-	deep_seek_chat_stream.response_use_tool.connect(on_response_use_tool)
-	deep_seek_chat_stream.use_tool.connect(on_use_tool)
-	deep_seek_chat_stream.error.connect(on_generate_error)
+	# init_message_list()
+	
+	# 初始化OpenAI客户端
+	openai_chat_stream.think.connect(on_agent_think)
+	openai_chat_stream.message.connect(on_agent_message)
+	openai_chat_stream.use_tool.connect(on_use_tool)
+	openai_chat_stream.generate_finish.connect(on_agent_finish)
+	openai_chat_stream.response_use_tool.connect(on_response_use_tool)
+	openai_chat_stream.error.connect(on_generate_error)
+	
+	# 初始化Ollama客户端
+	ollama_chat_stream.think.connect(on_agent_think)
+	ollama_chat_stream.message.connect(on_agent_message)
+	ollama_chat_stream.use_tool.connect(on_use_tool)
+	ollama_chat_stream.generate_finish.connect(on_agent_finish)
+	ollama_chat_stream.response_use_tool.connect(on_response_use_tool)
+	ollama_chat_stream.error.connect(on_generate_error)
+
+	# 初始化标题生成客户端
+	title_generate_openai_chat.generate_finish.connect(on_title_generate_finish)
+	title_generate_ollama_chat.generate_finish.connect(on_title_generate_finish)
+	
+	# 初始化模型选择
+	_init_model_selector()
+	_switch_to_current_model()
 
 	back_chat_button.pressed.connect(on_click_back_chat_button)
 	new_chat_button.pressed.connect(on_click_new_chat_button)
@@ -81,6 +111,8 @@ func _ready() -> void:
 	input_container.show_setting.connect(on_show_setting)
 	input_container.show_memory.connect(on_show_memory)
 	input_container.stop_chat.connect(on_stop_chat)
+	input_container.model_changed.connect(_on_model_selected)
+	input_container.manage_models_requested.connect(_on_manage_models_pressed)
 
 	# 初始化标题生成DeepSeek相关
 	title_generate_deep_seek_chat.secret_key = AlphaAgentPlugin.global_setting.secret_key
@@ -89,6 +121,98 @@ func _ready() -> void:
 
 	history_container.recovery.connect(on_recovery_history)
 	more_button.get_popup().id_pressed.connect(on_more_button_select)
+
+# 初始化模型选择器
+func _init_model_selector():
+	var model_manager = AlphaAgentPlugin.global_setting.model_manager
+	if model_manager == null:
+		return
+	
+	var current_model = model_manager.get_current_model()
+	var current_model_name = current_model.name if current_model else "Agent"
+	
+	# 更新输入容器中的模型选择器
+	input_container.update_model_selector(
+		model_manager.models, 
+		model_manager.current_model_id,
+		current_model_name
+	)
+
+# 切换到当前模型
+func _switch_to_current_model():
+	var model_manager = AlphaAgentPlugin.global_setting.model_manager
+	if model_manager == null:
+		current_chat_stream = openai_chat_stream
+		current_title_chat = title_generate_openai_chat
+		return
+	
+	var model = model_manager.get_current_model()
+	if model == null:
+		current_chat_stream = openai_chat_stream
+		current_title_chat = title_generate_openai_chat
+		return
+	
+	# 根据模型配置切换客户端
+	if model.provider == "ollama":
+		# 使用 Ollama 客户端
+		current_chat_stream = ollama_chat_stream
+		current_title_chat = title_generate_ollama_chat
+		ollama_chat_stream.api_base = model.api_base
+		ollama_chat_stream.model_name = model.model_name
+		ollama_chat_stream.max_tokens = model.max_tokens
+		
+		title_generate_ollama_chat.api_base = model.api_base
+		title_generate_ollama_chat.model_name = model.model_name
+		title_generate_ollama_chat.max_tokens = model.max_tokens
+	else:
+		# OpenAI 及其他兼容提供商（包括 DeepSeek）
+		current_chat_stream = openai_chat_stream
+		current_title_chat = title_generate_openai_chat
+		openai_chat_stream.api_base = model.api_base
+		openai_chat_stream.secret_key = model.api_key
+		openai_chat_stream.model_name = model.model_name
+		openai_chat_stream.max_tokens = model.max_tokens
+		openai_chat_stream.provider = model.provider
+		
+		title_generate_openai_chat.api_base = model.api_base
+		title_generate_openai_chat.secret_key = model.api_key
+		title_generate_openai_chat.model_name = model.model_name
+		title_generate_openai_chat.provider = model.provider
+
+# 模型选择回调
+func _on_model_selected(model_id: String):
+	var model_manager = AlphaAgentPlugin.global_setting.model_manager
+	if model_manager == null:
+		return
+	
+	model_manager.set_current_model(model_id)
+	_switch_to_current_model()
+	
+	# 更新输入容器的模型选择器显示
+	_init_model_selector()
+
+# 打开模型管理窗口
+func _on_manage_models_pressed():
+	if model_manager_window and is_instance_valid(model_manager_window):
+		# 确保窗口可见并居中
+		model_manager_window.popup_centered(Vector2i(600, 500))
+		return
+	
+	model_manager_window = MODEL_MANAGER.instantiate()
+	get_tree().root.add_child(model_manager_window)
+	model_manager_window.set_model_manager(AlphaAgentPlugin.global_setting.model_manager)
+	model_manager_window.models_changed.connect(_on_models_changed)
+	model_manager_window.popup_centered(Vector2i(600, 500))
+	# 当窗口关闭时，只隐藏不销毁
+	model_manager_window.close_requested.connect(func():
+		model_manager_window.hide()
+	)
+
+# 模型配置变更回调
+func _on_models_changed():
+	_init_model_selector()
+	_switch_to_current_model()
+	
 func reset_message_info():
 	current_message_item = null
 	current_think = ""
@@ -119,17 +243,26 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 	reset_message_info()
 	messages.push_back(user_message)
 
+	# 设置工具和模式
 	match input_container.get_input_mode():
 		"Ask":
-			deep_seek_chat_stream.tools = []
+			current_chat_stream.tools = []
 		"Agent":
-			deep_seek_chat_stream.tools = tools.get_tools_list()
+			current_chat_stream.tools = tools.get_tools_list()
 
-	deep_seek_chat_stream.use_thinking = use_thinking
-	if use_thinking:
-		deep_seek_chat_stream.max_tokens = 64 * 1024
+
+	current_chat_stream.use_thinking = use_thinking
+	
+	# 使用模型配置的max_tokens
+	var model_manager = AlphaAgentPlugin.global_setting.model_manager
+	if model_manager:
+		var model = model_manager.get_current_model()
+		if model:
+			current_chat_stream.max_tokens = model.max_tokens
+		else:
+			current_chat_stream.max_tokens = 8 * 1024
 	else:
-		deep_seek_chat_stream.max_tokens = 8 * 1024
+		current_chat_stream.max_tokens = 8 * 1024
 
 	var user_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
 	user_message_item.show_think = false
@@ -137,16 +270,26 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 	user_message_item.update_user_message_content(message_content)
 
 	current_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
-	current_message_item.show_think = deep_seek_chat_stream.use_thinking
+	# 始终根据用户选择的 use_thinking 来设置 show_think
+	# 如果模型不支持 thinking，后续会在 on_agent_think 中跳过更新
+	current_message_item.show_think = use_thinking
 	message_list.add_child(current_message_item)
 
-	deep_seek_chat_stream.post_message(messages)
+	current_chat_stream.post_message(messages)
 	message_container.scroll_vertical = 100000
 
 func on_agent_think(think: String):
-	current_think += think
-	current_message_item.update_think_content(current_think)
-	message_container.scroll_vertical = 100000
+	# 检查模型是否支持 thinking
+	if think != "":
+		var model_manager = AlphaAgentPlugin.global_setting.model_manager
+		var model = model_manager.get_current_model() if model_manager else null
+		var model_supports_thinking = model.supports_thinking if model else false
+		
+		# 只有模型支持 thinking 时才更新 thinking 内容
+		if model_supports_thinking:
+			current_think += think
+			current_message_item.update_think_content(current_think)
+			message_container.scroll_vertical = 100000
 
 func on_agent_message(msg: String):
 	current_message += msg
@@ -157,7 +300,8 @@ func on_response_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 	current_message_item.response_use_tool(tool_calls)
 	message_container.scroll_vertical = 100000
 
-func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
+func on_use_tool(tool_calls: Array):
+	# 兼容两种ToolCallsInfo类型
 	current_message_item.used_tools(tool_calls)
 
 	# 存储调用工具信息
@@ -165,7 +309,7 @@ func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 		"role": "assistant",
 		"content": null,
 		"reasoning_content": current_think,
-		"tool_calls": tool_calls.map(func (tool: DeepSeekChatStream.ToolCallsInfo): return tool.to_dict())
+		"tool_calls": tool_calls.map(func (tool): return tool.to_dict())
 	})
 
 
@@ -184,10 +328,10 @@ func on_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 
 	await get_tree().create_timer(0.5).timeout
 	current_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
-	current_message_item.show_think = deep_seek_chat_stream.use_thinking
+	current_message_item.show_think = current_chat_stream.use_thinking
 	message_list.add_child(current_message_item)
 
-	deep_seek_chat_stream.post_message(messages)
+	current_chat_stream.post_message(messages)
 
 	message_container.scroll_vertical = 100000
 
@@ -201,6 +345,18 @@ func on_generate_error(error_info: Dictionary):
 	printerr(error_info.data)
 	#current_message_item.update_think_content(current_think, false)
 	current_message_item.update_error_message(error_info.error_msg, error_info.data)
+	
+	# 如果当前消息存在，显示错误信息
+	# if current_message_item:
+	# 	if current_chat_stream.use_thinking and current_think != "":
+	# 		current_message_item.update_think_content(current_think, false)
+		
+	# 	# 显示错误信息
+	# 	var error_msg = "❌ " + error_info.error_msg
+	# 	if error_info.data:
+	# 		error_msg += "\n" + str(error_info.data)
+	# 	current_message_item.update_message_content(error_msg)
+	
 	input_container.disable = false
 	input_container.switch_button_to("Send")
 
@@ -254,7 +410,7 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 		current_history_item = AgentHistoryContainer.HistoryItem.new()
 		current_id = generate_random_string(16)
 		current_time = Time.get_datetime_string_from_system()
-		title_generate_deep_seek_chat.post_message([
+		var title_messages: Array[Dictionary] = [
 			{
 				"role": "system",
 			"content": """\
@@ -265,10 +421,11 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 				"role": "user",
 				"content": JSON.stringify(messages)
 			}
-		])
+		]
+		current_title_chat.post_message(title_messages)
 
 	current_history_item.mode = input_container.get_input_mode()
-	current_history_item.use_thinking = deep_seek_chat_stream.use_thinking
+	current_history_item.use_thinking = current_chat_stream.use_thinking
 	current_history_item.id = current_id
 	current_history_item.message = messages
 	current_history_item.title = current_title
@@ -315,19 +472,29 @@ func on_recovery_history(history_item: AgentHistoryContainer.HistoryItem):
 			continue
 		if message.role != "tool":
 			message_item = MESSAGE_ITEM.instantiate()
-			message_item.show_think = false
+			# 根据历史记录中的 use_thinking 设置 show_think
+			message_item.show_think = history_item.use_thinking if history_item.has("use_thinking") else false
 			message_list.add_child(message_item)
 
 		if message.role == "user":
 			message_item.update_user_message_content(message.content)
 		elif message.role == "assistant":
 			if message.has("tool_calls"):
-				var tool_call_array: Array[DeepSeekChatStream.ToolCallsInfo] = []
+				var tool_call_array: Array = []
 				for tool_call in message.tool_calls:
-					var tool_call_info = DeepSeekChatStream.ToolCallsInfo.new()
+					# 根据当前 chat_stream 类型创建对应的 ToolCallsInfo
+					var tool_call_info
+					if current_chat_stream is OpenAIChatStream:
+						tool_call_info = OpenAIChatStream.ToolCallsInfo.new()
+						tool_call_info.function = OpenAIChatStream.ToolCallsInfoFunc.new()
+					elif current_chat_stream is OllamaChatStream:
+						tool_call_info = OllamaChatStream.ToolCallsInfo.new()
+						tool_call_info.function = OllamaChatStream.ToolCallsInfoFunc.new()
+					else:
+						continue
+					
 					tool_call_info.id = tool_call.get("id")
 					tool_call_info.type = tool_call.get("type")
-					tool_call_info.function = DeepSeekChatStream.ToolCallsInfoFunc.new()
 					tool_call_info.function.arguments = tool_call.get("function").get("arguments")
 					tool_call_info.function.name = tool_call.get("function").get("name")
 					tool_call_array.push_back(tool_call_info)

@@ -48,6 +48,10 @@ func _process(delta: float) -> void:
 		thinking_time_label.text = "%.1f s" % think_time
 
 func update_think_content(text: String, start_timer: bool = true):
+	# 只有在 show_think 为 true 时才更新 thinking 内容
+	if not show_think:
+		return
+	
 	thinking = start_timer
 	think_container.show()
 	think_content.text = text
@@ -85,7 +89,7 @@ func response_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 
 	wait_using_tool_rich_text_label.text = "[agent_thinking freq=5.0 span=5.0] %s [/agent_thinking]" % wait_placeholder_text.pick_random()
 
-func used_tools(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
+func used_tools(tool_calls: Array):
 	wait_using_tool.hide()
 	for tool in tool_calls:
 		var use_tool_item = USE_TOOL_ITEM.instantiate()

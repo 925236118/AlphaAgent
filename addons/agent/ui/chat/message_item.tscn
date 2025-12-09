@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://cjytvn2j0yi3s"]
+[gd_scene load_steps=22 format=3 uid="uid://cjytvn2j0yi3s"]
 
 [ext_resource type="Script" uid="uid://b2ia356h5kd7m" path="res://addons/agent/ui/chat/message_item.gd" id="1_kn78a"]
 [ext_resource type="Script" uid="uid://ddyk6f1xy0q5e" path="res://addons/agent/ui/richtext_effects/agent_thinking_text_effect.gd" id="2_q4qcv"]
@@ -35,16 +35,23 @@ border_color = Color(0.2, 0.2, 0.2, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_njs72"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hv0vw"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ckm2q"]
 content_margin_left = 12.0
 content_margin_top = 6.0
-content_margin_right = 12.0
 content_margin_bottom = 6.0
 bg_color = Color(0.14901961, 0.1764706, 0.22745098, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rqoyl"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ckm2q"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_r6uvy"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4ud0n"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kn78a"]
 bg_color = Color(0.1254902, 0.1254902, 0.1254902, 1)
@@ -108,6 +115,7 @@ text = "0.0 s"
 unique_name_in_owner = true
 layout_mode = 2
 texture = ExtResource("2_rqoyl")
+flip_v = true
 
 [node name="ExpandButton" type="Button" parent="VBoxContainer/ContentContainer/ThinkContainer/ThinkTimePanel"]
 unique_name_in_owner = true
@@ -115,6 +123,7 @@ layout_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_nnls0")
 toggle_mode = true
+button_pressed = true
 flat = true
 
 [node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/ContentContainer/ThinkContainer"]
@@ -123,7 +132,6 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_q4qcv")
 
 [node name="ThinkContent" type="RichTextLabel" parent="VBoxContainer/ContentContainer/ThinkContainer/PanelContainer"]
 unique_name_in_owner = true
-visible = false
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 theme_override_colors/default_color = Color(0.46666667, 0.46666667, 0.46666667, 1)
@@ -157,22 +165,26 @@ selection_enabled = true
 [node name="UserMessageContainer" type="PanelContainer" parent="VBoxContainer/ContentContainer"]
 unique_name_in_owner = true
 visible = false
+clip_contents = true
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_hv0vw")
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_ckm2q")
 
 [node name="UserMessageContent" type="RichTextLabel" parent="VBoxContainer/ContentContainer/UserMessageContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 focus_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxEmpty_fsx2h")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_u11mo")
-theme_override_styles/background = SubResource("StyleBoxEmpty_dfcb6")
-theme_override_styles/fill = SubResource("StyleBoxEmpty_njs72")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rqoyl")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ckm2q")
+theme_override_styles/background = SubResource("StyleBoxEmpty_r6uvy")
+theme_override_styles/fill = SubResource("StyleBoxEmpty_4ud0n")
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
+autowrap_mode = 1
 selection_enabled = true
+text_direction = 3
 
 [node name="WaitUsingTool" type="PanelContainer" parent="VBoxContainer"]
 unique_name_in_owner = true

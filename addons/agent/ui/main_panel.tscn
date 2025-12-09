@@ -4,11 +4,13 @@
 [ext_resource type="Texture2D" uid="uid://dd5t0pwniqnr1" path="res://addons/agent/icons/history.svg" id="2_6rfr6"]
 [ext_resource type="Texture2D" uid="uid://d3tqc8rlqan2t" path="res://addons/agent/icons/back.svg" id="2_aabuu"]
 [ext_resource type="PackedScene" uid="uid://cq2jo5hlpns6j" path="res://addons/agent/tools/tools.tscn" id="3_2usmi"]
-[ext_resource type="Texture2D" uid="uid://ctaxjkunancs7" path="res://addons/agent/icons/add.svg" id="3_njbgt"]
+[ext_resource type="Texture2D" uid="uid://knvpu0jr7hwd" path="res://addons/agent/icons/newicon/Icon_add.svg" id="3_wlmmt"]
 [ext_resource type="PackedScene" uid="uid://dqkrjn0mak6lh" path="res://addons/agent/ui/chat/input_container.tscn" id="4_2dutf"]
 [ext_resource type="Texture2D" uid="uid://bmq6b8c3ud8ig" path="res://addons/agent/icons/menu.svg" id="4_cpi8b"]
 [ext_resource type="PackedScene" uid="uid://d2qy4nnjypt6o" path="res://addons/agent/ui/history/history_container.tscn" id="5_elhta"]
 [ext_resource type="Texture2D" uid="uid://bfeehv7cn64ie" path="res://addons/agent/icons/newicon/icon_monochrome_light.svg" id="7_aabuu"]
+[ext_resource type="Texture2D" uid="uid://bj7vdrhq42fmp" path="res://addons/agent/icons/newicon/icon_setting1.svg" id="6_cq37x"]
+[ext_resource type="Texture2D" uid="uid://7cvkbex7yjot" path="res://addons/agent/icons/newicon/Icon_help.svg" id="6_wlmmt"]
 [ext_resource type="PackedScene" uid="uid://fycl6xlfw8r5" path="res://addons/agent/ui/plan/plan_list.tscn" id="8_1ot7o"]
 [ext_resource type="PackedScene" uid="uid://bxe6hto0vk8fu" path="res://addons/agent/ui/setting/setting.tscn" id="8_5t7oo"]
 [ext_resource type="PackedScene" uid="uid://b66g7g3ydkkeb" path="res://addons/agent/ui/memory/memory_container.tscn" id="10_n876e"]
@@ -143,8 +145,23 @@ alignment = 0
 icon_alignment = 1
 expand_icon = true
 
+[node name="NewChatButton" type="Button" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar"]
+unique_name_in_owner = true
+self_modulate = Color(0.76862746, 0.76862746, 0.76862746, 1)
+layout_mode = 2
+size_flags_horizontal = 8
+tooltip_text = "创建新对话"
+mouse_default_cursor_shape = 2
+theme_override_font_sizes/font_size = 10
+theme_override_styles/focus = SubResource("StyleBoxEmpty_n876e")
+text = "      "
+icon = ExtResource("3_wlmmt")
+flat = true
+icon_alignment = 1
+
 [node name="HistoryButton" type="Button" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "查看历史记录"
@@ -157,22 +174,9 @@ flat = true
 icon_alignment = 1
 expand_icon = true
 
-[node name="NewChatButton" type="Button" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 8
-tooltip_text = "创建新对话"
-mouse_default_cursor_shape = 2
-theme_override_font_sizes/font_size = 10
-theme_override_styles/focus = SubResource("StyleBoxEmpty_n876e")
-text = "      "
-icon = ExtResource("3_njbgt")
-flat = true
-icon_alignment = 1
-expand_icon = true
-
 [node name="MoreButton" type="MenuButton" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "创建新对话"
@@ -190,6 +194,21 @@ popup/item_1/text = "帮助"
 popup/item_1/id = 1
 popup/item_2/text = "设置"
 popup/item_2/id = 2
+
+[node name="HelpButton" type="Button" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar"]
+unique_name_in_owner = true
+self_modulate = Color(0.76862746, 0.76862746, 0.76862746, 1)
+layout_mode = 2
+icon = ExtResource("6_wlmmt")
+flat = true
+icon_alignment = 1
+
+[node name="SettingButton" type="Button" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar"]
+unique_name_in_owner = true
+self_modulate = Color(0.76862746, 0.76862746, 0.76862746, 1)
+layout_mode = 2
+icon = ExtResource("6_cq37x")
+flat = true
 
 [node name="Containers" type="Control" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer"]
 unique_name_in_owner = true

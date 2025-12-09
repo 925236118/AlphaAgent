@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dqkrjn0mak6lh"]
+[gd_scene load_steps=15 format=3 uid="uid://dqkrjn0mak6lh"]
 
 [ext_resource type="Script" uid="uid://c0gayflg4ovas" path="res://addons/agent/ui/chat/input_container.gd" id="1_xi1dg"]
 
@@ -17,9 +17,49 @@ bg_color = Color(0.04303915, 0.043039158, 0.043039113, 0.38039216)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_model_button"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_coixe"]
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_c8smv"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gy7k7"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.14901961, 0.45882353, 0.8509804, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c3kby"]
+content_margin_left = 2.0
+content_margin_top = 8.0
+content_margin_right = 2.0
+content_margin_bottom = 8.0
+bg_color = Color(0.24705882, 0.61960787, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5t7oo"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k8r8m"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.87058824, 0.3019608, 0.11372549, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pm5wc"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.92156863, 0.4392157, 0.27058825, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="InputContainer" type="MarginContainer"]
 anchors_preset = 15
@@ -66,22 +106,25 @@ caret_multiple = false
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
+size_flags_vertical = 4
 alignment = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
 
 [node name="InputModeSelect" type="OptionButton" parent="VBoxContainer/HBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_vertical = 4
 mouse_default_cursor_shape = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_xi1dg")
 flat = true
 selected = 0
 item_count = 2
 popup/item_0/text = "Agent"
-popup/item_0/id = 0
+popup/item_0/id = 1
 popup/item_1/text = "Ask"
 popup/item_1/id = 1
 
@@ -104,48 +147,55 @@ button_pressed = true
 text = "思考"
 flat = true
 
-[node name="UsageLabel" type="Label" parent="VBoxContainer/HBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="UsageLabel" type="Label" parent="VBoxContainer/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 0
 
-[node name="ClearButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+[node name="ClearButton" type="Button" parent="VBoxContainer/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
+size_flags_vertical = 4
 tooltip_text = "清空输入内容"
 mouse_default_cursor_shape = 2
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_coixe")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_c8smv")
 text = "清空"
 flat = true
-icon_alignment = 1
-expand_icon = true
 
-[node name="SendButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+[node name="SendButton" type="Button" parent="VBoxContainer/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 8
+size_flags_vertical = 4
 tooltip_text = "发送"
 mouse_default_cursor_shape = 2
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_gy7k7")
+theme_override_styles/hover = SubResource("StyleBoxFlat_c3kby")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_5t7oo")
 text = "发送"
-flat = true
 icon_alignment = 1
 expand_icon = true
 
-[node name="StopButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+[node name="StopButton" type="Button" parent="VBoxContainer/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
-size_flags_horizontal = 8
+size_flags_horizontal = 4
+size_flags_vertical = 4
 tooltip_text = "发送"
 mouse_default_cursor_shape = 2
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_k8r8m")
+theme_override_styles/hover = SubResource("StyleBoxFlat_pm5wc")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_5t7oo")
 text = "停止"
-flat = true
 icon_alignment = 1
 expand_icon = true
 

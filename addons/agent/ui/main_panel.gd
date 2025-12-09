@@ -23,6 +23,9 @@ extends Control
 
 @onready var chat_container: VBoxContainer = %ChatContainer
 @onready var history_container: AgentHistoryContainer = %HistoryContainer
+@onready var setting_button: Button = %SettingButton
+@onready var help_button: Button = %HelpButton
+
 @onready var setting_container: ScrollContainer = %SettingContainer
 @onready var memory_container: VBoxContainer = %MemoryContainer
 @onready var plan_list: AgentPlanList = %PlanList
@@ -106,6 +109,8 @@ func _ready() -> void:
 	back_chat_button.pressed.connect(on_click_back_chat_button)
 	new_chat_button.pressed.connect(on_click_new_chat_button)
 	history_button.pressed.connect(on_click_history_button)
+	setting_button.pressed.connect(on_show_setting) 
+	help_button.pressed.connect(show_help_window)
 	input_container.send_message.connect(on_input_container_send_message)
 	input_container.show_help.connect(show_help_window)
 	input_container.show_setting.connect(on_show_setting)

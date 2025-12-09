@@ -1,11 +1,9 @@
-[gd_scene load_steps=13 format=3 uid="uid://dqkrjn0mak6lh"]
+[gd_scene load_steps=11 format=3 uid="uid://dqkrjn0mak6lh"]
 
 [ext_resource type="Script" uid="uid://c0gayflg4ovas" path="res://addons/agent/ui/chat/input_container.gd" id="1_xi1dg"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xi1dg"]
 bg_color = Color(0.04303915, 0.043039158, 0.043039113, 0.38039216)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_model_button"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1ot7o"]
 
@@ -16,6 +14,8 @@ bg_color = Color(0.04303915, 0.043039158, 0.043039113, 0.38039216)
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_elhta"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xi1dg"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_model_button"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_c8smv"]
 
@@ -94,7 +94,6 @@ theme_override_constants/h_separation = 2
 theme_override_font_sizes/font_size = 13
 theme_override_styles/focus = SubResource("StyleBoxEmpty_model_button")
 flat = true
-item_count = 0
 
 [node name="UseThinking" type="CheckButton" parent="VBoxContainer/HBoxContainer/HBoxContainer"]
 unique_name_in_owner = true

@@ -80,7 +80,7 @@ func _on_expand_button_toggled(toggled_on: bool) -> void:
 func set_expand_icon_flip(val: bool):
 	expand_icon.flip_v = val
 
-func response_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
+func response_use_tool():
 	wait_using_tool.show()
 
 	var wait_placeholder_text = [

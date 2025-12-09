@@ -76,6 +76,10 @@ func _ready() -> void:
 	welcome_message.show()
 	message_container.hide()
 	
+	# 初始化模型选择
+	_init_model_selector()
+	_switch_to_current_model()
+
 	# 初始化AI模型相关信息
 	# init_message_list()
 	
@@ -99,10 +103,6 @@ func _ready() -> void:
 	title_generate_openai_chat.generate_finish.connect(on_title_generate_finish)
 	title_generate_ollama_chat.generate_finish.connect(on_title_generate_finish)
 	
-	# 初始化模型选择
-	_init_model_selector()
-	_switch_to_current_model()
-
 	back_chat_button.pressed.connect(on_click_back_chat_button)
 	new_chat_button.pressed.connect(on_click_new_chat_button)
 	history_button.pressed.connect(on_click_history_button)
@@ -114,16 +114,12 @@ func _ready() -> void:
 	input_container.model_changed.connect(_on_model_selected)
 	input_container.manage_models_requested.connect(_on_manage_models_pressed)
 
-	# 初始化标题生成DeepSeek相关
-	title_generate_deep_seek_chat.secret_key = AlphaAgentPlugin.global_setting.secret_key
-	title_generate_deep_seek_chat.use_thinking = false
-	title_generate_deep_seek_chat.generate_finish.connect(on_title_generate_finish)
-
 	history_container.recovery.connect(on_recovery_history)
 	more_button.get_popup().id_pressed.connect(on_more_button_select)
 
 # 初始化模型选择器
 func _init_model_selector():
+	await get_tree().process_frame
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if model_manager == null:
 		return
@@ -296,8 +292,8 @@ func on_agent_message(msg: String):
 	current_message_item.update_message_content(current_message)
 	message_container.scroll_vertical = 100000
 
-func on_response_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
-	current_message_item.response_use_tool(tool_calls)
+func on_response_use_tool():
+	current_message_item.response_use_tool()
 	message_container.scroll_vertical = 100000
 
 func on_use_tool(tool_calls: Array):
@@ -549,7 +545,7 @@ func on_click_back_chat_button():
 	show_container(chat_container)
 
 func on_stop_chat():
-	deep_seek_chat_stream.close()
+	current_chat_stream.close()
 	input_container.disable = false
 	input_container.switch_button_to("Send")
 	current_message_item.update_stop_message()

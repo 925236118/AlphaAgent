@@ -1,17 +1,17 @@
 @tool
 extends Node
 
-@export_tool_button("测试") var test_action = test
+#@export_tool_button("测试") var test_action = test
 
-func test():
-	var tool = DeepSeekChatStream.ToolCallsInfo.new()
-	tool.function.name = "update_scene_node_property"
-	tool.function.arguments = JSON.stringify({"scene_path":"res://test/node2d.tscn", "node_path":"Node2D/AT", "property_name":"position", "property_value":"Vector2(50, 50)"})
-	#var image = load("res://icon.svg")
-	print(await use_tool(tool))
-	#print(ProjectSettings.get_setting("input"))
-	#var process_id = OS.create_instance(["--headless", "--script", "res://game.gd"])
-	pass
+#func test():
+	#var tool = DeepSeekChatStream.ToolCallsInfo.new()
+	#tool.function.name = "update_scene_node_property"
+	#tool.function.arguments = JSON.stringify({"scene_path":"res://test/node2d.tscn", "node_path":"Node2D/AT", "property_name":"position", "property_value":"Vector2(50, 50)"})
+	##var image = load("res://icon.svg")
+	#print(await use_tool(tool))
+	##print(ProjectSettings.get_setting("input"))
+	##var process_id = OS.create_instance(["--headless", "--script", "res://game.gd"])
+	#pass
 
 
 

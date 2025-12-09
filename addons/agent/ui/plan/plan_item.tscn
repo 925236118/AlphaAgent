@@ -1,4 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://58ryyxbn0dby"]
+[gd_scene load_steps=4 format=3 uid="uid://58ryyxbn0dby"]
+
+[ext_resource type="Script" uid="uid://7gpiy6hp6fo7" path="res://addons/agent/ui/plan/plan_item.gd" id="1_b2m8q"]
 
 [sub_resource type="Gradient" id="Gradient_n876e"]
 offsets = PackedFloat32Array(0.8349328, 0.8560461)
@@ -13,6 +15,7 @@ fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(0.6495727, 0.3846154)
 
 [node name="PlanItem" type="HBoxContainer"]
+script = ExtResource("1_b2m8q")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 2

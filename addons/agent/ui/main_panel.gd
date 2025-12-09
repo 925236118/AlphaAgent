@@ -7,7 +7,7 @@ extends Control
 @onready var message_list: VBoxContainer = %MessageList
 @onready var new_chat_button: Button = %NewChatButton
 @onready var welcome_message: Control = %WelcomeMessage
-@onready var input_container: MarginContainer = %InputContainer
+@onready var input_container: AgentInputContainer = %InputContainer
 @onready var chat_title: Label = %ChatTitle
 @onready var history_button: Button = %HistoryButton
 @onready var more_button: MenuButton = %MoreButton
@@ -20,6 +20,7 @@ extends Control
 @onready var history_container: AgentHistoryContainer = %HistoryContainer
 @onready var setting_container: ScrollContainer = %SettingContainer
 @onready var memory_container: VBoxContainer = %MemoryContainer
+@onready var plan_list: AgentPlanList = %PlanList
 
 @onready var container_list = [
 	chat_container,
@@ -96,7 +97,7 @@ func reset_message_info():
 # 初始化消息列表，添加系统提示词
 func init_message_list():
 	CONFIG = load("uid://b4bcww0bmnxt0")
-	
+
 	messages = [
 		{
 			"role": "system",
@@ -388,6 +389,5 @@ func on_stop_chat():
 	reset_message_info()
 	pass
 
-func on_update_plan_list(plan_list: Array[AlphaAgentPlugin.PlanItem]):
-	
-	pass
+func on_update_plan_list(plan_array: Array[AlphaAgentPlugin.PlanItem]):
+	plan_list.update_list(plan_array)

@@ -9,7 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://dqkrjn0mak6lh" path="res://addons/agent/ui/chat/input_container.tscn" id="4_2dutf"]
 [ext_resource type="Texture2D" uid="uid://bmq6b8c3ud8ig" path="res://addons/agent/icons/menu.svg" id="4_cpi8b"]
 [ext_resource type="PackedScene" uid="uid://d2qy4nnjypt6o" path="res://addons/agent/ui/history/history_container.tscn" id="5_elhta"]
-[ext_resource type="Script" uid="uid://c857yifca6rog" path="res://addons/agent/scripts/deepseek_chat.gd" id="7_5v6i3"]
+[ext_resource type="Script" path="res://addons/agent/scripts/deepseek_chat.gd" id="7_5v6i3"]
 [ext_resource type="Texture2D" uid="uid://bfeehv7cn64ie" path="res://addons/agent/icons/newicon/icon_monochrome_light.svg" id="7_aabuu"]
 [ext_resource type="PackedScene" uid="uid://fycl6xlfw8r5" path="res://addons/agent/ui/plan/plan_list.tscn" id="8_1ot7o"]
 [ext_resource type="PackedScene" uid="uid://bxe6hto0vk8fu" path="res://addons/agent/ui/setting/setting.tscn" id="8_5t7oo"]
@@ -320,10 +320,9 @@ uri = "https://godotvillage.github.io/"
 [node name="DeepSeekChatStream" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("1_fhbwo")
-secret_key = "sk-2bbba30b7abd4760b4bb90e68ff607c8"
+secret_key = "sk-0f37750620874f70baae9b74ba674325"
 temperature = 0.0
 max_tokens = 8192
-print_log = true
 tools = [{
 "function": {
 "description": "获取当前的Godot引擎信息。包含Godot版本，CPU型号、CPU 架构、内存信息、显卡信息、设备型号、当前系统时间等，还有当前项目的一些信息，例如项目名称、项目版本、项目描述、项目运行主场景、游戏运行窗口信息、全局的物理信息、全局的渲染设置、主题信息等。",
@@ -462,7 +461,7 @@ metadata/_custom_type_script = "uid://dlx7bujvsuk11"
 
 [node name="TitleGenerateDeepSeekChat" type="Node" parent="."]
 script = ExtResource("7_5v6i3")
-secret_key = "sk-2bbba30b7abd4760b4bb90e68ff607c8"
+secret_key = "sk-0f37750620874f70baae9b74ba674325"
 max_tokens = 4096
 
 [node name="Tools" parent="." instance=ExtResource("3_2usmi")]

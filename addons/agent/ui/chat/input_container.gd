@@ -1,4 +1,5 @@
 @tool
+class_name AgentInputContainer
 extends MarginContainer
 
 @onready var user_input: TextEdit = %UserInput
@@ -212,6 +213,9 @@ func on_click_send_message():
 		handle_command(command, args)
 		return
 
+	if AlphaAgentPlugin.global_setting.auto_clear:
+		init()
+
 	# 正常消息处理
 	self.disable = true
 	switch_button_to("Stop")
@@ -223,8 +227,6 @@ func on_click_send_message():
 		"content": "用户输入的内容：" + message_text + "\n引用的内容信息：" + info_list_string
 	}, message_text, use_thinking.button_pressed)
 
-	if AlphaAgentPlugin.global_setting.auto_clear:
-		init()
 
 ## 处理命令
 func handle_command(command: String, args: PackedStringArray):

@@ -51,7 +51,7 @@ func get_tools_list() -> Array[Dictionary]:
 				}
 			}
 		},
-		
+
 #endregion
 #region 查询
 		# get_project_info
@@ -792,23 +792,46 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 		"update_plan_list":
 			var json = JSON.parse_string(tool_call.function.arguments)
 			if not json == null and json.has("tasks"):
-				print(755)
 				var tasks = json.get("tasks")
 				var list: Array[AlphaAgentPlugin.PlanItem] = []
-				for t: Dictionary in tasks:
-					var task_name = t.get("name", "")
-					var task_state = t.get("state", "plan")
+				var active_index = -1
+				var all_finished = true
+				var all_plan = true
+				for index in tasks.size():
+					var task: Dictionary = tasks[index]
+					var task_name = task.get("name", "")
+					var task_state = task.get("state", "plan")
 					var plan_state: AlphaAgentPlugin.PlanState
 					match task_state:
 						"plan":
 							plan_state = AlphaAgentPlugin.PlanState.Plan
+							all_finished = false
 						"active":
 							plan_state = AlphaAgentPlugin.PlanState.Active
+							all_finished = false
+							active_index = index
+							all_plan = false
 						"finish":
 							plan_state = AlphaAgentPlugin.PlanState.Finish
+							all_plan = false
 					list.push_back(AlphaAgentPlugin.PlanItem.new(task_name, plan_state))
 				AlphaAgentPlugin.instance.update_plan_list.emit(list)
-				
+				if active_index == 0:
+					result = {
+						"success": "更新任务列表成功。开始执行当前任务。"
+					}
+				elif all_finished:
+					result = {
+						"success": "更新任务列表成功。所有任务均已完成，回复用户。"
+					}
+				elif all_plan:
+					result = {
+						"success": "更新任务列表成功。开始执行第一项任务。"
+					}
+				else:
+					result = {
+						"success": "更新任务列表成功。停止输出，等待用户确认。"
+					}
 		_:
 			result = {
 				"error": "错误的function.name"

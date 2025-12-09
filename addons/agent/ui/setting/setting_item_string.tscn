@@ -6,6 +6,7 @@
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_knhem"]
 
 [node name="SettingItemString" instance=ExtResource("1_2uwtn")]
+vertical = true
 script = ExtResource("2_knhem")
 
 [node name="LineEdit" type="LineEdit" parent="." index="1"]

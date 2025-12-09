@@ -1,7 +1,7 @@
 @tool
 @abstract
 class_name AgentSettingItemBase
-extends HBoxContainer
+extends BoxContainer
 
 signal value_changed
 

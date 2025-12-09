@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://rxdnm1d45nwm"]
 
-[node name="SettingItem" type="HBoxContainer"]
+[node name="SettingItem" type="BoxContainer"]
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 23.0
@@ -10,3 +10,4 @@ grow_horizontal = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
+size_flags_horizontal = 3

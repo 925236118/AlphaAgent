@@ -129,7 +129,8 @@ layout_mode = 0
 offset_right = 8.0
 offset_bottom = 8.0
 size_flags_horizontal = 8
-tooltip_text = "查看历史记录"
+tooltip_text = "回到对话"
+mouse_default_cursor_shape = 2
 theme_override_font_sizes/font_size = 10
 theme_override_styles/focus = SubResource("StyleBoxEmpty_aabuu")
 text = "      "
@@ -320,7 +321,7 @@ uri = "https://godotvillage.github.io/"
 [node name="DeepSeekChatStream" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("1_fhbwo")
-secret_key = "sk-0f37750620874f70baae9b74ba674325"
+secret_key = "sk-63105427768d4e2e9eceff921502cf90"
 temperature = 0.0
 max_tokens = 8192
 tools = [{
@@ -461,7 +462,7 @@ metadata/_custom_type_script = "uid://dlx7bujvsuk11"
 
 [node name="TitleGenerateDeepSeekChat" type="Node" parent="."]
 script = ExtResource("7_5v6i3")
-secret_key = "sk-0f37750620874f70baae9b74ba674325"
+secret_key = "sk-63105427768d4e2e9eceff921502cf90"
 max_tokens = 4096
 
 [node name="Tools" parent="." instance=ExtResource("3_2usmi")]

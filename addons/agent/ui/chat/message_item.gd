@@ -7,9 +7,10 @@ extends MarginContainer
 @onready var think_content: RichTextLabel = %ThinkContent
 @onready var message_container: VBoxContainer = %MessageContainer
 @onready var message_content: RichTextLabel = %MessageContent
-@onready var user_message_container: VBoxContainer = %UserMessageContainer
+@onready var user_message_container: PanelContainer = %UserMessageContainer
 @onready var user_message_content: RichTextLabel = %UserMessageContent
 @onready var error_message_container: VBoxContainer = %ErrorMessageContainer
+@onready var expand_icon: TextureRect = %ExpandIcon
 
 @onready var thinking_time_label: Label = %ThinkingTimeLabel
 @onready var thinking_label: Label = %ThinkingLabel
@@ -36,6 +37,11 @@ func _ready() -> void:
 	think_time = 0.0
 	message_content.meta_clicked.connect(on_click_rich_text_url)
 
+	if AlphaAgentPlugin.global_setting.auto_expand_think:
+		expand_button.button_pressed = true
+		set_expand_icon_flip(true)
+		think_content.visible = true
+
 func _process(delta: float) -> void:
 	if thinking:
 		think_time += delta
@@ -47,10 +53,6 @@ func update_think_content(text: String, start_timer: bool = true):
 	think_content.text = text
 	if not thinking:
 		thinking_label.text = "思考了"
-	if AlphaAgentPlugin.global_setting.auto_expand_think:
-		expand_button.button_pressed = true
-		expand_button.text = " ▲ "
-		think_content.visible = true
 
 func update_message_content(text: String):
 	thinking = false
@@ -67,8 +69,12 @@ func update_user_message_content(text: String):
 	user_message_content.text = text
 
 func _on_expand_button_toggled(toggled_on: bool) -> void:
-	expand_button.text = " ▲ " if toggled_on else " ▼ "
+	#expand_button.text = " ▲ " if toggled_on else " ▼ "
+	set_expand_icon_flip(toggled_on)
 	think_content.visible = toggled_on
+
+func set_expand_icon_flip(val: bool):
+	expand_icon.flip_v = val
 
 func response_use_tool(tool_calls: Array[DeepSeekChatStream.ToolCallsInfo]):
 	wait_using_tool.show()
@@ -112,7 +118,7 @@ func update_error_message(error_content: String, detail: String):
 	think_content.hide()
 	message_container.hide()
 	user_message_container.hide()
-	
+
 	error_message_container.show()
 	error_message_label.text = "[color=red]错误：" + error_content + "[/color]\n" + detail
 

@@ -5,8 +5,8 @@ extends Node
 
 func test():
 	var tool = DeepSeekChatStream.ToolCallsInfo.new()
-	tool.function.name = "update_script_file_content"
-	tool.function.arguments = JSON.stringify({"script_path": "res://game.gd", "content": "# test_text", "line": 0, "delete_line_count": 0})
+	tool.function.name = "update_scene_node_property"
+	tool.function.arguments = JSON.stringify({"scene_path":"res://test/node2d.tscn", "node_path":"Node2D/AT", "property_name":"position", "property_value":"Vector2(50, 50)"})
 	#var image = load("res://icon.svg")
 	print(await use_tool(tool))
 	#print(ProjectSettings.get_setting("input"))
@@ -333,6 +333,36 @@ func get_tools_list() -> Array[Dictionary]:
 						}
 					},
 					"required": ["script_path", "content", "line", "delete_line_count"]
+				}
+			}
+		},
+		# update_scene_node_property
+		{
+			"type": "function",
+			"function": {
+				"name": "update_scene_node_property",
+				"description": "调用编辑器接口，设置某个场景内的某个节点的某个属性为某个值，可设置的值的类型参照Godot官方文档中Variant.Type枚举值对应类型。",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"scene_path": {
+							"type": "string",
+							"description": "需要打开的场景路径，必须是以res://开头的路径。",
+						},
+						"node_path": {
+							"type": "string",
+							"description": "想修改的节点在场景树中的路径。从场景的根节点开始，用“/”分隔。",
+						},
+						"property_name": {
+							"type": "string",
+							"description": "想设置的属性的名称。",
+						},
+						"property_value": {
+							"type": "string",
+							"description": "想设置的属性的值，该字符串需要能用str_to_var方法还原对应Variant类型值",
+						}
+					},
+					"required": ["scene_path", "node_path", "property_name", "property_value"]
 				}
 			}
 		},
@@ -788,6 +818,18 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 					"file_content": editor.text,
 					"success": "更新成功"
 				}
+		"update_scene_node_property":
+			var json = JSON.parse_string(tool_call.function.arguments)
+
+			if not json == null and json.has("scene_path") and json.has("node_path") and json.has("property_name") and json.has("property_value"):
+				if update_scene_node_property(json.scene_path, json.node_path, json.property_name, json.property_value):
+					result = {
+					"success": "属性更新成功"
+					}
+				else:
+					result = {
+					"error":"操作失败"
+					}
 
 		"update_plan_list":
 			var json = JSON.parse_string(tool_call.function.arguments)
@@ -841,3 +883,60 @@ func use_tool(tool_call: DeepSeekChatStream.ToolCallsInfo):
 			"error": "调用失败。请检查参数是否正确。"
 		}
 	return JSON.stringify(result)
+
+#设置某个场景中的某个节点的某个属性为某个值
+func update_scene_node_property(scene_path: String, node_path: String, property_name: String, property_value: String) -> bool:
+	if not ResourceLoader.exists(scene_path):
+		return false
+	
+	var opened_scene = ResourceLoader.load(scene_path, "PackedScene") as PackedScene
+	if not opened_scene:
+		printerr("错误：无法打开场景 '", scene_path, "'。请检查路径是否正确。")
+		return false# 如果场景打开失败，则终止脚本
+	else:
+		EditorInterface.open_scene_from_path(scene_path)
+	
+	var instance = opened_scene.instantiate()
+	if instance is Node2D:
+		print("这是一个2D场景")
+		EditorInterface.set_main_screen_editor("2D")
+	elif instance is Node3D:
+		print("这是一个3D场景")
+		EditorInterface.set_main_screen_editor("3D")
+	else:
+		print("该场景非2D也非3D")
+		EditorInterface.set_main_screen_editor("2D")
+	instance.call_deferred("queue_free")
+	
+	# 2. 获取编辑器界面和场景树
+	var scene_root = EditorInterface.get_edited_scene_root()
+	if not scene_root:
+		printerr("错误：场景打开后，无法获取其根节点。")
+		return false
+
+	# 3. 根据节点路径查找并选中目标节点
+	var target_node = scene_root.get_node(node_path)
+	if not target_node:
+		printerr("错误：在场景 '", scene_root.name, "' 中找不到路径为 '", node_path, "' 的节点。请检查节点路径是否正确。")
+		return false
+
+	print("成功找到节点: ", target_node.get_path())
+	
+	# 选中节点，这会自动在检查器中显示它
+	EditorInterface.get_selection().clear()
+	EditorInterface.get_selection().add_node(target_node)
+	
+	# 4. 设置属性
+	print("正在设置属性 '", property_name, "' 的值为 '", property_value, "'...")
+	
+	# 检查属性是否存在
+	if not property_name in target_node:
+		printerr("错误：节点 '", target_node.name, "' 没有名为 '", property_name, "' 的属性。")
+		return false
+	
+	target_node.set(property_name, str_to_var(property_value))
+	
+	# 通知编辑器属性已更改，以便更新UI（如检查器）
+	EditorInterface.edit_node(target_node)
+	
+	return true

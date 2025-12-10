@@ -493,11 +493,11 @@ func on_recovery_history(history_item: AgentHistoryContainer.HistoryItem):
 					# 根据当前 chat_stream 类型创建对应的 ToolCallsInfo
 					var tool_call_info
 					if current_chat_stream is OpenAIChatStream:
-						tool_call_info = OpenAIChatStream.ToolCallsInfo.new()
-						tool_call_info.function = OpenAIChatStream.ToolCallsInfoFunc.new()
+						tool_call_info = AgentModelUtils.ToolCallsInfo.new()
+						tool_call_info.function = AgentModelUtils.ToolCallsInfoFunc.new()
 					elif current_chat_stream is OllamaChatStream:
-						tool_call_info = OllamaChatStream.ToolCallsInfo.new()
-						tool_call_info.function = OllamaChatStream.ToolCallsInfoFunc.new()
+						tool_call_info = AgentModelUtils.ToolCallsInfo.new()
+						tool_call_info.function = AgentModelUtils.ToolCallsInfoFunc.new()
 					else:
 						continue
 

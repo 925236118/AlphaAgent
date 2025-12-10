@@ -15,7 +15,7 @@
 [ext_resource type="ButtonGroup" uid="uid://4cfowu05scrd" path="res://addons/agent/ui/resource/setting_tab_group.tres" id="8_i5act"]
 [ext_resource type="PackedScene" uid="uid://b66g7g3ydkkeb" path="res://addons/agent/ui/memory/memory_container.tscn" id="10_n876e"]
 [ext_resource type="Script" uid="uid://ceok2hodt360c" path="res://addons/agent/scripts/openai_chat_stream.gd" id="13_wlmmt"]
-[ext_resource type="Script" path="res://addons/agent/scripts/openai_chat.gd" id="14_q7ex6"]
+[ext_resource type="Script" uid="uid://dwv814ayqkkbf" path="res://addons/agent/scripts/openai_chat.gd" id="14_q7ex6"]
 [ext_resource type="Script" uid="uid://cyh2gqd0jea8s" path="res://addons/agent/scripts/ollama_chat_stream.gd" id="15_cd0et"]
 [ext_resource type="Script" uid="uid://drxphw7kybfrr" path="res://addons/agent/scripts/ollama_chat.gd" id="16_i5act"]
 
@@ -56,6 +56,8 @@ corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
 [sub_resource type="LabelSettings" id="LabelSettings_6rfr6"]
+line_spacing = 6.0
+font_size = 24
 font_color = Color(0.7666196, 0.76661956, 0.76661956, 0.5254902)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5v6i3"]
@@ -278,7 +280,7 @@ alignment = 1
 
 [node name="AlphaLogo" type="TextureRect" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/WelcomeMessage/PanelContainer/VBoxContainer"]
 self_modulate = Color(0.21568628, 0.34117648, 0.5137255, 1)
-custom_minimum_size = Vector2(0, 80)
+custom_minimum_size = Vector2(0, 120)
 layout_mode = 2
 texture = ExtResource("7_aabuu")
 expand_mode = 1
@@ -286,6 +288,7 @@ stretch_mode = 5
 
 [node name="Description" type="Label" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/WelcomeMessage/PanelContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 10
 text = "帮助构建游戏项目
 帮助学习Godot插件
 帮助梳理已有功能"
@@ -372,7 +375,7 @@ uri = "https://godotvillage.github.io/"
 unique_name_in_owner = true
 script = ExtResource("13_wlmmt")
 api_base = "https://api.deepseek.com"
-secret_key = "sk-63105427768d4e2e9eceff921502cf90"
+secret_key = "sk-078ec588fe384842a339e5db806120dc"
 model_name = "deepseek-chat"
 max_tokens = 8192
 
@@ -380,7 +383,7 @@ max_tokens = 8192
 unique_name_in_owner = true
 script = ExtResource("14_q7ex6")
 api_base = "https://api.deepseek.com"
-secret_key = "sk-63105427768d4e2e9eceff921502cf90"
+secret_key = "sk-078ec588fe384842a339e5db806120dc"
 model_name = "deepseek-chat"
 
 [node name="OllamaChatStream" type="Node" parent="."]

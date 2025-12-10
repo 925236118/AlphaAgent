@@ -13,7 +13,6 @@ extends Control
 @onready var new_chat_button: Button = %NewChatButton
 @onready var welcome_message: Control = %WelcomeMessage
 @onready var input_container: AgentInputContainer = %InputContainer
-#@onready var chat_title: Label = %ChatTitle
 @onready var history_button: Button = %HistoryButton
 @onready var back_chat_button: Button = %BackChatButton
 @onready var top_bar_buttons: HBoxContainer = %TopBarButtons
@@ -21,12 +20,12 @@ extends Control
 @onready var setting_tabs: HBoxContainer = %SettingTabs
 @onready var setting_tab_memory: Button = %SettingTabMemory
 @onready var setting_tab_setting: Button = %SettingTabSetting
+@onready var history_and_title: PanelContainer = %HistoryAndTitle
 
 @onready var tools: Node = $Tools
 @onready var message_container: ScrollContainer = %MessageContainer
 
 @onready var chat_container: VBoxContainer = %ChatContainer
-@onready var history_container: AgentHistoryContainer = %HistoryContainer
 @onready var setting_button: Button = %SettingButton
 @onready var help_button: Button = %HelpButton
 
@@ -36,7 +35,6 @@ extends Control
 
 @onready var container_list = [
 	chat_container,
-	history_container,
 	setting_container,
 	memory_container
 ]
@@ -66,11 +64,11 @@ var current_think: String = ""
 var current_title = "新对话":
 	set(val):
 		current_title = val
-		#chat_title.text = current_title
+		history_and_title.set_title(current_title)
 var first_chat: bool = true
 var current_id: String = ""
 var current_time: String = ""
-var current_history_item: AgentHistoryContainer.HistoryItem = null
+var current_history_item: AgentHistoryAndTitle.HistoryItem = null
 
 # 当前使用的聊天流客户端
 var current_chat_stream = null
@@ -114,7 +112,7 @@ func _ready() -> void:
 	new_chat_button.pressed.connect(on_click_new_chat_button)
 	setting_button.pressed.connect(on_show_setting)
 	help_button.pressed.connect(show_help_window)
-	history_button.pressed.connect(on_click_history_button)
+	#history_button.pressed.connect(on_click_history_button)
 
 	input_container.send_message.connect(on_input_container_send_message)
 	input_container.show_help.connect(show_help_window)
@@ -124,7 +122,7 @@ func _ready() -> void:
 	input_container.model_changed.connect(_on_model_selected)
 	input_container.manage_models_requested.connect(_on_manage_models_pressed)
 
-	history_container.recovery.connect(on_recovery_history)
+	history_and_title.recovery.connect(on_recovery_history)
 
 	setting_tab_memory.pressed.connect(func(): show_container(memory_container))
 	setting_tab_setting.pressed.connect(func(): show_container(setting_container))
@@ -346,7 +344,7 @@ func on_use_tool(tool_calls: Array):
 
 	current_history_item.title = current_title
 
-	history_container.update_history(current_id, current_history_item)
+	history_and_title.update_history(current_id, current_history_item)
 
 func on_generate_error(error_info: Dictionary):
 	#printerr("发生错误")
@@ -391,11 +389,11 @@ func clear():
 	for i in message_count:
 		message_list.get_child(message_count - i - 1).queue_free()
 
-func on_click_history_button():
-	if history_container.visible:
-		show_container(chat_container)
-	else:
-		show_container(history_container)
+#func on_click_history_button():
+	#if history_container.visible:
+		#show_container(chat_container)
+	#else:
+		#show_container(history_container)
 func on_agent_finish(finish_reason: String, total_tokens: float):
 	#print("finish_reason ", finish_reason)
 	#print("total_tokens ", total_tokens)
@@ -415,7 +413,7 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 
 	if first_chat:
 		#print(JSON.stringify(messages))
-		current_history_item = AgentHistoryContainer.HistoryItem.new()
+		current_history_item = AgentHistoryAndTitle.HistoryItem.new()
 		current_id = generate_random_string(16)
 		current_time = Time.get_datetime_string_from_system()
 		var title_messages: Array[Dictionary] = [
@@ -439,14 +437,14 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 	current_history_item.title = current_title
 	current_history_item.time = current_time
 
-	history_container.update_history(current_id, current_history_item)
+	history_and_title.update_history(current_id, current_history_item)
 
 func on_title_generate_finish(message: String, _think_msg: String):
 	current_title = message
 	#print("标题是 ", current_title)
 	first_chat = false
 	current_history_item.title = current_title
-	history_container.update_history(current_id, current_history_item)
+	history_and_title.update_history(current_id, current_history_item)
 
 # 生成随机字符串函数
 func generate_random_string(length: int) -> String:
@@ -459,7 +457,7 @@ func generate_random_string(length: int) -> String:
 
 	return result
 
-func on_recovery_history(history_item: AgentHistoryContainer.HistoryItem):
+func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
 	show_container(chat_container)
 
 	clear()
@@ -481,7 +479,7 @@ func on_recovery_history(history_item: AgentHistoryContainer.HistoryItem):
 		if message.role != "tool":
 			message_item = MESSAGE_ITEM.instantiate()
 			# 根据历史记录中的 use_thinking 设置 show_think
-			message_item.show_think = history_item.use_thinking if history_item.has("use_thinking") else false
+			message_item.show_think = history_item.use_thinking
 			message_list.add_child(message_item)
 
 		if message.role == "user":
@@ -539,7 +537,7 @@ func _exit_tree() -> void:
 
 func show_container(container: Control):
 	back_chat_button.visible = container != chat_container
-	#chat_title.visible = container == chat_container
+	history_and_title.visible = container == chat_container
 
 	if container == memory_container or container == setting_container:
 		setting_tabs.show()

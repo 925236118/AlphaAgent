@@ -1,8 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://dob5hdboaqcnu"]
+[gd_scene load_steps=13 format=3 uid="uid://dob5hdboaqcnu"]
 
 [ext_resource type="Texture2D" uid="uid://btnh1plrm3etf" path="res://addons/agent/icons/newicon/Icon_arrowdown.svg" id="1_0u44n"]
 [ext_resource type="Script" uid="uid://0iv7f02886de" path="res://addons/agent/ui/history/history_and_title.gd" id="1_a7crv"]
-[ext_resource type="PackedScene" uid="uid://eq8fe48g3uch" path="res://addons/agent/ui/history/history_message_item.tscn" id="3_inyv1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cd0et"]
 bg_color = Color(0.15686275, 0.15686275, 0.15686275, 1)
@@ -12,6 +11,25 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [sub_resource type="LabelSettings" id="LabelSettings_5v6i3"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a7crv"]
+bg_color = Color(0.15686275, 0.15686275, 0.15686275, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.24313726, 0.24313726, 0.24313726, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="LabelSettings" id="LabelSettings_inyv1"]
+font_size = 12
+font_color = Color(0.46666667, 0.46666667, 0.46666667, 1)
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_r2sb8"]
+color = Color(1, 1, 1, 0.101960786)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_erjd2"]
 bg_color = Color(0.2, 0.2, 0.2, 1)
@@ -120,53 +138,75 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_a7crv")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="HistoryList/Panel"]
+[node name="MarginContainer" type="MarginContainer" parent="HistoryList/Panel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HistoryList/Panel/ScrollContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="HistoryList/Panel/MarginContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HistoryList/Panel/MarginContainer/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Label" type="Label" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer"]
 layout_mode = 2
 text = "今天"
+label_settings = SubResource("LabelSettings_inyv1")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
+[node name="TodayHistoryContainer" type="VBoxContainer" parent="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 
-[node name="HistoryMessageItem" parent="HistoryList/Panel/ScrollContainer/VBoxContainer/VBoxContainer" instance=ExtResource("3_inyv1")]
+[node name="HSeparator" type="HSeparator" parent="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_r2sb8")
 
-[node name="HSeparator" type="HSeparator" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="Label2" type="Label" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
+[node name="Label2" type="Label" parent="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer"]
 layout_mode = 2
 text = "昨天"
+label_settings = SubResource("LabelSettings_inyv1")
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
+[node name="YestodayHistoryContainer" type="VBoxContainer" parent="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 
-[node name="HistoryMessageItem2" parent="HistoryList/Panel/ScrollContainer/VBoxContainer/VBoxContainer2" instance=ExtResource("3_inyv1")]
+[node name="HSeparator2" type="HSeparator" parent="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_r2sb8")
+
+[node name="Label4" type="Label" parent="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+text = "近一周"
+label_settings = SubResource("LabelSettings_inyv1")
+
+[node name="ToweekHistoryContainer" type="VBoxContainer" parent="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 
-[node name="HSeparator2" type="HSeparator" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
+[node name="HSeparator3" type="HSeparator" parent="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_r2sb8")
 
-[node name="Label3" type="Label" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
+[node name="Label3" type="Label" parent="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer"]
 layout_mode = 2
 text = "更早之前"
+label_settings = SubResource("LabelSettings_inyv1")
 
-[node name="VBoxContainer3" type="VBoxContainer" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="HistoryMessageItem3" parent="HistoryList/Panel/ScrollContainer/VBoxContainer/VBoxContainer3" instance=ExtResource("3_inyv1")]
+[node name="AgoHistoryContainer" type="VBoxContainer" parent="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="HistoryExpandButton" type="Button" parent="."]

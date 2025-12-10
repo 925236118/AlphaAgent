@@ -16,10 +16,10 @@
 [ext_resource type="PackedScene" uid="uid://bxe6hto0vk8fu" path="res://addons/agent/ui/setting/setting.tscn" id="8_5t7oo"]
 [ext_resource type="ButtonGroup" uid="uid://4cfowu05scrd" path="res://addons/agent/ui/resource/setting_tab_group.tres" id="8_i5act"]
 [ext_resource type="PackedScene" uid="uid://b66g7g3ydkkeb" path="res://addons/agent/ui/memory/memory_container.tscn" id="10_n876e"]
-[ext_resource type="Script" path="res://addons/agent/scripts/openai_chat_stream.gd" id="13_wlmmt"]
+[ext_resource type="Script" uid="uid://ceok2hodt360c" path="res://addons/agent/scripts/openai_chat_stream.gd" id="13_wlmmt"]
 [ext_resource type="Script" path="res://addons/agent/scripts/openai_chat.gd" id="14_q7ex6"]
-[ext_resource type="Script" path="res://addons/agent/scripts/ollama_chat_stream.gd" id="15_cd0et"]
-[ext_resource type="Script" path="res://addons/agent/scripts/ollama_chat.gd" id="16_i5act"]
+[ext_resource type="Script" uid="uid://cyh2gqd0jea8s" path="res://addons/agent/scripts/ollama_chat_stream.gd" id="15_cd0et"]
+[ext_resource type="Script" uid="uid://drxphw7kybfrr" path="res://addons/agent/scripts/ollama_chat.gd" id="16_i5act"]
 
 [sub_resource type="Theme" id="Theme_aabuu"]
 

@@ -21,7 +21,7 @@ func _ready() -> void:
 	AlphaAgentPlugin.global_setting.load_global_setting()
 	init_item_values()
 	init_signals()
-	config_model_button.pressed.connect(func (): config_model.emit())
+	config_model_button.pressed.connect(config_model.emit)
 
 func init_item_values():
 	for setting_item in setting_item_nodes:

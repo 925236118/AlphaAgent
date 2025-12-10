@@ -44,9 +44,9 @@ func post_message(messages: Array[Dictionary]):
 			"num_predict": max_tokens
 		}
 	}
-	
+
 	var request_body = JSON.stringify(request_data)
-	
+
 	if not http_request.request_completed.is_connected(_http_request_completed):
 		http_request.request_completed.connect(_http_request_completed)
 
@@ -54,13 +54,13 @@ func post_message(messages: Array[Dictionary]):
 	var url = api_base
 	if url.ends_with("/"):
 		url = url.substr(0, url.length() - 1)
-	
+
 	# 检查 api_base 是否已经包含 /api 路径
 	if url.ends_with("/api"):
 		url += "/chat"
 	else:
 		url += "/api/chat"
-	
+
 	# 发送POST请求
 	var err = http_request.request(url, headers, HTTPClient.METHOD_POST, request_body)
 	generatting = true
@@ -70,12 +70,12 @@ func post_message(messages: Array[Dictionary]):
 
 func _http_request_completed(_result, response_code, _headers, body: PackedByteArray):
 	generatting = false
-	
+
 	if response_code != 200:
 		push_error("Ollama HTTP错误: " + str(response_code))
 		push_error(body.get_string_from_utf8())
 		return
-	
+
 	var json = JSON.new()
 	var err = json.parse(body.get_string_from_utf8())
 	if err != OK:
@@ -84,7 +84,7 @@ func _http_request_completed(_result, response_code, _headers, body: PackedByteA
 		return
 
 	var data = json.get_data()
-	
+
 	# Ollama 响应格式:
 	# {
 	#   "model": "llama3:8b",
@@ -96,7 +96,7 @@ func _http_request_completed(_result, response_code, _headers, body: PackedByteA
 	#   "done": true,
 	#   "done_reason": "stop"
 	# }
-	
+
 	if data and data.has("message"):
 		var message_data = data["message"]
 		var content = message_data.get("content", "")

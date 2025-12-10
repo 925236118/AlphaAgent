@@ -366,6 +366,40 @@ func get_tools_list() -> Array[Dictionary]:
 				}
 			}
 		},
+		# set_resource_property
+		{
+			"type": "function",
+			"function": {
+				"name": "set_resource_property",
+				"description": "写入资源文件，并将其引用为某个场景内的某个节点的某个属性。",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"scene_path": {
+							"type": "string",
+							"description": "需要打开的场景路径，必须是以res://开头的路径。",
+						},
+						"node_path": {
+							"type": "string",
+							"description": "想修改的节点在场景树中的路径。从场景的根节点开始，用“/”分隔。",
+						},
+						"property_path": {
+							"type": "string",
+							"description": "想设置的属性的路径，注意对于shader文件等可能会嵌套在其他资源内的属性，这个路径应该为material/shader，即格式为‘节点属性/资源属性/.../目标属性’",
+						},
+						"resource_path": {
+							"type": "string",
+							"description": "需要写入的文件目录，必须是以res://开头的绝对路径。",
+						},
+						"content": {
+							"type": "string",
+							"description": "需要写入的文件内容",
+						}
+					},
+					"required": ["scene_path", "node_path", "property_path", "resource_path", "content"]
+				}
+			}
+		},
 #endregion
 #region 配置
 		# set_singleton
@@ -687,14 +721,8 @@ func use_tool(tool_call):
 				var path: String = json.path
 				var content = json.content
 				# var is_new_file = not FileAccess.file_exists(path)
-				var file = FileAccess.open(path, FileAccess.WRITE)
-				if not file == null:
-					file.store_string(content)
-					file.close()
-
-					EditorInterface.get_resource_filesystem().update_file(path)
-
-					EditorInterface.get_script_editor().notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
+				#var file = FileAccess.open(path, FileAccess.WRITE)
+				if write_file(path, content):
 
 					if path.get_file().get_extension() == "tscn":
 						EditorInterface.reload_scene_from_path(path)
@@ -830,6 +858,23 @@ func use_tool(tool_call):
 					result = {
 					"error":"操作失败"
 					}
+		"set_resource_property":
+			var json = JSON.parse_string(tool_call.function.arguments)
+
+			if not json == null and json.has("scene_path") and json.has("node_path") and json.has("property_path") and json.has("resource_path") and json.has("content"):
+				if write_file(json.resource_path, json.content):
+					if set_resource_property(json.resource_path, json.scene_path, json.node_path, json.property_path):
+						result = {
+						"success": "更新成功"
+						}
+					else:
+						result = {
+						"error": "资源挂载失败"
+						}
+				else:
+					result = {
+					"error": "资源写入失败"
+					}
 
 		"update_plan_list":
 			var json = JSON.parse_string(tool_call.function.arguments)
@@ -883,6 +928,21 @@ func use_tool(tool_call):
 			"error": "调用失败。请检查参数是否正确。"
 		}
 	return JSON.stringify(result)
+
+#写入文件
+func write_file(path: String, content: String) -> bool:
+	DirAccess.make_dir_recursive_absolute(path)
+	var file = FileAccess.open(path, FileAccess.WRITE)
+	if not file == null:
+		file.store_string(content)
+		file.close()
+
+		EditorInterface.get_resource_filesystem().update_file(path)
+
+		EditorInterface.get_script_editor().notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
+		return true
+	else:
+		return false
 
 #设置某个场景中的某个节点的某个属性为某个值
 func update_scene_node_property(scene_path: String, node_path: String, property_name: String, property_value: String) -> bool:
@@ -940,3 +1000,61 @@ func update_scene_node_property(scene_path: String, node_path: String, property_
 	EditorInterface.edit_node(target_node)
 	
 	return true
+
+#设置节点某个需要资源的属性（包括嵌套在资源内）
+func set_resource_property(resource_path: String, scene_path: String, node_path: String, property_name: String) -> bool:
+	# 加载资源文件
+	var resource = load(resource_path)
+	if resource == null:
+		print("错误: 无法加载资源文件: ", resource_path)
+		return false
+	
+	# 加载场景
+	var opened_scene = ResourceLoader.load(scene_path, "PackedScene") as PackedScene
+	if not opened_scene:
+		printerr("错误：无法打开场景 '", scene_path, "'。请检查路径是否正确。")
+		return false# 如果场景打开失败，则终止脚本
+	else:
+		EditorInterface.open_scene_from_path(scene_path)
+	
+	# 获取场景的根节点
+	var scene_root = EditorInterface.get_edited_scene_root()
+	if scene_root == null:
+		print("错误：场景打开后，无法获取其根节点。")
+		return false
+	
+	# 获取目标节点
+	var target_node = scene_root.get_node(node_path)
+	if target_node == null:
+		print("错误: 在场景中找不到节点路径: ", node_path)
+		return false
+	
+	EditorInterface.get_selection().clear()
+	EditorInterface.get_selection().add_node(target_node)
+	
+	var array := property_name.split("/")
+	if set_res(target_node, array, resource):
+		# 刷新编辑器以显示更改
+		EditorInterface.edit_node(target_node)
+		
+		print("成功在编辑器中将资源挂载到节点属性")
+		return true
+	else:
+		return false
+
+#通过递归尝试查找属性并设置
+func set_res(target: Object, property_target: Array[String], res: Resource):
+	if property_target.size() > 1:
+		var property = property_target.pop_front()
+		if property in target:
+			return set_res(target.get(property), property_target, res)
+		else:
+			printerr("路径存在问题")
+			return false
+	else:
+		if property_target[0] in target:
+			target.set(property_target[0], res)
+			return true
+		else:
+			printerr("未找到属性", property_target[0])
+			return false

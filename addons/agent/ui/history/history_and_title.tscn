@@ -127,6 +127,7 @@ stretch_mode = 5
 transparent_bg = true
 oversampling_override = 1.0
 size = Vector2i(200, 400)
+visible = false
 borderless = true
 transparent = true
 unfocusable = true

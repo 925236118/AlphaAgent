@@ -363,6 +363,8 @@ func on_input_menu_list_item_selected(index: int):
 			input_menu_list.clear()
 
 func _on_user_input_gui_input(event: InputEvent) -> void:
+	if disable:
+		return
 	var send_shortcut = AlphaAgentPlugin.global_setting.send_shortcut
 	if send_shortcut == AlphaAgentPlugin.SendShotcut.None:
 		return

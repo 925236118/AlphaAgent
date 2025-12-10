@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://bewckbivwp036"]
+[gd_scene load_steps=7 format=3 uid="uid://bewckbivwp036"]
 
 [ext_resource type="Script" uid="uid://cr3yllr6krrdr" path="res://addons/agent/ui/chat/reference_item.gd" id="1_pyu6d"]
+[ext_resource type="Texture2D" uid="uid://60p5i4otthyn" path="res://addons/agent/icons/newicon/Icon_close.svg" id="2_o8647"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2usmi"]
 bg_color = Color(0.18359044, 0.18359047, 0.18359032, 1)
@@ -9,11 +10,17 @@ corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pyu6d"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o8647"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_15bjw"]
-bg_color = Color(0.09998574, 0.0999861, 0.09998601, 1)
+bg_color = Color(0.2627451, 0.16862746, 0.13725491, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_o8647"]
 
 [node name="ReferenceItem" type="PanelContainer"]
 theme_override_styles/panel = SubResource("StyleBoxFlat_2usmi")
@@ -26,16 +33,25 @@ theme_override_constants/margin_top = 1
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 1
 
-[node name="Label" type="Label" parent="MarginContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/HBoxContainer"]
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 
-[node name="Button" type="Button" parent="MarginContainer"]
+[node name="DeleteButton" type="Button" parent="MarginContainer/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 4
+mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.8745098, 0.8745098, 0.8745098, 0)
-theme_override_styles/normal = SubResource("StyleBoxFlat_pyu6d")
+theme_override_colors/icon_hover_color = Color(0.87058824, 0.3019608, 0.11372549, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_o8647")
 theme_override_styles/hover = SubResource("StyleBoxFlat_15bjw")
-text = " × "
+theme_override_styles/focus = SubResource("StyleBoxEmpty_o8647")
+icon = ExtResource("2_o8647")
+expand_icon = true

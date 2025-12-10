@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://dqkrjn0mak6lh"]
+[gd_scene load_steps=16 format=3 uid="uid://dqkrjn0mak6lh"]
 
 [ext_resource type="Script" uid="uid://c0gayflg4ovas" path="res://addons/agent/ui/chat/input_container.gd" id="1_xi1dg"]
 
@@ -17,25 +17,19 @@ bg_color = Color(0.04303915, 0.043039158, 0.043039113, 0.38039216)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_model_button"]
 
+[sub_resource type="LabelSettings" id="LabelSettings_gy7k7"]
+font_color = Color(0.46666667, 0.46666667, 0.46666667, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_coixe"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_c8smv"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gy7k7"]
 content_margin_left = 8.0
+content_margin_top = 0.0
 content_margin_right = 8.0
+content_margin_bottom = 0.0
 bg_color = Color(0.14901961, 0.45882353, 0.8509804, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c3kby"]
-content_margin_left = 2.0
-content_margin_top = 8.0
-content_margin_right = 2.0
-content_margin_bottom = 8.0
-bg_color = Color(0.24705882, 0.61960787, 1, 1)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -97,7 +91,7 @@ size_flags_horizontal = 3
 theme_override_styles/normal = SubResource("StyleBoxEmpty_5v6i3")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_cpi8b")
 theme_override_styles/read_only = SubResource("StyleBoxEmpty_elhta")
-placeholder_text = "输入问题，或拖拽添加引用。"
+placeholder_text = "输入问题，不使用工具，获得更安全的体验。"
 drag_and_drop_selection_enabled = false
 wrap_mode = 1
 scroll_fit_content_height = true
@@ -124,7 +118,7 @@ flat = true
 selected = 0
 item_count = 2
 popup/item_0/text = "Agent"
-popup/item_0/id = 1
+popup/item_0/id = 0
 popup/item_1/text = "Ask"
 popup/item_1/id = 1
 
@@ -150,11 +144,13 @@ flat = true
 [node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 4
+theme_override_constants/separation = 6
 
 [node name="UsageLabel" type="Label" parent="VBoxContainer/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 0
+label_settings = SubResource("LabelSettings_gy7k7")
 
 [node name="ClearButton" type="Button" parent="VBoxContainer/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
@@ -163,7 +159,8 @@ size_flags_horizontal = 8
 size_flags_vertical = 4
 tooltip_text = "清空输入内容"
 mouse_default_cursor_shape = 2
-theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.46666667, 0.46666667, 0.46666667, 1)
+theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBoxFlat_coixe")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_c8smv")
 text = "清空"
@@ -172,16 +169,13 @@ flat = true
 [node name="SendButton" type="Button" parent="VBoxContainer/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 4
 tooltip_text = "发送"
 mouse_default_cursor_shape = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBoxFlat_gy7k7")
-theme_override_styles/hover = SubResource("StyleBoxFlat_c3kby")
+theme_override_styles/hover = SubResource("StyleBoxFlat_gy7k7")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_5t7oo")
 text = "发送"
-icon_alignment = 1
-expand_icon = true
 
 [node name="StopButton" type="Button" parent="VBoxContainer/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
@@ -191,7 +185,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 tooltip_text = "发送"
 mouse_default_cursor_shape = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBoxFlat_k8r8m")
 theme_override_styles/hover = SubResource("StyleBoxFlat_pm5wc")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_5t7oo")

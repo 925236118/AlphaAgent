@@ -1,8 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://bxe6hto0vk8fu"]
+[gd_scene load_steps=5 format=3 uid="uid://bxe6hto0vk8fu"]
 
 [ext_resource type="Script" uid="uid://dry1n6m67ku3q" path="res://addons/agent/ui/setting/setting.gd" id="1_c2l6f"]
 [ext_resource type="PackedScene" uid="uid://c2ei06dd8phsw" path="res://addons/agent/ui/setting/setting_item_bool.tscn" id="1_ca3bj"]
-[ext_resource type="PackedScene" uid="uid://bldax4sbp20q2" path="res://addons/agent/ui/setting/setting_item_string.tscn" id="3_c2l6f"]
 [ext_resource type="PackedScene" uid="uid://jbwyo7x0ce47" path="res://addons/agent/ui/setting/setting_item_option.tscn" id="4_83qt4"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_83qt4"]
@@ -62,7 +61,7 @@ setting_key = "send_shortcut"
 text = "输入框发送快捷键"
 
 [node name="OptionButton" parent="SettingPanel/SettingItemsContainer/SendShotCut" index="1"]
-selected = 1
+selected = 2
 item_count = 3
 popup/item_0/text = "不使用快捷键"
 popup/item_1/text = "Enter"
@@ -83,9 +82,8 @@ layout_mode = 2
 text = "模型设置"
 label_settings = SubResource("LabelSettings_83qt4")
 
-[node name="SecretKeySetting" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("3_c2l6f")]
+[node name="ConfigModelButton" type="Button" parent="SettingPanel/SettingItemsContainer"]
 layout_mode = 2
-setting_name = "DeepSeek密钥"
-setting_key = "secret_key"
+text = "配置模型"
 
 [editable path="SettingPanel/SettingItemsContainer/SendShotCut"]

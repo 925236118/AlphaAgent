@@ -34,34 +34,13 @@ signal think(msg: String)
 ## 返回结束
 signal generate_finish(finish_reason: String, total_tokens: float)
 ## 使用工具
-signal use_tool(tool_calls: Array[ToolCallsInfo])
+signal use_tool(tool_calls: Array[AgentModelUtils.ToolCallsInfo])
 ## 正在返回使用工具请求
 signal response_use_tool
 ## 失败
 signal error(error_info: Dictionary)
 
-var tool_calls: Array[ToolCallsInfo] = []
-
-class ToolCallsInfo:
-	var id: String = ""
-	var function: ToolCallsInfoFunc = ToolCallsInfoFunc.new()
-	var type: String = "function"
-	func to_dict():
-		return {
-			"id": id,
-			"type": type,
-			"function": function.to_dict()
-		}
-
-class ToolCallsInfoFunc:
-	var name: String = ""
-	var arguments: String = ""
-
-	func to_dict():
-		return {
-			"name": name,
-			"arguments": arguments
-		}
+var tool_calls: Array[AgentModelUtils.ToolCallsInfo] = []
 
 ## 发送请求的http客户端
 @onready var http_client: HTTPClient = HTTPClient.new()
@@ -72,7 +51,7 @@ var generatting: bool = false
 func post_message(messages: Array[Dictionary]):
 	tool_calls = []
 	if print_log: print("请求消息列表: ", messages)
-	
+
 	# 准备请求头
 	var headers = [
 		"Accept: application/json",
@@ -91,20 +70,20 @@ func post_message(messages: Array[Dictionary]):
 		"temperature": temperature,
 		"top_p": 1,
 	}
-	
+
 	if tools.size() > 0:
 		request_data["tools"] = tools
-	
+
 	var request_body = JSON.stringify(request_data)
-	
+
 	if print_log: print("请求消息数据体: ", request_body)
 
 	# 解析API URL
 	var url_parts = api_base.replace("https://", "").replace("http://", "").split("/", false, 1)
 	var host = url_parts[0]
 	var use_tls = api_base.begins_with("https://")
-	
-	var connect_err = http_client.connect_to_host(host, 443 if use_tls else 80, 
+
+	var connect_err = http_client.connect_to_host(host, 443 if use_tls else 80,
 												  TLSOptions.client() if use_tls else null)
 	if connect_err != OK:
 		error.emit({
@@ -134,7 +113,7 @@ func post_message(messages: Array[Dictionary]):
 		# 移除末尾的斜杠
 		if base_path.ends_with("/"):
 			base_path = base_path.substr(0, base_path.length() - 1)
-		
+
 		# 检查路径情况 - 按照优先级从具体到一般
 		if base_path.ends_with("/chat/completions"):
 			# 已经是完整路径（如豆包：/api/v3/chat/completions）
@@ -148,12 +127,12 @@ func post_message(messages: Array[Dictionary]):
 		else:
 			# 默认添加完整的 /v1/chat/completions
 			path = base_path + "/v1/chat/completions"
-	
+
 	if print_log:
 		print("请求主机: ", host)
 		print("请求路径: ", path)
 		print("请求模型: ", model_name)
-	
+
 	var err = http_client.request(HTTPClient.METHOD_POST, path, headers, request_body)
 	if err != OK:
 		error.emit({
@@ -187,7 +166,7 @@ func post_message(messages: Array[Dictionary]):
 			if chunk.size() > 0:
 				body_chunks.append_array(chunk)
 			await get_tree().process_frame
-		
+
 		var error_body = body_chunks.get_string_from_utf8()
 		error.emit({
 			"error_msg": "HTTP错误: " + str(http_client.get_response_code()),
@@ -212,16 +191,16 @@ func post_message(messages: Array[Dictionary]):
 func _process_buffer(buffer: PackedByteArray):
 	var text = buffer.get_string_from_utf8()
 	var lines = text.split("\n")
-	
+
 	for i in range(lines.size() - 1):
 		var line = lines[i].strip_edges()
-		
+
 		# 处理 [DONE] 标记
 		if line == "[DONE]" or line == "data: [DONE]":
 			continue
-		
+
 		var data_str = ""
-		
+
 		# 检查是否有 "data: " 前缀（标准 OpenAI 格式）
 		if line.begins_with("data: "):
 			data_str = line.substr(6).strip_edges()
@@ -231,29 +210,29 @@ func _process_buffer(buffer: PackedByteArray):
 		else:
 			# 跳过空行或其他无效行
 			continue
-		
+
 		# 跳过空行或不完整的数据
 		if data_str.is_empty():
 			continue
-		
+
 		# 必须以 { 开头（确保是完整的 JSON 对象）
 		if not data_str.begins_with("{"):
 			if print_log and data_str.length() > 0:
 				print("跳过非JSON数据: ", data_str.substr(0, 50))
 			continue
-		
+
 		# 验证 JSON 是否完整（简单检查括号平衡）
 		if not _is_valid_json_string(data_str):
 			if print_log:
 				print("跳过不完整的JSON: ", data_str.substr(0, 50))
 			continue
-		
+
 		var json = JSON.parse_string(data_str)
 		if json != null and json is Dictionary:
 			_process_chunk(json)
 		elif print_log:
 			print("JSON解析失败或格式错误: ", data_str.substr(0, 100))
-	
+
 	# 保留最后一行（可能不完整）
 	if lines.size() > 0:
 		buffer.clear()
@@ -263,30 +242,30 @@ func _process_buffer(buffer: PackedByteArray):
 func _is_valid_json_string(json_str: String) -> bool:
 	if json_str.is_empty():
 		return false
-	
+
 	var brace_count = 0
 	var bracket_count = 0
 	var in_string = false
 	var escape_next = false
-	
+
 	for i in range(json_str.length()):
 		var c = json_str[i]
-		
+
 		if escape_next:
 			escape_next = false
 			continue
-		
+
 		if c == "\\":
 			escape_next = true
 			continue
-		
+
 		if c == '"':
 			in_string = !in_string
 			continue
-		
+
 		if in_string:
 			continue
-		
+
 		if c == "{":
 			brace_count += 1
 		elif c == "}":
@@ -295,64 +274,64 @@ func _is_valid_json_string(json_str: String) -> bool:
 			bracket_count += 1
 		elif c == "]":
 			bracket_count -= 1
-	
+
 	return brace_count == 0 and bracket_count == 0 and not in_string
 
 ## 处理单个数据块
 func _process_chunk(data: Dictionary):
 	if not data.has("choices"):
 		return
-	
+
 	var choices = data["choices"]
 	if choices.is_empty():
 		return
-	
+
 	var choice = choices[0]
 	var delta = choice.get("delta", {})
 	var finish_reason = choice.get("finish_reason", null)
-	
+
 	# 处理思考内容（支持 reasoning_content 的提供商，如 SiliconFlow）
 	if delta.has("reasoning_content") and delta["reasoning_content"] != null:
 		think.emit(delta["reasoning_content"])
-	
+
 	# 处理普通消息
 	if delta.has("content") and delta["content"] != null:
 		message.emit(delta["content"])
-	
+
 	# 处理工具调用
 	if delta.has("tool_calls"):
 		_process_tool_calls(delta["tool_calls"])
-	
+
 	# 处理结束
 	if finish_reason != null:
 		if finish_reason == "tool_calls":
 			use_tool.emit(tool_calls)
-		
+
 		var total_tokens = 0
 		if data.has("usage"):
 			total_tokens = data["usage"].get("total_tokens", 0)
-		
+
 		generate_finish.emit(finish_reason, total_tokens)
 
 ## 处理工具调用
 func _process_tool_calls(tool_calls_data: Array):
 	response_use_tool.emit()
-	
+
 	for tool_call_data in tool_calls_data:
 		var index = tool_call_data.get("index", 0)
-		
+
 		# 确保有足够的tool_calls槽位
 		while tool_calls.size() <= index:
-			tool_calls.append(ToolCallsInfo.new())
-		
+			tool_calls.append(AgentModelUtils.ToolCallsInfo.new())
+
 		var tool_call = tool_calls[index]
-		
+
 		if tool_call_data.has("id"):
 			tool_call.id = tool_call_data["id"]
-		
+
 		if tool_call_data.has("type"):
 			tool_call.type = tool_call_data["type"]
-		
+
 		if tool_call_data.has("function"):
 			var func_data = tool_call_data["function"]
 			if func_data.has("name"):

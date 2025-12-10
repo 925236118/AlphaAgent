@@ -1,14 +1,13 @@
 @tool
 extends PanelContainer
+@onready var label: Label = $MarginContainer/HBoxContainer/Label
 
-@onready var label: Label = $MarginContainer/Label
-@onready var button: Button = $MarginContainer/Button
-
+@onready var delete_button: Button = %DeleteButton
 
 var info = {}
 
 func _ready() -> void:
-	button.pressed.connect(queue_free)
+	delete_button.pressed.connect(queue_free)
 
 func set_label(text):
 	label.text = text

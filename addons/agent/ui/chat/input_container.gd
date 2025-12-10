@@ -63,7 +63,7 @@ func _ready() -> void:
 
 	user_input.text_changed.connect(on_user_input_text_changed)
 	input_menu_list.item_selected.connect(on_input_menu_list_item_selected)
-	
+
 	# 初始化模型选择器
 	if model_button:
 		model_button.item_selected.connect(_on_model_selected)
@@ -78,24 +78,27 @@ func _ready() -> void:
 func update_model_selector(models: Array, current_model_id: String, current_model_name: String):
 	if not model_button:
 		return
-	
+
 	model_button.clear()
-	
+
 	var current_idx = 0
 	var idx = 0
 	for model in models:
 		model_button.add_item(model.name)
 		if model.id == current_model_id:
 			current_idx = idx
+			var supports_thinking: bool = model.supports_thinking
+			use_thinking.visible = supports_thinking
+			use_thinking.button_pressed = supports_thinking
 		idx += 1
-	
+
 	# 添加分隔符和 "Manage Models..." 选项
 	model_button.add_separator()
 	var manage_idx = model_button.item_count
 	model_button.add_item("Manage Models...")
 	# 将 "Manage Models..." 设置为禁用状态（不可选中，但可点击）
 	model_button.set_item_disabled(manage_idx, false)
-	
+
 	# 设置当前选中的模型
 	model_button.selected = current_idx
 
@@ -104,7 +107,7 @@ func _on_model_selected(idx: int):
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if not model_manager:
 		return
-	
+
 	# 检查是否是最后一项（Manage Models...）
 	if idx == model_button.item_count - 1:
 		# 触发打开模型管理窗口
@@ -119,6 +122,9 @@ func _on_model_selected(idx: int):
 	else:
 		# 获取选中的模型ID
 		if idx < model_manager.models.size():
+			var supports_thinking: bool = model_manager.models[idx].supports_thinking
+			use_thinking.visible = supports_thinking
+			use_thinking.button_pressed = supports_thinking
 			model_changed.emit(model_manager.models[idx].id)
 
 ## 是否可以将数据拖放到输入框

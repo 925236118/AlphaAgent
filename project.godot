@@ -14,6 +14,11 @@ config/name="GodotAiAgent"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
+[display]
+
+window/size/viewport_width=648
+window/size/viewport_height=1152
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/agent/plugin.cfg")

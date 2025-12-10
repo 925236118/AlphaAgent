@@ -56,7 +56,6 @@ class GlobalSetting:
 	var auto_clear: bool = false
 	var auto_expand_think: bool = false
 	var auto_add_file_ref: bool = true
-	var secret_key: String = ""
 	var send_shortcut: SendShotcut = SendShotcut.None
 	var model_manager: ModelConfig.ModelManager = null
 
@@ -76,9 +75,8 @@ class GlobalSetting:
 		self.auto_clear = json.get("auto_clear", false)
 		self.auto_expand_think = json.get("auto_clear", false)
 		self.auto_add_file_ref = json.get("auto_add_file_ref", true)
-		self.secret_key = json.get("secret_key", "")
 		self.send_shortcut = json.get("send_shortcut", SendShotcut.Enter)
-		
+
 		# 初始化模型管理器
 		model_manager = ModelConfig.ModelManager.new(models_file)
 
@@ -86,7 +84,6 @@ class GlobalSetting:
 		var dict = {
 			"auto_clear": self.auto_clear,
 			"auto_expand_think": self.auto_expand_think,
-			"secret_key": self.secret_key,
 			"auto_add_file_ref": self.auto_add_file_ref,
 			"send_shortcut": self.send_shortcut,
 		}

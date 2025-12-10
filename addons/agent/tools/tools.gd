@@ -888,14 +888,14 @@ func use_tool(tool_call):
 func update_scene_node_property(scene_path: String, node_path: String, property_name: String, property_value: String) -> bool:
 	if not ResourceLoader.exists(scene_path):
 		return false
-	
+
 	var opened_scene = ResourceLoader.load(scene_path, "PackedScene") as PackedScene
 	if not opened_scene:
 		printerr("错误：无法打开场景 '", scene_path, "'。请检查路径是否正确。")
 		return false# 如果场景打开失败，则终止脚本
 	else:
 		EditorInterface.open_scene_from_path(scene_path)
-	
+
 	var instance = opened_scene.instantiate()
 	if instance is Node2D:
 		print("这是一个2D场景")
@@ -907,7 +907,7 @@ func update_scene_node_property(scene_path: String, node_path: String, property_
 		print("该场景非2D也非3D")
 		EditorInterface.set_main_screen_editor("2D")
 	instance.call_deferred("queue_free")
-	
+
 	# 2. 获取编辑器界面和场景树
 	var scene_root = EditorInterface.get_edited_scene_root()
 	if not scene_root:
@@ -921,22 +921,22 @@ func update_scene_node_property(scene_path: String, node_path: String, property_
 		return false
 
 	print("成功找到节点: ", target_node.get_path())
-	
+
 	# 选中节点，这会自动在检查器中显示它
 	EditorInterface.get_selection().clear()
 	EditorInterface.get_selection().add_node(target_node)
-	
+
 	# 4. 设置属性
 	print("正在设置属性 '", property_name, "' 的值为 '", property_value, "'...")
-	
+
 	# 检查属性是否存在
 	if not property_name in target_node:
 		printerr("错误：节点 '", target_node.name, "' 没有名为 '", property_name, "' 的属性。")
 		return false
-	
+
 	target_node.set(property_name, str_to_var(property_value))
-	
+
 	# 通知编辑器属性已更改，以便更新UI（如检查器）
 	EditorInterface.edit_node(target_node)
-	
+
 	return true

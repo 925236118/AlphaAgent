@@ -15,8 +15,12 @@ extends Control
 @onready var input_container: AgentInputContainer = %InputContainer
 @onready var chat_title: Label = %ChatTitle
 @onready var history_button: Button = %HistoryButton
-@onready var more_button: MenuButton = %MoreButton
 @onready var back_chat_button: Button = %BackChatButton
+@onready var top_bar_buttons: HBoxContainer = %TopBarButtons
+
+@onready var setting_tabs: HBoxContainer = %SettingTabs
+@onready var setting_tab_memory: Button = %SettingTabMemory
+@onready var setting_tab_setting: Button = %SettingTabSetting
 
 @onready var tools: Node = $Tools
 @onready var message_container: ScrollContainer = %MessageContainer
@@ -78,14 +82,14 @@ func _ready() -> void:
 	# 展示欢迎语
 	welcome_message.show()
 	message_container.hide()
-	
+
 	# 初始化模型选择
 	_init_model_selector()
 	_switch_to_current_model()
 
 	# 初始化AI模型相关信息
 	# init_message_list()
-	
+
 	# 初始化OpenAI客户端
 	openai_chat_stream.think.connect(on_agent_think)
 	openai_chat_stream.message.connect(on_agent_message)
@@ -93,7 +97,7 @@ func _ready() -> void:
 	openai_chat_stream.generate_finish.connect(on_agent_finish)
 	openai_chat_stream.response_use_tool.connect(on_response_use_tool)
 	openai_chat_stream.error.connect(on_generate_error)
-	
+
 	# 初始化Ollama客户端
 	ollama_chat_stream.think.connect(on_agent_think)
 	ollama_chat_stream.message.connect(on_agent_message)
@@ -105,12 +109,13 @@ func _ready() -> void:
 	# 初始化标题生成客户端
 	title_generate_openai_chat.generate_finish.connect(on_title_generate_finish)
 	title_generate_ollama_chat.generate_finish.connect(on_title_generate_finish)
-	
+
 	back_chat_button.pressed.connect(on_click_back_chat_button)
 	new_chat_button.pressed.connect(on_click_new_chat_button)
-	history_button.pressed.connect(on_click_history_button)
-	setting_button.pressed.connect(on_show_setting) 
+	setting_button.pressed.connect(on_show_setting)
 	help_button.pressed.connect(show_help_window)
+	history_button.pressed.connect(on_click_history_button)
+
 	input_container.send_message.connect(on_input_container_send_message)
 	input_container.show_help.connect(show_help_window)
 	input_container.show_setting.connect(on_show_setting)
@@ -120,7 +125,10 @@ func _ready() -> void:
 	input_container.manage_models_requested.connect(_on_manage_models_pressed)
 
 	history_container.recovery.connect(on_recovery_history)
-	more_button.get_popup().id_pressed.connect(on_more_button_select)
+
+	setting_tab_memory.pressed.connect(func(): show_container(memory_container))
+	setting_tab_setting.pressed.connect(func(): show_container(setting_container))
+	setting_container.config_model.connect(_on_manage_models_pressed)
 
 # 初始化模型选择器
 func _init_model_selector():
@@ -128,13 +136,13 @@ func _init_model_selector():
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if model_manager == null:
 		return
-	
+
 	var current_model = model_manager.get_current_model()
 	var current_model_name = current_model.name if current_model else "Agent"
-	
+
 	# 更新输入容器中的模型选择器
 	input_container.update_model_selector(
-		model_manager.models, 
+		model_manager.models,
 		model_manager.current_model_id,
 		current_model_name
 	)
@@ -146,13 +154,13 @@ func _switch_to_current_model():
 		current_chat_stream = openai_chat_stream
 		current_title_chat = title_generate_openai_chat
 		return
-	
+
 	var model = model_manager.get_current_model()
 	if model == null:
 		current_chat_stream = openai_chat_stream
 		current_title_chat = title_generate_openai_chat
 		return
-	
+
 	# 根据模型配置切换客户端
 	if model.provider == "ollama":
 		# 使用 Ollama 客户端
@@ -161,7 +169,7 @@ func _switch_to_current_model():
 		ollama_chat_stream.api_base = model.api_base
 		ollama_chat_stream.model_name = model.model_name
 		ollama_chat_stream.max_tokens = model.max_tokens
-		
+
 		title_generate_ollama_chat.api_base = model.api_base
 		title_generate_ollama_chat.model_name = model.model_name
 		title_generate_ollama_chat.max_tokens = model.max_tokens
@@ -174,7 +182,7 @@ func _switch_to_current_model():
 		openai_chat_stream.model_name = model.model_name
 		openai_chat_stream.max_tokens = model.max_tokens
 		openai_chat_stream.provider = model.provider
-		
+
 		title_generate_openai_chat.api_base = model.api_base
 		title_generate_openai_chat.secret_key = model.api_key
 		title_generate_openai_chat.model_name = model.model_name
@@ -185,10 +193,10 @@ func _on_model_selected(model_id: String):
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if model_manager == null:
 		return
-	
+
 	model_manager.set_current_model(model_id)
 	_switch_to_current_model()
-	
+
 	# 更新输入容器的模型选择器显示
 	_init_model_selector()
 
@@ -198,7 +206,7 @@ func _on_manage_models_pressed():
 		# 确保窗口可见并居中
 		model_manager_window.popup_centered(Vector2i(600, 500))
 		return
-	
+
 	model_manager_window = MODEL_MANAGER.instantiate()
 	get_tree().root.add_child(model_manager_window)
 	model_manager_window.set_model_manager(AlphaAgentPlugin.global_setting.model_manager)
@@ -213,7 +221,7 @@ func _on_manage_models_pressed():
 func _on_models_changed():
 	_init_model_selector()
 	_switch_to_current_model()
-	
+
 func reset_message_info():
 	current_message_item = null
 	current_think = ""
@@ -251,19 +259,19 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 		"Agent":
 			current_chat_stream.tools = tools.get_tools_list()
 
-
-	current_chat_stream.use_thinking = use_thinking
-	
-	# 使用模型配置的max_tokens
+	# 使用模型配置的max_tokens 和 thinking
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if model_manager:
 		var model = model_manager.get_current_model()
 		if model:
 			current_chat_stream.max_tokens = model.max_tokens
+			current_chat_stream.use_thinking = model.supports_thinking and use_thinking
 		else:
 			current_chat_stream.max_tokens = 8 * 1024
+			current_chat_stream.use_thinking = use_thinking
 	else:
 		current_chat_stream.max_tokens = 8 * 1024
+		current_chat_stream.use_thinking = use_thinking
 
 	var user_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
 	user_message_item.show_think = false
@@ -285,7 +293,7 @@ func on_agent_think(think: String):
 		var model_manager = AlphaAgentPlugin.global_setting.model_manager
 		var model = model_manager.get_current_model() if model_manager else null
 		var model_supports_thinking = model.supports_thinking if model else false
-		
+
 		# 只有模型支持 thinking 时才更新 thinking 内容
 		if model_supports_thinking:
 			current_think += think
@@ -346,18 +354,18 @@ func on_generate_error(error_info: Dictionary):
 	printerr(error_info.data)
 	#current_message_item.update_think_content(current_think, false)
 	current_message_item.update_error_message(error_info.error_msg, error_info.data)
-	
+
 	# 如果当前消息存在，显示错误信息
 	# if current_message_item:
 	# 	if current_chat_stream.use_thinking and current_think != "":
 	# 		current_message_item.update_think_content(current_think, false)
-		
+
 	# 	# 显示错误信息
 	# 	var error_msg = "❌ " + error_info.error_msg
 	# 	if error_info.data:
 	# 		error_msg += "\n" + str(error_info.data)
 	# 	current_message_item.update_message_content(error_msg)
-	
+
 	input_container.disable = false
 	input_container.switch_button_to("Send")
 
@@ -388,7 +396,6 @@ func on_click_history_button():
 		show_container(chat_container)
 	else:
 		show_container(history_container)
-
 func on_agent_finish(finish_reason: String, total_tokens: float):
 	#print("finish_reason ", finish_reason)
 	#print("total_tokens ", total_tokens)
@@ -493,7 +500,7 @@ func on_recovery_history(history_item: AgentHistoryContainer.HistoryItem):
 						tool_call_info.function = OllamaChatStream.ToolCallsInfoFunc.new()
 					else:
 						continue
-					
+
 					tool_call_info.id = tool_call.get("id")
 					tool_call_info.type = tool_call.get("type")
 					tool_call_info.function.arguments = tool_call.get("function").get("arguments")
@@ -506,15 +513,6 @@ func on_recovery_history(history_item: AgentHistoryContainer.HistoryItem):
 				message_item.update_message_content(message.content)
 		elif message.role == "tool":
 			message_item.update_used_tool_result(message.tool_call_id, message.content)
-
-func on_more_button_select(id: int):
-	match id:
-		MoreButtonIds.Memory:
-			show_container(memory_container)
-		MoreButtonIds.Help:
-			show_help_window()
-		MoreButtonIds.Setting:
-			show_container(setting_container)
 
 func show_help_window():
 	if help_window:
@@ -542,6 +540,17 @@ func _exit_tree() -> void:
 func show_container(container: Control):
 	back_chat_button.visible = container != chat_container
 	chat_title.visible = container == chat_container
+
+	if container == memory_container or container == setting_container:
+		setting_tabs.show()
+		top_bar_buttons.hide()
+		if container == memory_container:
+			setting_tab_memory.button_pressed = true
+		if container == setting_container:
+			setting_tab_setting.button_pressed = true
+	else:
+		setting_tabs.hide()
+		top_bar_buttons.show()
 
 	for c: Control in container_list:
 		c.visible = container == c

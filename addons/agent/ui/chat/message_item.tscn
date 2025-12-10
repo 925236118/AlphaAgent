@@ -93,6 +93,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_rqoyl")
 layout_mode = 2
 theme_override_constants/margin_left = 6
 theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 6
 theme_override_constants/margin_bottom = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/ContentContainer/ThinkContainer/ThinkTimePanel/MarginContainer"]
@@ -113,8 +114,11 @@ text = "0.0 s"
 
 [node name="ExpandIcon" type="TextureRect" parent="VBoxContainer/ContentContainer/ThinkContainer/ThinkTimePanel/MarginContainer/HBoxContainer"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(15, 10)
 layout_mode = 2
 texture = ExtResource("2_rqoyl")
+expand_mode = 1
+stretch_mode = 5
 flip_v = true
 
 [node name="ExpandButton" type="Button" parent="VBoxContainer/ContentContainer/ThinkContainer/ThinkTimePanel"]
@@ -132,6 +136,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_q4qcv")
 
 [node name="ThinkContent" type="RichTextLabel" parent="VBoxContainer/ContentContainer/ThinkContainer/PanelContainer"]
 unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 theme_override_colors/default_color = Color(0.46666667, 0.46666667, 0.46666667, 1)

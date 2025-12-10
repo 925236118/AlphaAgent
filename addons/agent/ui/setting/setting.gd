@@ -5,21 +5,23 @@ extends ScrollContainer
 @onready var auto_expand_think_setting: BoxContainer = $SettingPanel/SettingItemsContainer/AutoExpandThinkSetting
 @onready var auto_add_file_ref_setting: BoxContainer = $SettingPanel/SettingItemsContainer/AutoAddFileRefSetting
 @onready var send_shot_cut: BoxContainer = $SettingPanel/SettingItemsContainer/SendShotCut
-@onready var secret_key_setting: BoxContainer = $SettingPanel/SettingItemsContainer/SecretKeySetting
+@onready var config_model_button: Button = $SettingPanel/SettingItemsContainer/ConfigModelButton
 
 # 添加新节点后需要在这里注册
 @onready var setting_item_nodes = [
 	auto_clear_setting,
 	auto_expand_think_setting,
 	auto_add_file_ref_setting,
-	send_shot_cut,
-	secret_key_setting
+	send_shot_cut
 ]
+
+signal config_model
 
 func _ready() -> void:
 	AlphaAgentPlugin.global_setting.load_global_setting()
 	init_item_values()
 	init_signals()
+	config_model_button.pressed.connect(func (): config_model.emit())
 
 func init_item_values():
 	for setting_item in setting_item_nodes:

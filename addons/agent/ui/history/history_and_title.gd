@@ -52,15 +52,20 @@ class HistoryItem:
 
 func _ready() -> void:
 	check_history_file()
+	add_history_nodes()
 	history_expand_button.pressed.connect(on_click_history_expand_button)
 	history_list_window.close_requested.connect(on_close_history_list)
+
+func refresh_list():
+	clear_history_nodes()
+	await get_tree().process_frame
+	add_history_nodes()
 
 func set_title(title: String):
 	chat_title.text = title
 
 func on_click_history_expand_button():
 	var window_pos = get_tree().root.position
-	add_history_nodes()
 	var window_width = 296
 	var window_height = min(162 + history_list.size() * 32 + 16, 500)
 	history_list_window.popup(Rect2i(Vector2i(global_position) + popup_offset + window_pos, Vector2i(window_width, window_height)))
@@ -68,7 +73,6 @@ func on_click_history_expand_button():
 
 func on_close_history_list():
 	history_list_window.hide()
-	clear_history_nodes()
 	expand_icon.flip_v = false
 
 var history_list: Array = []
@@ -132,6 +136,7 @@ func update_history(id: String, item: HistoryItem):
 		history_list[index] = item
 
 	update_file_content()
+	refresh_list()
 
 func clear_history_nodes():
 	for items_container in [
@@ -157,10 +162,6 @@ func add_history_nodes():
 	#else:
 		#no_message_container.show()
 
-#func on_visibility_changed():
-	#if visible:
-	#else:
-
 func on_recovery_history_item(history_item: HistoryItem):
 	recovery.emit(history_item)
 
@@ -176,3 +177,4 @@ func on_delete_history_item(history_item: HistoryItem, node: Control):
 	node.queue_free()
 
 	update_file_content()
+	refresh_list()

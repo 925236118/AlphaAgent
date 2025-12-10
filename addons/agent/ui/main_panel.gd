@@ -13,7 +13,7 @@ extends Control
 @onready var new_chat_button: Button = %NewChatButton
 @onready var welcome_message: Control = %WelcomeMessage
 @onready var input_container: AgentInputContainer = %InputContainer
-@onready var chat_title: Label = %ChatTitle
+#@onready var chat_title: Label = %ChatTitle
 @onready var history_button: Button = %HistoryButton
 @onready var back_chat_button: Button = %BackChatButton
 @onready var top_bar_buttons: HBoxContainer = %TopBarButtons
@@ -66,7 +66,7 @@ var current_think: String = ""
 var current_title = "新对话":
 	set(val):
 		current_title = val
-		chat_title.text = current_title
+		#chat_title.text = current_title
 var first_chat: bool = true
 var current_id: String = ""
 var current_time: String = ""
@@ -539,7 +539,7 @@ func _exit_tree() -> void:
 
 func show_container(container: Control):
 	back_chat_button.visible = container != chat_container
-	chat_title.visible = container == chat_container
+	#chat_title.visible = container == chat_container
 
 	if container == memory_container or container == setting_container:
 		setting_tabs.show()

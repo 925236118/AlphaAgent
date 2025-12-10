@@ -1,11 +1,10 @@
-[gd_scene load_steps=38 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=30 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Texture2D" uid="uid://dd5t0pwniqnr1" path="res://addons/agent/icons/history.svg" id="2_6rfr6"]
 [ext_resource type="Texture2D" uid="uid://d3tqc8rlqan2t" path="res://addons/agent/icons/back.svg" id="2_aabuu"]
-[ext_resource type="Texture2D" uid="uid://btnh1plrm3etf" path="res://addons/agent/icons/newicon/Icon_arrowdown.svg" id="2_cd0et"]
+[ext_resource type="PackedScene" uid="uid://dob5hdboaqcnu" path="res://addons/agent/ui/history/history_and_title.tscn" id="2_i5act"]
 [ext_resource type="PackedScene" uid="uid://cq2jo5hlpns6j" path="res://addons/agent/tools/tools.tscn" id="3_2usmi"]
-[ext_resource type="Texture2D" uid="uid://bj6c0vfw4s6an" path="res://addons/agent/icons/newicon/icon_reason.svg" id="3_i5act"]
 [ext_resource type="Texture2D" uid="uid://knvpu0jr7hwd" path="res://addons/agent/icons/newicon/Icon_add.svg" id="3_wlmmt"]
 [ext_resource type="PackedScene" uid="uid://dqkrjn0mak6lh" path="res://addons/agent/ui/chat/input_container.tscn" id="4_2dutf"]
 [ext_resource type="PackedScene" uid="uid://d2qy4nnjypt6o" path="res://addons/agent/ui/history/history_container.tscn" id="5_elhta"]
@@ -34,71 +33,6 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 corner_detail = 12
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cd0et"]
-bg_color = Color(0.15686275, 0.15686275, 0.15686275, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_erjd2"]
-bg_color = Color(0.2, 0.2, 0.2, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pcyt6"]
-bg_color = Color(0.15686275, 0.15686275, 0.15686275, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.24313726, 0.24313726, 0.24313726, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxLine" id="StyleBoxLine_dhmi8"]
-color = Color(1, 1, 1, 0.101960786)
-
-[sub_resource type="Theme" id="Theme_erjd2"]
-PopupMenu/colors/font_accelerator_color = Color(1, 1, 1, 1)
-PopupMenu/colors/font_color = Color(1, 1, 1, 1)
-PopupMenu/colors/font_disabled_color = Color(0.46666667, 0.46666667, 0.46666667, 1)
-PopupMenu/colors/font_hover_color = Color(1, 1, 1, 1)
-PopupMenu/colors/font_outline_color = Color(1, 1, 1, 1)
-PopupMenu/colors/font_separator_color = Color(1, 1, 1, 1)
-PopupMenu/colors/font_separator_outline_color = Color(1, 1, 1, 1)
-PopupMenu/constants/h_separation = 4
-PopupMenu/constants/icon_max_width = 15
-PopupMenu/constants/indent = 0
-PopupMenu/constants/item_end_padding = 8
-PopupMenu/constants/item_start_padding = 8
-PopupMenu/constants/outline_size = 0
-PopupMenu/constants/separator_outline_size = 1
-PopupMenu/constants/v_separation = 8
-PopupMenu/font_sizes/font_separator_size = 16
-PopupMenu/font_sizes/font_size = 16
-PopupMenu/fonts/font = null
-PopupMenu/fonts/font_separator = null
-PopupMenu/icons/checked = null
-PopupMenu/icons/checked_disabled = null
-PopupMenu/icons/radio_checked = null
-PopupMenu/icons/radio_checked_disabled = null
-PopupMenu/icons/radio_unchecked = null
-PopupMenu/icons/radio_unchecked_disabled = null
-PopupMenu/icons/submenu = null
-PopupMenu/icons/submenu_mirrored = null
-PopupMenu/icons/unchecked = null
-PopupMenu/icons/unchecked_disabled = null
-PopupMenu/styles/hover = SubResource("StyleBoxFlat_erjd2")
-PopupMenu/styles/labeled_separator_left = null
-PopupMenu/styles/labeled_separator_right = null
-PopupMenu/styles/panel = SubResource("StyleBoxFlat_pcyt6")
-PopupMenu/styles/separator = SubResource("StyleBoxLine_dhmi8")
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_i5act"]
-
-[sub_resource type="LabelSettings" id="LabelSettings_5v6i3"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_aabuu"]
 
@@ -186,65 +120,13 @@ theme_override_constants/margin_bottom = 10
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="PanelContainer" type="PanelContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar"]
-visible = false
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_cd0et")
-
-[node name="MarginContainer" type="MarginContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar/PanelContainer"]
-layout_mode = 2
-theme_override_constants/margin_left = 6
-theme_override_constants/margin_top = 2
-theme_override_constants/margin_right = 6
-theme_override_constants/margin_bottom = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar/PanelContainer/MarginContainer"]
-layout_mode = 2
-
-[node name="ExpandIcon" type="TextureRect" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar/PanelContainer/MarginContainer/HBoxContainer"]
+[node name="HistoryAndTitle" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar" instance=ExtResource("2_i5act")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(15, 10)
 layout_mode = 2
-texture = ExtResource("2_cd0et")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="HistoryExpandButton" type="MenuButton" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar/PanelContainer"]
-custom_minimum_size = Vector2(30, 30)
-layout_mode = 2
-mouse_default_cursor_shape = 2
-theme = SubResource("Theme_erjd2")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_i5act")
-expand_icon = true
-item_count = 5
-popup/item_0/text = "今日"
-popup/item_0/id = 0
-popup/item_0/disabled = true
-popup/item_1/text = "测试对话"
-popup/item_1/icon = ExtResource("3_i5act")
-popup/item_1/id = 1
-popup/item_2/checked = true
-popup/item_2/id = 2
-popup/item_2/separator = true
-popup/item_3/text = "昨天"
-popup/item_3/id = 3
-popup/item_3/disabled = true
-popup/item_4/text = "测试对话"
-popup/item_4/icon = ExtResource("3_i5act")
-popup/item_4/id = 4
 
 [node name="HBoxContainer" type="HBoxContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar"]
 layout_mode = 2
 size_flags_horizontal = 3
-
-[node name="ChatTitle" type="Label" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-text = "新对话"
-label_settings = SubResource("LabelSettings_5v6i3")
-clip_text = true
-text_overrun_behavior = 3
 
 [node name="BackChatButton" type="Button" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar/HBoxContainer"]
 unique_name_in_owner = true

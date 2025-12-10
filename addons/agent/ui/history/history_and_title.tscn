@@ -1,0 +1,180 @@
+[gd_scene load_steps=11 format=3 uid="uid://dob5hdboaqcnu"]
+
+[ext_resource type="Texture2D" uid="uid://btnh1plrm3etf" path="res://addons/agent/icons/newicon/Icon_arrowdown.svg" id="1_0u44n"]
+[ext_resource type="Script" uid="uid://0iv7f02886de" path="res://addons/agent/ui/history/history_and_title.gd" id="1_a7crv"]
+[ext_resource type="PackedScene" uid="uid://eq8fe48g3uch" path="res://addons/agent/ui/history/history_message_item.tscn" id="3_inyv1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cd0et"]
+bg_color = Color(0.15686275, 0.15686275, 0.15686275, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="LabelSettings" id="LabelSettings_5v6i3"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_erjd2"]
+bg_color = Color(0.2, 0.2, 0.2, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pcyt6"]
+bg_color = Color(0.15686275, 0.15686275, 0.15686275, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.24313726, 0.24313726, 0.24313726, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_dhmi8"]
+color = Color(1, 1, 1, 0.101960786)
+
+[sub_resource type="Theme" id="Theme_erjd2"]
+PopupMenu/colors/font_accelerator_color = Color(1, 1, 1, 1)
+PopupMenu/colors/font_color = Color(1, 1, 1, 1)
+PopupMenu/colors/font_disabled_color = Color(0.46666667, 0.46666667, 0.46666667, 1)
+PopupMenu/colors/font_hover_color = Color(1, 1, 1, 1)
+PopupMenu/colors/font_outline_color = Color(1, 1, 1, 1)
+PopupMenu/colors/font_separator_color = Color(1, 1, 1, 1)
+PopupMenu/colors/font_separator_outline_color = Color(1, 1, 1, 1)
+PopupMenu/constants/h_separation = 4
+PopupMenu/constants/icon_max_width = 15
+PopupMenu/constants/indent = 0
+PopupMenu/constants/item_end_padding = 8
+PopupMenu/constants/item_start_padding = 8
+PopupMenu/constants/outline_size = 0
+PopupMenu/constants/separator_outline_size = 1
+PopupMenu/constants/v_separation = 8
+PopupMenu/font_sizes/font_separator_size = 16
+PopupMenu/font_sizes/font_size = 16
+PopupMenu/fonts/font = null
+PopupMenu/fonts/font_separator = null
+PopupMenu/icons/checked = null
+PopupMenu/icons/checked_disabled = null
+PopupMenu/icons/radio_checked = null
+PopupMenu/icons/radio_checked_disabled = null
+PopupMenu/icons/radio_unchecked = null
+PopupMenu/icons/radio_unchecked_disabled = null
+PopupMenu/icons/submenu = null
+PopupMenu/icons/submenu_mirrored = null
+PopupMenu/icons/unchecked = null
+PopupMenu/icons/unchecked_disabled = null
+PopupMenu/styles/hover = SubResource("StyleBoxFlat_erjd2")
+PopupMenu/styles/labeled_separator_left = null
+PopupMenu/styles/labeled_separator_right = null
+PopupMenu/styles/panel = SubResource("StyleBoxFlat_pcyt6")
+PopupMenu/styles/separator = SubResource("StyleBoxLine_dhmi8")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_i5act"]
+
+[node name="HistoryAndTitle" type="PanelContainer"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 36.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_cd0et")
+script = ExtResource("1_a7crv")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="ChatTitle" type="Label" parent="MarginContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "新对话"
+label_settings = SubResource("LabelSettings_5v6i3")
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="ExpandIcon" type="TextureRect" parent="MarginContainer/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(15, 10)
+layout_mode = 2
+texture = ExtResource("1_0u44n")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HistoryList" type="Window" parent="."]
+transparent_bg = true
+oversampling_override = 1.0
+size = Vector2i(200, 400)
+borderless = true
+transparent = true
+unfocusable = true
+popup_window = true
+
+[node name="Panel" type="Panel" parent="HistoryList"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HistoryList/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HistoryList/Panel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+text = "今天"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HistoryMessageItem" parent="HistoryList/Panel/ScrollContainer/VBoxContainer/VBoxContainer" instance=ExtResource("3_inyv1")]
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+text = "昨天"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HistoryMessageItem2" parent="HistoryList/Panel/ScrollContainer/VBoxContainer/VBoxContainer2" instance=ExtResource("3_inyv1")]
+layout_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+text = "更早之前"
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="HistoryList/Panel/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HistoryMessageItem3" parent="HistoryList/Panel/ScrollContainer/VBoxContainer/VBoxContainer3" instance=ExtResource("3_inyv1")]
+layout_mode = 2
+
+[node name="HistoryExpandButton" type="Button" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme = SubResource("Theme_erjd2")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_i5act")
+flat = true
+expand_icon = true

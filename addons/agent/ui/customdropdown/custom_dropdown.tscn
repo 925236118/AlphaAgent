@@ -1,0 +1,203 @@
+[gd_scene load_steps=14 format=3 uid="uid://cr0rgr6uojjsh"]
+
+[ext_resource type="Script" uid="uid://cry5mjqycvwr8" path="res://addons/agent/ui/customdropdown/custom_dropdown.gd" id="1_0jk5c"]
+[ext_resource type="Texture2D" uid="uid://btnh1plrm3etf" path="res://addons/agent/icons/newicon/Icon_arrowdown.svg" id="1_xnw6q"]
+[ext_resource type="Texture2D" uid="uid://ba73pa4qitcps" path="res://addons/agent/icons/newicon/Icon_checkmark.svg" id="2_xx33k"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_paqa0"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.15686275, 0.15686275, 0.15686275, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38746396, 0.38746396, 0.38746396, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1pkie"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.3882353, 0.3882353, 0.3882353, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dfnic"]
+content_margin_left = 10.0
+content_margin_top = 4.0
+content_margin_right = 2.0
+content_margin_bottom = 4.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vn7bn"]
+content_margin_left = 10.0
+content_margin_top = 4.0
+content_margin_right = 2.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.101960786)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2cq5q"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y7pdv"]
+content_margin_left = 10.0
+content_margin_top = 4.0
+content_margin_right = 2.0
+content_margin_bottom = 4.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k0lqw"]
+content_margin_left = 10.0
+content_margin_top = 4.0
+content_margin_right = 2.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.101960786)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mcfbi"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0jk5c"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_bottom = 4.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xx33k"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_bottom = 4.0
+bg_color = Color(0.2, 0.2, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="CustomDropdown" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_0jk5c")
+
+[node name="DropdownPanelContainer" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -89.0
+offset_right = 106.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_paqa0")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="DropdownPanelContainer"]
+layout_mode = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="DropdownPanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_1pkie")
+
+[node name="AgentButton" type="Button" parent="DropdownPanelContainer/VBoxContainer/PanelContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_dfnic")
+theme_override_styles/hover = SubResource("StyleBoxFlat_vn7bn")
+text = "Agent  "
+alignment = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="DropdownPanelContainer/VBoxContainer/PanelContainer"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_right = 6
+
+[node name="AgentTextureRect" type="TextureRect" parent="DropdownPanelContainer/VBoxContainer/PanelContainer/MarginContainer"]
+unique_name_in_owner = true
+self_modulate = Color(0.24705882, 0.61960787, 1, 1)
+clip_contents = true
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("2_xx33k")
+expand_mode = 5
+
+[node name="PanelContainer2" type="PanelContainer" parent="DropdownPanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_2cq5q")
+
+[node name="AskButton" type="Button" parent="DropdownPanelContainer/VBoxContainer/PanelContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_y7pdv")
+theme_override_styles/hover = SubResource("StyleBoxFlat_k0lqw")
+text = "ASK  "
+alignment = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="DropdownPanelContainer/VBoxContainer/PanelContainer2"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_right = 6
+
+[node name="ASKTextureRect" type="TextureRect" parent="DropdownPanelContainer/VBoxContainer/PanelContainer2/MarginContainer"]
+unique_name_in_owner = true
+visible = false
+self_modulate = Color(0.24705882, 0.61960787, 1, 1)
+custom_minimum_size = Vector2(12, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("2_xx33k")
+expand_mode = 5
+
+[node name="CheckedDefaultPanelContainer" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(72, 0)
+layout_mode = 1
+offset_right = 90.0
+offset_bottom = 34.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_mcfbi")
+
+[node name="CheckedDefaultButton" type="Button" parent="CheckedDefaultPanelContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_0jk5c")
+theme_override_styles/hover = SubResource("StyleBoxFlat_xx33k")
+text = "Agent"
+alignment = 0
+
+[node name="IconArrowdownTextureRect" type="TextureRect" parent="CheckedDefaultPanelContainer"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("1_xnw6q")
+stretch_mode = 2
+
+[node name="Camera2D" type="Camera2D" parent="."]

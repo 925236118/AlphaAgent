@@ -353,23 +353,14 @@ func on_generate_error(error_info: Dictionary):
 	#current_message_item.update_think_content(current_think, false)
 	current_message_item.update_error_message(error_info.error_msg, error_info.data)
 
-	# 如果当前消息存在，显示错误信息
-	# if current_message_item:
-	# 	if current_chat_stream.use_thinking and current_think != "":
-	# 		current_message_item.update_think_content(current_think, false)
-
-	# 	# 显示错误信息
-	# 	var error_msg = "❌ " + error_info.error_msg
-	# 	if error_info.data:
-	# 		error_msg += "\n" + str(error_info.data)
-	# 	current_message_item.update_message_content(error_msg)
-
 	input_container.disable = false
 	input_container.switch_button_to("Send")
 
 func on_click_new_chat_button():
+	if current_chat_stream != null and current_chat_stream.generatting:
+		current_chat_stream.close()
 	clear()
-
+	input_container.disable = false
 	show_container(chat_container)
 
 func clear():

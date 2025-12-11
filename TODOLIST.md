@@ -22,13 +22,13 @@
 | 12  | `check_script_error`         | 调试       | 检查脚本中的语法错误                |
 | 13  | `open_resource`              | 编辑器操作 | 使用编辑器打开资源文件              |
 | 14  | `update_script_file_content` | 编辑器操作 | 使用编辑器编辑脚本内容 |
+| 15  | `update_scene_node_property` | 编辑器操作 | 设置某个场景中的某个节点的某个属性为某个值 |
+| 16  | `set_resource_property`      | 编辑器操作 | 将资源挂载到某个场景的某个属性，支持嵌套资源 |
+| 17  | `execute_command`            | 命令行操作 | 允许agent直接在项目目录下调用命令行工具 |
+| 18  | `editor_script_feature`      | 编辑器操作 | 编写脚本可以直接运行的脚本，并运行（暂不开放agent调用） |
 
 
 ### 待完成
-- 设置某个场景中的某个节点的某个属性为某个值
-    - 先打开场景，切换到2D/3D界面，然后选中节点后，设置对应的值，问题在于如何声明需要的变量？
-- 编辑器内编辑Shader
-    - 参考update_script_file_content，但是需要先获得节点
 - 操作AnimationPlayer中的动画资源
     - 加载动画资源后，根据ai结果分别添加动画、轨道。ai结果应是一个json数组，这样可以一次返回，多次设置。
 - 操作TileSet中的数据
@@ -36,8 +36,6 @@
 - 获取TileSet中的数据
     - 可筛选图集
     - 将图集中的瓦片信息、坐标、大小、物理、渲染、光照、导航、
-- 编写脚本可以直接运行的脚本，并运行
-    - 参照update_script_file_content的调用快捷键方式
 
 
 

@@ -1,6 +1,7 @@
-[gd_scene load_steps=18 format=3 uid="uid://dqkrjn0mak6lh"]
+[gd_scene load_steps=19 format=3 uid="uid://dqkrjn0mak6lh"]
 
 [ext_resource type="Script" uid="uid://c0gayflg4ovas" path="res://addons/agent/ui/chat/input_container.gd" id="1_xi1dg"]
+[ext_resource type="PackedScene" uid="uid://cr0rgr6uojjsh" path="res://addons/agent/ui/customdropdown/custom_dropdown.tscn" id="2_c3kby"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xi1dg"]
 bg_color = Color(0.04303915, 0.043039158, 0.043039113, 0.38039216)
@@ -128,6 +129,10 @@ alignment = 2
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
+
+[node name="CustomDropdown" parent="VBoxContainer/HBoxContainer/HBoxContainer" instance=ExtResource("2_c3kby")]
+custom_minimum_size = Vector2(96, 30)
+layout_mode = 2
 
 [node name="InputModeSelect" type="OptionButton" parent="VBoxContainer/HBoxContainer/HBoxContainer"]
 unique_name_in_owner = true

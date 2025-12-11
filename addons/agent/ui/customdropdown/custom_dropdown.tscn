@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cr0rgr6uojjsh"]
+[gd_scene load_steps=19 format=3 uid="uid://cr0rgr6uojjsh"]
 
 [ext_resource type="Script" uid="uid://cry5mjqycvwr8" path="res://addons/agent/ui/customdropdown/custom_dropdown.gd" id="1_0jk5c"]
 [ext_resource type="Texture2D" uid="uid://btnh1plrm3etf" path="res://addons/agent/icons/newicon/Icon_arrowdown.svg" id="1_xnw6q"]
@@ -34,6 +34,10 @@ content_margin_right = 2.0
 content_margin_bottom = 4.0
 bg_color = Color(0.6, 0.6, 0.6, 0)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pfnlw"]
+content_margin_left = 10.0
+bg_color = Color(0.1882353, 0.25882354, 0.3647059, 0.19607843)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vn7bn"]
 content_margin_left = 10.0
 content_margin_top = 4.0
@@ -63,6 +67,10 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k2la0"]
+content_margin_left = 10.0
+bg_color = Color(0.1882353, 0.25882354, 0.3647059, 0.19607843)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k0lqw"]
 content_margin_left = 10.0
 content_margin_top = 4.0
@@ -83,6 +91,12 @@ content_margin_top = 2.0
 content_margin_bottom = 4.0
 bg_color = Color(0.6, 0.6, 0.6, 0)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w0bvn"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_bottom = 4.0
+bg_color = Color(0.6, 0.6, 0.6, 0.19607843)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xx33k"]
 content_margin_left = 8.0
 content_margin_top = 2.0
@@ -93,46 +107,62 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4f8kd"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_03qtp"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
 [node name="CustomDropdown" type="Control"]
+custom_minimum_size = Vector2(96, 35)
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_right = 96.0
+grow_vertical = 0
 script = ExtResource("1_0jk5c")
 
-[node name="DropdownPanelContainer" type="PanelContainer" parent="."]
-unique_name_in_owner = true
-visible = false
-custom_minimum_size = Vector2(96, 0)
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -89.0
-offset_right = 106.0
+offset_top = -127.0
+offset_right = 103.0
 grow_vertical = 0
+alignment = 2
+
+[node name="DropdownPanelContainer" type="PanelContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_paqa0")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="DropdownPanelContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/DropdownPanelContainer"]
 layout_mode = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="DropdownPanelContainer/VBoxContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/DropdownPanelContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_1pkie")
 
-[node name="AgentButton" type="Button" parent="DropdownPanelContainer/VBoxContainer/PanelContainer"]
+[node name="AgentButton" type="Button" parent="VBoxContainer/DropdownPanelContainer/VBoxContainer/PanelContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBoxFlat_dfnic")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pfnlw")
 theme_override_styles/hover = SubResource("StyleBoxFlat_vn7bn")
 text = "Agent  "
 alignment = 0
 
-[node name="MarginContainer" type="MarginContainer" parent="DropdownPanelContainer/VBoxContainer/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/DropdownPanelContainer/VBoxContainer/PanelContainer"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_right = 6
 
-[node name="AgentTextureRect" type="TextureRect" parent="DropdownPanelContainer/VBoxContainer/PanelContainer/MarginContainer"]
+[node name="AgentTextureRect" type="TextureRect" parent="VBoxContainer/DropdownPanelContainer/VBoxContainer/PanelContainer/MarginContainer"]
 unique_name_in_owner = true
 self_modulate = Color(0.24705882, 0.61960787, 1, 1)
 clip_contents = true
@@ -144,25 +174,26 @@ mouse_filter = 2
 texture = ExtResource("2_xx33k")
 expand_mode = 5
 
-[node name="PanelContainer2" type="PanelContainer" parent="DropdownPanelContainer/VBoxContainer"]
+[node name="PanelContainer2" type="PanelContainer" parent="VBoxContainer/DropdownPanelContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_2cq5q")
 
-[node name="AskButton" type="Button" parent="DropdownPanelContainer/VBoxContainer/PanelContainer2"]
+[node name="AskButton" type="Button" parent="VBoxContainer/DropdownPanelContainer/VBoxContainer/PanelContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBoxFlat_y7pdv")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_k2la0")
 theme_override_styles/hover = SubResource("StyleBoxFlat_k0lqw")
 text = "ASK  "
 alignment = 0
 
-[node name="MarginContainer" type="MarginContainer" parent="DropdownPanelContainer/VBoxContainer/PanelContainer2"]
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/DropdownPanelContainer/VBoxContainer/PanelContainer2"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_right = 6
 
-[node name="ASKTextureRect" type="TextureRect" parent="DropdownPanelContainer/VBoxContainer/PanelContainer2/MarginContainer"]
+[node name="ASKTextureRect" type="TextureRect" parent="VBoxContainer/DropdownPanelContainer/VBoxContainer/PanelContainer2/MarginContainer"]
 unique_name_in_owner = true
 visible = false
 self_modulate = Color(0.24705882, 0.61960787, 1, 1)
@@ -174,23 +205,26 @@ mouse_filter = 2
 texture = ExtResource("2_xx33k")
 expand_mode = 5
 
-[node name="CheckedDefaultPanelContainer" type="PanelContainer" parent="."]
-custom_minimum_size = Vector2(72, 0)
-layout_mode = 1
-offset_right = 90.0
-offset_bottom = 34.0
+[node name="CheckedDefaultPanelContainer" type="PanelContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
 theme_override_styles/panel = SubResource("StyleBoxFlat_mcfbi")
 
-[node name="CheckedDefaultButton" type="Button" parent="CheckedDefaultPanelContainer"]
+[node name="CheckedDefaultButton" type="Button" parent="VBoxContainer/CheckedDefaultPanelContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBoxFlat_0jk5c")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_w0bvn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_xx33k")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_4f8kd")
+theme_override_styles/focus = SubResource("StyleBoxFlat_03qtp")
 text = "Agent"
 alignment = 0
 
-[node name="IconArrowdownTextureRect" type="TextureRect" parent="CheckedDefaultPanelContainer"]
+[node name="IconArrowdownTextureRect" type="TextureRect" parent="VBoxContainer/CheckedDefaultPanelContainer"]
 unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
@@ -199,5 +233,4 @@ size_flags_vertical = 4
 mouse_filter = 2
 texture = ExtResource("1_xnw6q")
 stretch_mode = 2
-
-[node name="Camera2D" type="Camera2D" parent="."]
+flip_v = true

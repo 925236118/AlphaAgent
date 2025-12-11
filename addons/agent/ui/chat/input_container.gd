@@ -226,9 +226,11 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 			#var shader_editor =
 			pass
 
+#获取当前下拉框选择条目Agent、ASK#
 func get_input_mode():
 	return input_mode_select.get_item_text(input_mode_select.get_selected_id())
 
+#修改基础按钮字样Agent、ASK#
 func set_input_mode(name: String):
 	var id = -1
 	for i in input_mode_select.item_count:
@@ -237,6 +239,7 @@ func set_input_mode(name: String):
 
 	input_mode_select.select(id)
 
+#控制禁用#
 func set_input_mode_disable(disabled: bool):
 	input_mode_select.disabled = disabled
 

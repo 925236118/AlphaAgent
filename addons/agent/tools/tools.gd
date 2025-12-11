@@ -918,6 +918,25 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 					result = {
 						"error": "创建进程失败"
 					}
+		
+		#本工具目前具有较大不确定性，暂不提供调用
+		"editor_script_feature":
+			var json = JSON.parse_string(tool_call.function.arguments)
+
+			if not json == null and json.has("path") and json.has("content"):
+				if write_file(json.path, json.content):
+					if run_editor_script(json.path):
+						result = {
+							"success": "已运行EditorScript:" + json.path
+						}
+					else:
+						result = {
+							"error": "运行EditorScript失败:" + json.path
+						}
+				else:
+					result = {
+							"error": "创建脚本失败:" + json.path
+						}
 
 		"update_plan_list":
 			var json = JSON.parse_string(tool_call.function.arguments)
@@ -1133,3 +1152,32 @@ func execute_command(command: String, args: Array = [], blocking: bool = true) -
 	result.success = true if info else false
 	
 	return result
+
+#运行EditorScript
+func run_editor_script(script_path: String) -> bool:
+	# 加载脚本资源
+	var script = load(script_path) as Script
+	# 检查脚本是否成功加载
+	if not script:
+		push_error("无法加载脚本: " + script_path)
+		return false
+	# 创建脚本实例
+	var script_instance = script.new()
+	
+	# 检查实例是否成功创建
+	if not script_instance:
+		push_error("无法创建脚本实例: " + script_path)
+		return false
+	
+	#检查是否EditorScript
+	if not script_instance is EditorScript:
+		printerr("脚本非EditorScript：" + script_path)
+		return false
+	
+	# 如果脚本有_run方法，则调用它
+	if script_instance.has_method("_run"):
+		script_instance._run()
+		return true
+	else:
+		push_error("脚本没有_run方法: " + script_path)
+		return false

@@ -425,6 +425,35 @@ func get_tools_list() -> Array[Dictionary]:
 			}
 		},
 #endregion
+
+#region 命令行工具
+		# execute_command
+		{
+			"type": "function",
+			"function": {
+				"name": "execute_command",
+				"description": "创建一个独立于 Godot 运行的命令行工具，该工具运行在项目目录下。调用本工具需要提醒用户，以防止造成无法预料的后果。",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"command": {
+							"type": "string",
+							"description": "需要执行的命令名称",
+						},
+						"args": {
+							"type": "array",
+							"description": "需要执行的命令的参数，会按给定顺序执行。",
+						},
+						"blocking": {
+							"type": "boolean",
+							"description": "如果 blocking 为 false，则创建的管道使用非阻塞模式，即读写操作会立即返回。默认为ture。",
+						},
+					},
+					"required": ["command", "args"]
+				}
+			}
+		},
+#endregion
 	]
 
 
@@ -876,6 +905,20 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 					"error": "资源写入失败"
 					}
 
+		"execute_command":
+			var json = JSON.parse_string(tool_call.function.arguments)
+
+			if not json == null and json.has("command") and json.has("args") and json.has("blocking"):
+				var command_result = execute_command(json.command, json.args, json.blocking)
+				if command_result.success:
+					result = {
+						"success": "成功执行命令，信息如下：" + str(command_result.info)
+					}
+				else:
+					result = {
+						"error": "创建进程失败"
+					}
+
 		"update_plan_list":
 			var json = JSON.parse_string(tool_call.function.arguments)
 			if not json == null and json.has("tasks"):
@@ -1058,3 +1101,35 @@ func set_res(target: Object, property_target: Array[String], res: Resource):
 		else:
 			printerr("未找到属性", property_target[0])
 			return false
+
+#命令行调用工具
+func execute_command(command: String, args: Array = [], blocking: bool = true) -> Dictionary:
+	var result = {
+		"success": false,
+		"output": [],
+		"info": {}
+	}
+	
+	# 获取项目目录
+	var working_dir = ProjectSettings.globalize_path("res://")
+	
+	# 在Linux/Mac上使用bash，Windows上使用cmd
+	var shell = "bash" if OS.get_name() != "Windows" else "cmd"
+	var shell_args = []
+	
+	if OS.get_name() != "Windows":
+		 # 使用bash，先切换目录，然后执行命令
+		var full_command = "cd '" + working_dir + "' && " + command + " " + " ".join(args)
+		shell_args = ["-c", full_command]
+	else:
+		# 使用cmd，先切换目录，然后执行命令
+		var full_command = "cd /d \"" + working_dir + "\" && " + command + " " + " ".join(args)
+		shell_args = ["/c", full_command]
+	
+	# 执行命令
+	var info = OS.execute_with_pipe(shell, shell_args, blocking)
+	
+	result.info = info
+	result.success = true if info else false
+	
+	return result

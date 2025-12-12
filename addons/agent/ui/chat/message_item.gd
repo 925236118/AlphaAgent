@@ -47,6 +47,7 @@ enum MessageType {
 var message_type: MessageType = MessageType.None
 
 signal resend
+signal copy
 
 var message_id: String = ""
 
@@ -56,6 +57,7 @@ func _ready() -> void:
 	think_time = 0.0
 	message_content.meta_clicked.connect(on_click_rich_text_url)
 	re_send_button.pressed.connect(resend.emit)
+	copy_button.pressed.connect(copy.emit)
 
 	if AlphaAgentPlugin.global_setting.auto_expand_think:
 		expand_button.button_pressed = true

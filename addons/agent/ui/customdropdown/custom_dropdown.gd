@@ -2,8 +2,7 @@
 extends Control
 class_name CustomDropdown
 
-signal check_agent
-signal check_ask
+signal is_action_mode
 
 @onready var icon_arrowdown_texture_rect: TextureRect = %IconArrowdownTextureRect
 @onready var checked_default_button: Button = %CheckedDefaultButton
@@ -40,7 +39,7 @@ func select_agent():
 		ask_texture_rect.visible =! ask_texture_rect.visible
 	checked_default_button.text = "Agent"
 	change_the_arrowdown()
-	check_agent.emit()
+	check_is_action_mode()
 
 #选择ASK#
 func select_ask():
@@ -49,4 +48,27 @@ func select_ask():
 		agent_texture_rect.visible =! agent_texture_rect.visible
 	checked_default_button.text = "ASK"
 	change_the_arrowdown()
-	check_ask.emit()
+	check_is_action_mode()
+
+func get_now_mode() -> String:
+	#print(checked_default_button.text)
+	return checked_default_button.text
+	
+
+func check_is_action_mode():
+	is_action_mode.emit()
+	print("now click")
+
+
+
+
+
+
+
+
+
+
+
+
+
+#down#

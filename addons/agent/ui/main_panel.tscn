@@ -377,7 +377,7 @@ uri = "https://godotvillage.github.io/"
 unique_name_in_owner = true
 script = ExtResource("13_wlmmt")
 api_base = "https://api.deepseek.com"
-secret_key = "sk-63105427768d4e2e9eceff921502cf90"
+secret_key = "sk-078ec588fe384842a339e5db806120dc"
 model_name = "deepseek-chat"
 max_tokens = 8192
 
@@ -385,7 +385,7 @@ max_tokens = 8192
 unique_name_in_owner = true
 script = ExtResource("14_q7ex6")
 api_base = "https://api.deepseek.com"
-secret_key = "sk-63105427768d4e2e9eceff921502cf90"
+secret_key = "sk-078ec588fe384842a339e5db806120dc"
 model_name = "deepseek-chat"
 
 [node name="OllamaChatStream" type="Node" parent="ChatModels"]

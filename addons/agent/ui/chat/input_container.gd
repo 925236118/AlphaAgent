@@ -12,6 +12,8 @@ extends MarginContainer
 @onready var use_thinking: CheckButton = %UseThinking
 @onready var stop_button: Button = %StopButton
 @onready var model_button: OptionButton = %ModelButton
+@onready var custom_dropdown: CustomDropdown = %CustomDropdown
+
 
 const REFERENCE_ITEM = preload("uid://bewckbivwp036")
 
@@ -63,7 +65,9 @@ func _ready() -> void:
 
 	user_input.text_changed.connect(on_user_input_text_changed)
 	input_menu_list.item_selected.connect(on_input_menu_list_item_selected)
-
+	custom_dropdown.is_action_mode.connect(update_user_input_placeholder)
+	
+	
 	# 初始化模型选择器
 	if model_button:
 		model_button.item_selected.connect(_on_model_selected)
@@ -227,8 +231,11 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 			pass
 
 #获取当前下拉框选择条目Agent、ASK#
-func get_input_mode():
-	return input_mode_select.get_item_text(input_mode_select.get_selected_id())
+func get_input_mode() -> String:
+	#新重写，获取自定义控件文本#
+	return custom_dropdown.get_now_mode()
+	
+	#return input_mode_select.get_item_text(input_mode_select.get_selected_id())
 
 #修改基础按钮字样Agent、ASK#
 func set_input_mode(name: String):
@@ -334,6 +341,9 @@ func update_user_input_placeholder():
 			user_input.placeholder_text = "输入问题，不使用工具，获得更安全的体验。"
 		"Agent":
 			user_input.placeholder_text = "输入问题，或拖拽添加引用。"
+	print(get_input_mode())
+
+
 
 func _on_input_mode_select_item_selected(index: int) -> void:
 	update_user_input_placeholder()

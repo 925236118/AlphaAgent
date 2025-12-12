@@ -131,12 +131,13 @@ size_flags_horizontal = 3
 size_flags_vertical = 4
 
 [node name="CustomDropdown" parent="VBoxContainer/HBoxContainer/HBoxContainer" instance=ExtResource("2_c3kby")]
-visible = false
+unique_name_in_owner = true
 custom_minimum_size = Vector2(96, 30)
 layout_mode = 2
 
 [node name="InputModeSelect" type="OptionButton" parent="VBoxContainer/HBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 size_flags_vertical = 4
 mouse_default_cursor_shape = 2

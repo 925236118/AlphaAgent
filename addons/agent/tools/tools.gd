@@ -150,6 +150,28 @@ func get_tools_list() -> Array[Dictionary]:
 				}
 			}
 		},
+		# get_tileset_info
+		{
+			"type": "function",
+			"function": {
+				"name": "get_tileset_info",
+				"description": "获取TileSet的所有信息，包括纹理原点、调色、Z索引、Y排序原点、地形、概率、物理、导航、自定义数据和光照遮挡等。",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"scene_path": {
+							"type": "string",
+							"description": "想获取的TileSet所在的场景路径，必须是以res://开头的路径。",
+						},
+						"tile_map_path": {
+							"type": "string",
+							"description": "想获取的TileSet被挂载在的TileMapLayer节点在场景树中的路径。从场景的根节点开始，用“/”分隔。",
+						},
+					},
+					"required": ["scene_path","tile_map_path"]
+				}
+			}
+		},
 #endregion
 #region 文件操作
 		# read_file
@@ -782,6 +804,16 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 					"image_format_name": image.data.format,
 					"data_size": image.get_data_size()
 				}
+		"get_tileset_info":
+			var json = JSON.parse_string(tool_call.function.arguments)
+			if not json == null and json.has("scene_path") and json.has("tile_map_path"):
+				var node = get_target_node(json.scene_path, json.tile_map_path)
+				if node:
+					result = get_tileset_info(node.tile_set)
+				else:
+					result = {
+						"error": "没有找到对应TileMapLayer节点"
+					}
 
 		"set_singleton":
 			var json = JSON.parse_string(tool_call.function.arguments)
@@ -1008,47 +1040,11 @@ func write_file(path: String, content: String) -> bool:
 
 #设置某个场景中的某个节点的某个属性为某个值
 func update_scene_node_property(scene_path: String, node_path: String, property_name: String, property_value: String) -> bool:
-	if not ResourceLoader.exists(scene_path):
-		return false
-
-	var opened_scene = ResourceLoader.load(scene_path, "PackedScene") as PackedScene
-	if not opened_scene:
-		printerr("错误：无法打开场景 '", scene_path, "'。请检查路径是否正确。")
-		return false# 如果场景打开失败，则终止脚本
-	else:
-		EditorInterface.open_scene_from_path(scene_path)
-
-	var instance = opened_scene.instantiate()
-	if instance is Node2D:
-		print("这是一个2D场景")
-		EditorInterface.set_main_screen_editor("2D")
-	elif instance is Node3D:
-		print("这是一个3D场景")
-		EditorInterface.set_main_screen_editor("3D")
-	else:
-		print("该场景非2D也非3D")
-		EditorInterface.set_main_screen_editor("2D")
-	instance.call_deferred("queue_free")
-
-	# 2. 获取编辑器界面和场景树
-	var scene_root = EditorInterface.get_edited_scene_root()
-	if not scene_root:
-		printerr("错误：场景打开后，无法获取其根节点。")
-		return false
-
-	# 3. 根据节点路径查找并选中目标节点
-	var target_node = scene_root.get_node(node_path)
+	var target_node = get_target_node(scene_path, node_path)
 	if not target_node:
-		printerr("错误：在场景 '", scene_root.name, "' 中找不到路径为 '", node_path, "' 的节点。请检查节点路径是否正确。")
+		printerr("错误，未能找到"+scene_path+"内的目标节点"+node_path)
 		return false
 
-	print("成功找到节点: ", target_node.get_path())
-
-	# 选中节点，这会自动在检查器中显示它
-	EditorInterface.get_selection().clear()
-	EditorInterface.get_selection().add_node(target_node)
-
-	# 4. 设置属性
 	print("正在设置属性 '", property_name, "' 的值为 '", property_value, "'...")
 
 	# 检查属性是否存在
@@ -1181,3 +1177,135 @@ func run_editor_script(script_path: String) -> bool:
 	else:
 		push_error("脚本没有_run方法: " + script_path)
 		return false
+
+#获取TileSet数据工具
+func get_tileset_info(tileset: TileSet) -> Dictionary:
+	
+	var tileset_data = {}
+	for source_index in tileset.get_source_count():
+		var source = tileset.get_source(tileset.get_source_id(source_index))
+		if source is TileSetAtlasSource:
+			var atlas_data = {}
+			for tile_index in source.get_tiles_count():
+				var tile_data = source.get_tile_data(source.get_tile_id(tile_index), 0)
+				atlas_data[source.get_tile_id(tile_index)] = tile_data_to_dict(tile_data, tileset)
+			
+			tileset_data[tileset.get_source_id(source_index)] = atlas_data
+		tileset_data["texture/" + str(tileset.get_source_id(source_index))] = source.texture.resource_path
+	return tileset_data
+
+# 将 TileData 转换为字典的核心函数
+func tile_data_to_dict(tile_data: TileData, tileset: TileSet, source_texture: Texture2D = null) -> Dictionary:
+	var dict := {}
+	var physics_layers_count = tileset.get_physics_layers_count()
+	var navigation_layers_count = tileset.get_navigation_layers_count()
+	var custom_data_layers_count = tileset.get_custom_data_layers_count()
+	var occlusion_layers_count = tileset.get_occlusion_layers_count()
+	
+	# 1. 基础属性
+	dict["flip_h"] = tile_data.flip_h
+	dict["flip_v"] = tile_data.flip_v
+	dict["transpose"] = tile_data.transpose
+	dict["z_index"] = tile_data.get_z_index()
+	dict["y_sort_origin"] = tile_data.get_y_sort_origin()
+	dict["material"] = str(tile_data.material.resource_path) if tile_data.material else ""
+	
+	# 2. 纹理相关
+	dict["texture_origin"] = tile_data.texture_origin
+	
+	# 3. 颜色
+	dict["modulate"] = var_to_str(tile_data.get_modulate())
+	
+	# 4. 物理层（碰撞形状）
+	var physics_layers := []
+	for layer_index in physics_layers_count:
+		var physic_layer := {}
+		physic_layer["constant_angular_velocity"] = tile_data.get_constant_angular_velocity(layer_index)
+		physic_layer["constant_linear_velocity"] = tile_data.get_constant_linear_velocity(layer_index)
+		var polygons_count = tile_data.get_collision_polygons_count(layer_index)
+		for polygons_index in polygons_count:
+			var polygons_info := {}
+			polygons_info["collision_polygon_points"] = tile_data.get_collision_polygon_points(layer_index, polygons_index)
+			polygons_info["collision_polygon_one_way"] = tile_data.is_collision_polygon_one_way(layer_index, polygons_index)
+			polygons_info["collision_polygon_one_way_margin"] = tile_data.get_collision_polygon_one_way_margin(layer_index, polygons_index)
+			physic_layer["polygons:"+str(polygons_index)] = polygons_info
+		physics_layers.append(physic_layer)
+	dict["physics_layers"] = physics_layers
+	
+	# 5. 导航层
+	var navigation_layers := []
+	for layer_index in navigation_layers_count:
+		navigation_layers.append(tile_data.get_navigation_polygon(layer_index))
+	dict["navigation_layers"] = navigation_layers
+	
+	# 6. 自定义数据层
+	var custom_data := {}
+	for layer_index in custom_data_layers_count:
+		var layer_name = tileset.get_custom_data_layer_name(layer_index)
+		custom_data[layer_name] = tile_data.get_custom_data(layer_name)
+	dict["custom_data"] = custom_data
+	
+	# 7. 地形与翻转
+	dict["terrain_set"] = tile_data.terrain_set
+	dict["terrain"] = tile_data.terrain
+	dict["probability"] = tile_data.probability
+	
+	# 8. 备用属性（备用贴图）
+	dict["alternative_tile"] = tile_data.alternative_tile if "alternative_tile" in tile_data else -1
+	
+	# 9. 光照遮挡
+	var occlusion_layers := []
+	for layer_index in occlusion_layers_count:
+		var occlusion_layer := {}
+		var occlusion_count = tile_data.get_occluder_polygons_count(layer_index)
+		for occlusion_index in occlusion_count:
+			var occlusion_info := {}
+			occlusion_info["occlusion_polygon_points"] = tile_data.get_occluder_polygon(layer_index, occlusion_index)
+			occlusion_layer["occlusion:"+str(occlusion_index)] = occlusion_info
+		occlusion_layers.append(occlusion_layer)
+	dict["occlusion_layers"] = occlusion_layers
+	
+	return dict
+
+#获取目标节点
+func get_target_node(scene_path: String, node_path: String) -> Node:
+	if not ResourceLoader.exists(scene_path):
+		return null
+
+	var opened_scene = ResourceLoader.load(scene_path, "PackedScene") as PackedScene
+	if not opened_scene:
+		printerr("错误：无法打开场景 '", scene_path, "'。请检查路径是否正确。")
+		return null# 如果场景打开失败，则终止脚本
+	else:
+		EditorInterface.open_scene_from_path(scene_path)
+	
+	var instance = opened_scene.instantiate()
+	if instance is Node2D:
+		print("这是一个2D场景")
+		EditorInterface.set_main_screen_editor("2D")
+	elif instance is Node3D:
+		print("这是一个3D场景")
+		EditorInterface.set_main_screen_editor("3D")
+	else:
+		print("该场景非2D也非3D")
+		EditorInterface.set_main_screen_editor("2D")
+	instance.call_deferred("queue_free")
+	
+	var scene_root = EditorInterface.get_edited_scene_root()
+	if not scene_root:
+		printerr("错误：场景打开后，无法获取其根节点。")
+		return null
+
+	# 3. 根据节点路径查找并选中目标节点
+	var target_node = scene_root.get_node(node_path)
+	if not target_node:
+		printerr("错误：在场景 '", scene_root.name, "' 中找不到路径为 '", node_path, "' 的节点。请检查节点路径是否正确。")
+		return null
+
+	print("成功找到节点: ", target_node)
+
+	# 选中节点，这会自动在检查器中显示它
+	EditorInterface.get_selection().clear()
+	EditorInterface.get_selection().add_node(target_node)
+	
+	return target_node

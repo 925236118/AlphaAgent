@@ -295,7 +295,6 @@ func send_messages():
 	current_message_item.message_id = current_random_message_id
 	current_message_item.show_think = use_thinking
 	message_list.add_child(current_message_item)
-	print_messages()
 	current_chat_stream.post_message(messages)
 	message_container.scroll_vertical = 100000
 
@@ -418,6 +417,7 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 		current_message_item.update_finished_message("Success")
 		message_container.scroll_vertical = 100000
 		current_message_item.resend.connect(on_resend_user_message.bind(current_message_item), CONNECT_ONE_SHOT)
+		current_message_item.copy.connect(on_copy_output_message.bind(current_message_item))
 
 		reset_message_info()
 
@@ -451,8 +451,6 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 	current_history_item.time = current_time
 
 	history_and_title.update_history(current_id, current_history_item)
-
-	print_messages()
 
 func on_title_generate_finish(message: String, _think_msg: String):
 	current_title = message
@@ -584,6 +582,7 @@ func on_stop_chat():
 	input_container.switch_button_to("Send")
 	current_message_item.update_finished_message("Stop")
 	current_message_item.resend.connect(on_resend_user_message.bind(current_message_item), CONNECT_ONE_SHOT)
+	current_message_item.copy.connect(on_copy_output_message.bind(current_message_item))
 	message_container.scroll_vertical = 100000
 	reset_message_info()
 
@@ -618,7 +617,18 @@ func on_resend_user_message(message_item_node: AgentChatMessageItem):
 
 	send_messages()
 
+func on_copy_output_message(message_item_node: AgentChatMessageItem):
+	var found_user_message_item_index = -1
+	for i in range(message_item_node.get_index(), -1, -1):
+		var message_item = message_list.get_child(i) as AgentChatMessageItem
+		if message_item.message_type == AgentChatMessageItem.MessageType.UserMessage:
+			found_user_message_item_index = i
+			break
+	var assistant_result = []
+	for i in range(found_user_message_item_index, message_item_node.get_index() + 1):
+		var message_item = message_list.get_child(i) as AgentChatMessageItem
+		if message_item.message_type == AgentChatMessageItem.MessageType.AssistantMessage:
+			assistant_result.push_back(message_item.message_content.text)
+			print("复制成功")
 
-func print_messages():
-	return
-	print(messages.map(func(m): return {"role": m.role, "id": m.get("id")}))
+	DisplayServer.clipboard_set("\n".join(assistant_result))

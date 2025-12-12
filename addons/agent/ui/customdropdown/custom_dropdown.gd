@@ -27,6 +27,11 @@ func _process(delta: float) -> void:
 func change_the_arrowdown():
 	icon_arrowdown_texture_rect.flip_v =! icon_arrowdown_texture_rect.flip_v
 	dropdown_panel_container.visible = ! dropdown_panel_container.visible
+	#if dropdown_panel_container.mouse_filter == MOUSE_FILTER_STOP:
+		#dropdown_panel_container.mouse_filter = MOUSE_FILTER_IGNORE
+	#if dropdown_panel_container.mouse_filter == MOUSE_FILTER_IGNORE:
+		#dropdown_panel_container.mouse_filter = MOUSE_FILTER_STOP
+	#print(dropdown_panel_container.mouse_filter)
 
 #选择Aggent#
 func select_agent():

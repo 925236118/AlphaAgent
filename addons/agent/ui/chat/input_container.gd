@@ -288,7 +288,7 @@ func on_click_send_message():
 	send_message.emit({
 		"role": "user",
 		"content": "用户输入的内容：" + message_text + "\n引用的内容信息：" + info_list_string
-	}, message_text, use_thinking.button_pressed)
+	}, message_text)
 
 
 ## 处理命令
@@ -399,3 +399,6 @@ func switch_button_to(button_name: String):
 
 func on_click_stop_button():
 	stop_chat.emit()
+
+func get_use_thinking() -> bool:
+	return use_thinking.button_pressed

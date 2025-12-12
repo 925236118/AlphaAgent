@@ -19,8 +19,12 @@ extends MarginContainer
 @onready var wait_using_tool: PanelContainer = %WaitUsingTool
 @onready var wait_using_tool_rich_text_label: RichTextLabel = %WaitUsingTool/RichTextLabel
 @onready var error_message_label: RichTextLabel = %ErrorMessageLabel
-@onready var stop_message: Label = %StopMessage
 
+@onready var finish_message: HBoxContainer = %FinishMessage
+@onready var success_message: HBoxContainer = %SuccessMessage
+@onready var stop_message: HBoxContainer = %StopMessage
+@onready var copy_button: Button = %CopyButton
+@onready var re_send_button: Button = %ReSendButton
 
 @export var show_think: bool = false
 
@@ -31,11 +35,27 @@ var thinking: bool = false
 var think_time: float = 0.0
 var use_tool_list: Dictionary[String, Control] = {}
 
+enum MessageType {
+	None,
+	SystemMessage,
+	UserMessage,
+	AssistantMessage,
+	ToolMessage,
+	ErrorMessage
+}
+
+var message_type: MessageType = MessageType.None
+
+signal resend
+
+var message_id: String = ""
+
 func _ready() -> void:
 	expand_button.toggled.connect(_on_expand_button_toggled)
 	think_container.visible = show_think
 	think_time = 0.0
 	message_content.meta_clicked.connect(on_click_rich_text_url)
+	re_send_button.pressed.connect(resend.emit)
 
 	if AlphaAgentPlugin.global_setting.auto_expand_think:
 		expand_button.button_pressed = true
@@ -48,6 +68,7 @@ func _process(delta: float) -> void:
 		thinking_time_label.text = "%.1f s" % think_time
 
 func update_think_content(text: String, start_timer: bool = true):
+	message_type = MessageType.AssistantMessage
 	# 只有在 show_think 为 true 时才更新 thinking 内容
 	if not show_think:
 		return
@@ -59,6 +80,7 @@ func update_think_content(text: String, start_timer: bool = true):
 		thinking_label.text = "思考了"
 
 func update_message_content(text: String):
+	message_type = MessageType.AssistantMessage
 	thinking = false
 	if show_think:
 		thinking_label.text = "思考了"
@@ -68,6 +90,7 @@ func update_message_content(text: String):
 		message_content.show()
 
 func update_user_message_content(text: String):
+	message_type = MessageType.UserMessage
 	user_message_container.show()
 	user_message_content.show()
 	user_message_content.text = text
@@ -81,6 +104,7 @@ func set_expand_icon_flip(val: bool):
 	expand_icon.flip_v = val
 
 func response_use_tool():
+	message_type = MessageType.ToolMessage
 	wait_using_tool.show()
 
 	var wait_placeholder_text = [
@@ -90,6 +114,7 @@ func response_use_tool():
 	wait_using_tool_rich_text_label.text = "[agent_thinking freq=5.0 span=5.0] %s [/agent_thinking]" % wait_placeholder_text.pick_random()
 
 func used_tools(tool_calls: Array):
+	message_type = MessageType.ToolMessage
 	wait_using_tool.hide()
 	for tool in tool_calls:
 		var use_tool_item = USE_TOOL_ITEM.instantiate()
@@ -116,6 +141,7 @@ func on_click_rich_text_url(meta):
 		print("不支持的跳转方式，您可以复制链接后自行跳转： ", meta)
 
 func update_error_message(error_content: String, detail: String):
+	message_type = MessageType.ErrorMessage
 	thinking = false
 	use_tool_container.hide()
 	wait_using_tool.hide()
@@ -126,6 +152,11 @@ func update_error_message(error_content: String, detail: String):
 	error_message_container.show()
 	error_message_label.text = "[color=red]错误：" + error_content + "[/color]\n" + detail
 
-func update_stop_message():
-	stop_message.show()
-	thinking = false
+func update_finished_message(type: String):
+	finish_message.show()
+	if type == "Stop":
+		stop_message.show()
+		thinking = false
+	elif type == "Success":
+		success_message.show()
+		thinking = false

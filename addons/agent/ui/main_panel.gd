@@ -2,12 +2,12 @@
 extends Control
 
 # OpenAI 兼容客户端（支持 OpenAI, DeepSeek 等）
-@onready var openai_chat_stream: OpenAIChatStream = $OpenAIChatStream
-@onready var title_generate_openai_chat: OpenAIChat = $TitleGenerateOpenAIChat
+@onready var openai_chat_stream: OpenAIChatStream = %OpenAIChatStream
+@onready var title_generate_openai_chat: OpenAIChat = %TitleGenerateOpenAIChat
 
 # 新增：Ollama客户端
-@onready var ollama_chat_stream: OllamaChatStream = $OllamaChatStream
-@onready var title_generate_ollama_chat: OllamaChat = $TitleGenerateOllamaChat
+@onready var ollama_chat_stream: OllamaChatStream = %OllamaChatStream
+@onready var title_generate_ollama_chat: OllamaChat = %TitleGenerateOllamaChat
 
 @onready var message_list: VBoxContainer = %MessageList
 @onready var new_chat_button: Button = %NewChatButton
@@ -69,6 +69,7 @@ var first_chat: bool = true
 var current_id: String = ""
 var current_time: String = ""
 var current_history_item: AgentHistoryAndTitle.HistoryItem = null
+var current_random_message_id: String = ""
 
 # 当前使用的聊天流客户端
 var current_chat_stream = null
@@ -147,6 +148,7 @@ func _init_model_selector():
 
 # 切换到当前模型
 func _switch_to_current_model():
+	await get_tree().process_frame
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if model_manager == null:
 		current_chat_stream = openai_chat_stream
@@ -235,11 +237,12 @@ func init_message_list():
 			"content": CONFIG.system_prompt.format({
 				"project_memory": ''.join(AlphaAgentPlugin.instance.project_memory.map(func(m): return "-" + m + "\n")),
 				"global_memory": ''.join(AlphaAgentPlugin.instance.global_memory.map(func(m): return "-" + m + "\n"))
-			})
+			}),
+			"id": generate_random_string(16)
 		}
 	]
 
-func on_input_container_send_message(user_message: Dictionary, message_content: String, use_thinking: bool):
+func on_input_container_send_message(user_message: Dictionary, message_content: String):
 	if first_chat:
 		init_message_list()
 
@@ -248,8 +251,22 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 	message_container.show()
 
 	reset_message_info()
+
+	var random_id = generate_random_string(16)
+	user_message.id = random_id
+
 	messages.push_back(user_message)
 
+	var user_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
+	user_message_item.show_think = false
+	user_message_item.message_id = random_id
+	message_list.add_child(user_message_item)
+	user_message_item.update_user_message_content(message_content)
+
+	send_messages()
+
+func send_messages():
+	var use_thinking = input_container.get_use_thinking()
 	# 设置工具和模式
 	match input_container.get_input_mode():
 		"Ask":
@@ -271,17 +288,14 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 		current_chat_stream.max_tokens = 8 * 1024
 		current_chat_stream.use_thinking = use_thinking
 
-	var user_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
-	user_message_item.show_think = false
-	message_list.add_child(user_message_item)
-	user_message_item.update_user_message_content(message_content)
-
+	current_random_message_id = generate_random_string(16)
 	current_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
 	# 始终根据用户选择的 use_thinking 来设置 show_think
 	# 如果模型不支持 thinking，后续会在 on_agent_think 中跳过更新
+	current_message_item.message_id = current_random_message_id
 	current_message_item.show_think = use_thinking
 	message_list.add_child(current_message_item)
-
+	print_messages()
 	current_chat_stream.post_message(messages)
 	message_container.scroll_vertical = 100000
 
@@ -298,35 +312,41 @@ func on_agent_think(think: String):
 			current_message_item.update_think_content(current_think)
 			message_container.scroll_vertical = 100000
 
+		current_message_item.message_id = current_random_message_id
+
 func on_agent_message(msg: String):
 	current_message += msg
 	current_message_item.update_message_content(current_message)
 	message_container.scroll_vertical = 100000
+	current_message_item.message_id = current_random_message_id
 
 func on_response_use_tool():
 	current_message_item.response_use_tool()
 	message_container.scroll_vertical = 100000
+	current_message_item.message_id = current_random_message_id
 
 func on_use_tool(tool_calls: Array):
 	# 兼容两种ToolCallsInfo类型
 	current_message_item.used_tools(tool_calls)
-
 	# 存储调用工具信息
 	messages.push_back({
 		"role": "assistant",
 		"content": null,
 		"reasoning_content": current_think,
-		"tool_calls": tool_calls.map(func (tool): return tool.to_dict())
+		"tool_calls": tool_calls.map(func (tool): return tool.to_dict()),
+		"id": current_random_message_id
 	})
 
 
 	for tool in tool_calls:
 		#print(tool.id)
 		var content = await tools.use_tool(tool)
+
 		messages.push_back({
 			"role": "tool",
 			"tool_call_id": tool.id,
-			"content": content
+			"content": content,
+			"id": current_random_message_id
 		})
 
 		current_message_item.update_used_tool_result(tool.id, content)
@@ -334,7 +354,9 @@ func on_use_tool(tool_calls: Array):
 	reset_message_info()
 
 	await get_tree().create_timer(0.5).timeout
+
 	current_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
+	current_message_item.message_id = current_random_message_id
 	current_message_item.show_think = current_chat_stream.use_thinking
 	message_list.add_child(current_message_item)
 
@@ -380,11 +402,6 @@ func clear():
 	for i in message_count:
 		message_list.get_child(message_count - i - 1).queue_free()
 
-#func on_click_history_button():
-	#if history_container.visible:
-		#show_container(chat_container)
-	#else:
-		#show_container(history_container)
 func on_agent_finish(finish_reason: String, total_tokens: float):
 	#print("finish_reason ", finish_reason)
 	#print("total_tokens ", total_tokens)
@@ -395,8 +412,13 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 		messages.push_back({
 			"role": "assistant",
 			"content": current_message,
-			"reasoning_content": current_think
+			"reasoning_content": current_think,
+			"id": current_random_message_id
 		})
+		current_message_item.update_finished_message("Success")
+		message_container.scroll_vertical = 100000
+		current_message_item.resend.connect(on_resend_user_message.bind(current_message_item), CONNECT_ONE_SHOT)
+
 		reset_message_info()
 
 	input_container.set_usage_label(total_tokens, 128)
@@ -429,6 +451,8 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 	current_history_item.time = current_time
 
 	history_and_title.update_history(current_id, current_history_item)
+
+	print_messages()
 
 func on_title_generate_finish(message: String, _think_msg: String):
 	current_title = message
@@ -464,6 +488,7 @@ func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
 	input_container.set_input_mode(history_item.mode)
 
 	var message_item = null
+	var last_message_item = null
 	for message in messages:
 		if message.role == "system" :
 			continue
@@ -474,6 +499,8 @@ func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
 			message_list.add_child(message_item)
 
 		if message.role == "user":
+			if not last_message_item == null:
+				last_message_item.update_finished_message("Success")
 			message_item.update_user_message_content(message.content)
 		elif message.role == "assistant":
 			if message.has("tool_calls"):
@@ -502,6 +529,10 @@ func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
 				message_item.update_message_content(message.content)
 		elif message.role == "tool":
 			message_item.update_used_tool_result(message.tool_call_id, message.content)
+		if message_item:
+			(message_item as AgentChatMessageItem).message_id = message.get("id")
+		last_message_item = message_item
+	last_message_item.update_finished_message("Success")
 
 func show_help_window():
 	if help_window:
@@ -551,9 +582,43 @@ func on_stop_chat():
 	current_chat_stream.close()
 	input_container.disable = false
 	input_container.switch_button_to("Send")
-	current_message_item.update_stop_message()
+	current_message_item.update_finished_message("Stop")
+	current_message_item.resend.connect(on_resend_user_message.bind(current_message_item), CONNECT_ONE_SHOT)
+	message_container.scroll_vertical = 100000
 	reset_message_info()
-	pass
 
 func on_update_plan_list(plan_array: Array[AlphaAgentPlugin.PlanItem]):
 	plan_list.update_list(plan_array)
+
+func on_resend_user_message(message_item_node: AgentChatMessageItem):
+	var current_message_index = messages.find_custom(func(m): return m.id == message_item_node.message_id)
+
+	var found_last_user_message_index = -1
+	for i in current_message_index:
+		var message = messages[current_message_index - i - 1]
+		if message.get("role", "") == "user":
+			found_last_user_message_index = current_message_index - i - 1
+			break
+	if found_last_user_message_index != -1:
+		messages = messages.slice(0, found_last_user_message_index + 1)
+
+	var message_count = message_list.get_child_count()
+	var found_user_message_item_index = -1
+
+	for i in range(message_item_node.get_index(), -1, -1):
+		var message_item = message_list.get_child(i) as AgentChatMessageItem
+		if message_item.message_type == AgentChatMessageItem.MessageType.UserMessage:
+			found_user_message_item_index = i
+			break
+
+	for i in range(message_count - 1, found_user_message_item_index, -1):
+		message_list.get_child(i).queue_free()
+
+	await get_tree().process_frame
+
+	send_messages()
+
+
+func print_messages():
+	return
+	print(messages.map(func(m): return {"role": m.role, "id": m.get("id")}))

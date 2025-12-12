@@ -371,25 +371,27 @@ uri = "https://godotvillage.github.io/"
 
 [node name="Tools" parent="." instance=ExtResource("3_2usmi")]
 
-[node name="OpenAIChatStream" type="Node" parent="."]
+[node name="ChatModels" type="Node" parent="."]
+
+[node name="OpenAIChatStream" type="Node" parent="ChatModels"]
 unique_name_in_owner = true
 script = ExtResource("13_wlmmt")
 api_base = "https://api.deepseek.com"
-secret_key = "sk-078ec588fe384842a339e5db806120dc"
+secret_key = "sk-63105427768d4e2e9eceff921502cf90"
 model_name = "deepseek-chat"
 max_tokens = 8192
 
-[node name="TitleGenerateOpenAIChat" type="Node" parent="."]
+[node name="TitleGenerateOpenAIChat" type="Node" parent="ChatModels"]
 unique_name_in_owner = true
 script = ExtResource("14_q7ex6")
 api_base = "https://api.deepseek.com"
-secret_key = "sk-078ec588fe384842a339e5db806120dc"
+secret_key = "sk-63105427768d4e2e9eceff921502cf90"
 model_name = "deepseek-chat"
 
-[node name="OllamaChatStream" type="Node" parent="."]
+[node name="OllamaChatStream" type="Node" parent="ChatModels"]
 unique_name_in_owner = true
 script = ExtResource("15_cd0et")
 
-[node name="TitleGenerateOllamaChat" type="Node" parent="."]
+[node name="TitleGenerateOllamaChat" type="Node" parent="ChatModels"]
 unique_name_in_owner = true
 script = ExtResource("16_i5act")

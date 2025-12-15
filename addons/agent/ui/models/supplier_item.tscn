@@ -1,0 +1,192 @@
+[gd_scene load_steps=13 format=3 uid="uid://cktcl3yjma34l"]
+
+[ext_resource type="Texture2D" uid="uid://btnh1plrm3etf" path="res://addons/agent/icons/newicon/Icon_arrowdown.svg" id="1_vka0h"]
+[ext_resource type="Texture2D" uid="uid://yhceflqqddt3" path="res://addons/agent/icons/newicon/Icon_more.svg" id="2_vka0h"]
+[ext_resource type="Texture2D" uid="uid://dv0l7ve7m51jf" path="res://addons/agent/icons/newicon/Icon_edit.svg" id="3_omc8c"]
+[ext_resource type="PackedScene" uid="uid://t8tpl55g2wg0" path="res://addons/agent/ui/models/setting_model_item.tscn" id="3_vka0h"]
+[ext_resource type="Texture2D" uid="uid://b2el7xc75pfe7" path="res://addons/agent/icons/newicon/Icon_bin.svg" id="4_cxw2j"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_omc8c"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.15686275, 0.15686275, 0.15686275, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.2, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3c5pc"]
+content_margin_left = 4.0
+content_margin_right = 4.0
+bg_color = Color(0.2, 0.2, 0.2, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3019608, 0.3019608, 0.3019608, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d56vv"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.2, 0.2, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_omc8c"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vka0h"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.14901961, 0.45882353, 0.8509804, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_d56vv"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cxw2j"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0, 0, 0, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.15686275, 0.15686275, 0.15686275, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="SupplierItem" type="PanelContainer"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 115.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_omc8c")
+
+[node name="SupplierShow" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SupplierShow"]
+layout_mode = 2
+
+[node name="ExpendModelButton" type="TextureButton" parent="SupplierShow/HBoxContainer"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+toggle_mode = true
+texture_normal = ExtResource("1_vka0h")
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="SupplierShow/HBoxContainer"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_3c5pc")
+text = "供应商"
+
+[node name="Label2" type="Label" parent="SupplierShow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "DeepSeek"
+
+[node name="MoreActionButton" type="MenuButton" parent="SupplierShow/HBoxContainer"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+icon = ExtResource("2_vka0h")
+item_count = 2
+popup/item_0/text = "编辑"
+popup/item_0/icon = ExtResource("3_omc8c")
+popup/item_0/id = 0
+popup/item_1/text = "删除"
+popup/item_1/icon = ExtResource("4_cxw2j")
+popup/item_1/id = 1
+
+[node name="SettingModelList" type="VBoxContainer" parent="SupplierShow"]
+layout_mode = 2
+
+[node name="SettingModelItem" parent="SupplierShow/SettingModelList" instance=ExtResource("3_vka0h")]
+layout_mode = 2
+
+[node name="SettingModelItem2" parent="SupplierShow/SettingModelList" instance=ExtResource("3_vka0h")]
+layout_mode = 2
+
+[node name="SupplierEdit" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SupplierEdit"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="SupplierEdit/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "编辑供应商"
+
+[node name="Button" type="Button" parent="SupplierEdit/HBoxContainer"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_d56vv")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_d56vv")
+theme_override_styles/hover = SubResource("StyleBoxFlat_d56vv")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_d56vv")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_omc8c")
+text = "取消"
+
+[node name="Button2" type="Button" parent="SupplierEdit/HBoxContainer"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_vka0h")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_vka0h")
+theme_override_styles/hover = SubResource("StyleBoxFlat_vka0h")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_vka0h")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_d56vv")
+text = "保存"
+
+[node name="Label" type="Label" parent="SupplierEdit"]
+layout_mode = 2
+text = "选择供应商"
+
+[node name="OptionButton" type="OptionButton" parent="SupplierEdit"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_cxw2j")
+selected = 0
+item_count = 1
+popup/item_0/text = "DeepSeek"
+popup/item_0/id = 0
+
+[node name="Label2" type="Label" parent="SupplierEdit"]
+layout_mode = 2
+text = "API 基础 URL"
+
+[node name="LineEdit" type="LineEdit" parent="SupplierEdit"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_cxw2j")
+placeholder_text = "示列: https://api.openai.com/v1"
+
+[node name="Label3" type="Label" parent="SupplierEdit"]
+layout_mode = 2
+text = "API Key"
+
+[node name="LineEdit2" type="LineEdit" parent="SupplierEdit"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_cxw2j")
+placeholder_text = "请输入Key"

@@ -66,8 +66,8 @@ func _ready() -> void:
 	user_input.text_changed.connect(on_user_input_text_changed)
 	input_menu_list.item_selected.connect(on_input_menu_list_item_selected)
 	custom_dropdown.is_action_mode.connect(update_user_input_placeholder)
-	
-	
+
+
 	# 初始化模型选择器
 	if model_button:
 		model_button.item_selected.connect(_on_model_selected)
@@ -234,7 +234,7 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 func get_input_mode() -> String:
 	#新重写，获取自定义控件文本#
 	return custom_dropdown.get_now_mode()
-	
+
 	#return input_mode_select.get_item_text(input_mode_select.get_selected_id())
 
 #修改基础按钮字样Agent、ASK#

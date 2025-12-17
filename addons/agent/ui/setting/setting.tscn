@@ -92,9 +92,11 @@ text = "配置模型"
 layout_mode = 2
 
 [node name="SupplierList" type="VBoxContainer" parent="SettingPanel/SettingItemsContainer/ModelSetting"]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="AddSupplierButton" type="Button" parent="SettingPanel/SettingItemsContainer/ModelSetting/SupplierList"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "添加供应商"
 

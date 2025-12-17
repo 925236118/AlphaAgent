@@ -5,7 +5,11 @@ extends ScrollContainer
 @onready var auto_expand_think_setting: BoxContainer = $SettingPanel/SettingItemsContainer/AutoExpandThinkSetting
 @onready var auto_add_file_ref_setting: BoxContainer = $SettingPanel/SettingItemsContainer/AutoAddFileRefSetting
 @onready var send_shot_cut: BoxContainer = $SettingPanel/SettingItemsContainer/SendShotCut
-@onready var config_model_button: Button = $SettingPanel/SettingItemsContainer/ConfigModelButton
+#@onready var config_model_button: Button = $SettingPanel/SettingItemsContainer/ConfigModelButton
+@onready var add_supplier_button: Button = %AddSupplierButton
+@onready var supplier_list: VBoxContainer = %SupplierList
+
+const SUPPLIER_ITEM = preload("uid://cktcl3yjma34l")
 
 # 添加新节点后需要在这里注册
 @onready var setting_item_nodes = [
@@ -21,7 +25,8 @@ func _ready() -> void:
 	AlphaAgentPlugin.global_setting.load_global_setting()
 	init_item_values()
 	init_signals()
-	config_model_button.pressed.connect(config_model.emit)
+	add_supplier_button.pressed.connect(on_click_add_supplier_button)
+	#config_model_button.pressed.connect(config_model.emit)
 
 func init_item_values():
 	for setting_item in setting_item_nodes:
@@ -36,3 +41,8 @@ func init_signals():
 func save_settings(setting_item: AgentSettingItemBase):
 	AlphaAgentPlugin.global_setting[setting_item.setting_key] = setting_item.get_value()
 	AlphaAgentPlugin.global_setting.save_global_setting()
+
+func on_click_add_supplier_button():
+	var new_supplier := SUPPLIER_ITEM.instantiate() as AgentSupplierItem
+	supplier_list.add_child(new_supplier)
+	new_supplier.editing = true

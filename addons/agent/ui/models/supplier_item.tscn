@@ -1,5 +1,6 @@
-[gd_scene load_steps=13 format=3 uid="uid://cktcl3yjma34l"]
+[gd_scene load_steps=14 format=3 uid="uid://cktcl3yjma34l"]
 
+[ext_resource type="Script" uid="uid://7x5ejtpqe0r4" path="res://addons/agent/ui/models/supplier_item.gd" id="1_cxw2j"]
 [ext_resource type="Texture2D" uid="uid://btnh1plrm3etf" path="res://addons/agent/icons/newicon/Icon_arrowdown.svg" id="1_vka0h"]
 [ext_resource type="Texture2D" uid="uid://yhceflqqddt3" path="res://addons/agent/icons/newicon/Icon_more.svg" id="2_vka0h"]
 [ext_resource type="Texture2D" uid="uid://dv0l7ve7m51jf" path="res://addons/agent/icons/newicon/Icon_edit.svg" id="3_omc8c"]
@@ -84,14 +85,17 @@ anchor_right = 1.0
 offset_bottom = 115.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_omc8c")
+script = ExtResource("1_cxw2j")
 
 [node name="SupplierShow" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="SupplierShow"]
 layout_mode = 2
 
 [node name="ExpendModelButton" type="TextureButton" parent="SupplierShow/HBoxContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 mouse_default_cursor_shape = 2
@@ -110,6 +114,7 @@ size_flags_horizontal = 3
 text = "DeepSeek"
 
 [node name="MoreActionButton" type="MenuButton" parent="SupplierShow/HBoxContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 mouse_default_cursor_shape = 2
@@ -123,6 +128,8 @@ popup/item_1/icon = ExtResource("4_cxw2j")
 popup/item_1/id = 1
 
 [node name="SettingModelList" type="VBoxContainer" parent="SupplierShow"]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
 
 [node name="SettingModelItem" parent="SupplierShow/SettingModelList" instance=ExtResource("3_vka0h")]
@@ -132,6 +139,7 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="SupplierEdit" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
 visible = false
 layout_mode = 2
 
@@ -143,7 +151,8 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "编辑供应商"
 
-[node name="Button" type="Button" parent="SupplierEdit/HBoxContainer"]
+[node name="CancelSaveButton" type="Button" parent="SupplierEdit/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_d56vv")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_d56vv")
@@ -152,7 +161,8 @@ theme_override_styles/disabled = SubResource("StyleBoxFlat_d56vv")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_omc8c")
 text = "取消"
 
-[node name="Button2" type="Button" parent="SupplierEdit/HBoxContainer"]
+[node name="SaveButton" type="Button" parent="SupplierEdit/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_vka0h")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_vka0h")
@@ -161,23 +171,37 @@ theme_override_styles/disabled = SubResource("StyleBoxFlat_vka0h")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_d56vv")
 text = "保存"
 
+[node name="Label4" type="Label" parent="SupplierEdit"]
+layout_mode = 2
+text = "供应商名称"
+
+[node name="SupplierName" type="LineEdit" parent="SupplierEdit"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_cxw2j")
+placeholder_text = "请输入供应商名称"
+
 [node name="Label" type="Label" parent="SupplierEdit"]
 layout_mode = 2
-text = "选择供应商"
+text = "选择API类型"
 
-[node name="OptionButton" type="OptionButton" parent="SupplierEdit"]
+[node name="SupplierAPIType" type="OptionButton" parent="SupplierEdit"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_cxw2j")
 selected = 0
-item_count = 1
-popup/item_0/text = "DeepSeek"
+item_count = 2
+popup/item_0/text = "Open AI"
 popup/item_0/id = 0
+popup/item_1/text = "Ollama"
+popup/item_1/id = 1
 
 [node name="Label2" type="Label" parent="SupplierEdit"]
 layout_mode = 2
 text = "API 基础 URL"
 
-[node name="LineEdit" type="LineEdit" parent="SupplierEdit"]
+[node name="SupplierBaseURL" type="LineEdit" parent="SupplierEdit"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_cxw2j")
 placeholder_text = "示列: https://api.openai.com/v1"
@@ -186,7 +210,8 @@ placeholder_text = "示列: https://api.openai.com/v1"
 layout_mode = 2
 text = "API Key"
 
-[node name="LineEdit2" type="LineEdit" parent="SupplierEdit"]
+[node name="SupplierSecretKey" type="LineEdit" parent="SupplierEdit"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_cxw2j")
 placeholder_text = "请输入Key"

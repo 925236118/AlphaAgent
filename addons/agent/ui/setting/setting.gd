@@ -20,13 +20,15 @@ const SUPPLIER_ITEM = preload("uid://cktcl3yjma34l")
 ]
 
 signal config_model
-
+var suppliers: Array[AgentSupplierItem] = []
 func _ready() -> void:
 	AlphaAgentPlugin.global_setting.load_global_setting()
 	init_item_values()
 	init_signals()
 	add_supplier_button.pressed.connect(on_click_add_supplier_button)
 	#config_model_button.pressed.connect(config_model.emit)
+	init_models_supplier()
+	visibility_changed.connect(_on_show_setting)
 
 func init_item_values():
 	for setting_item in setting_item_nodes:
@@ -46,3 +48,19 @@ func on_click_add_supplier_button():
 	var new_supplier := SUPPLIER_ITEM.instantiate() as AgentSupplierItem
 	supplier_list.add_child(new_supplier)
 	new_supplier.editing = true
+
+func init_models_supplier():
+	var model_manager = AlphaAgentPlugin.global_setting.model_manager
+	if model_manager == null:
+		return
+
+	for supplier in model_manager.suppliers:
+		var new_supplier := SUPPLIER_ITEM.instantiate() as AgentSupplierItem
+		supplier_list.add_child(new_supplier)
+		new_supplier.set_supplier_info(supplier)
+		suppliers.append(new_supplier)
+		
+func _on_show_setting():
+	if visible:
+		for supplier in suppliers:
+			supplier.update_current_model()

@@ -9,8 +9,8 @@ class SupplierInfo:
 	var name: String = ""
 	var base_url: String = ""
 	var api_key: String = ""
-	var provider: String = "openai"  # 提供商类型: openai, deepseek, ollama
-	var models: Array[ModelInfo] = []
+	var provider: String = "deepseek"  # 提供商类型: openai, deepseek, ollama
+	var models: Array = []
 
 	func _init(s_id: String = "", s_name: String = "", s_api_base: String = "",
 			   s_api_key: String = ""):
@@ -52,6 +52,7 @@ class ModelInfo:
 	var supports_tools: bool = true  # 是否支持工具调用
 	var max_tokens: int = 8192  # 最大token数
 	var active: bool = false  # 是否激活
+	var supplier_id: String = ""  # 所属供应商ID
 
 	func _init(p_id: String = "", p_name: String= "", p_model_name: String = "", p_active: bool = true):
 		id = p_id if p_id != "" else _generate_id()
@@ -70,7 +71,8 @@ class ModelInfo:
 			"supports_thinking": supports_thinking,
 			"supports_tools": supports_tools,
 			"max_tokens": max_tokens,
-			"active": active
+			"active": active,
+			"supplier_id": supplier_id
 		}
 
 	static func from_dict(data: Dictionary) -> ModelInfo:
@@ -82,6 +84,7 @@ class ModelInfo:
 		info.supports_tools = data.get("supports_tools", true)
 		info.max_tokens = data.get("max_tokens", 8192)
 		info.active = data.get("active", false)
+		info.supplier_id = data.get("supplier_id", "")
 		return info
 
 ## 模型配置管理器
@@ -109,7 +112,7 @@ class ModelManager:
 		# 添加默认DeepSeek供应商
 		var supplier = SupplierInfo.new()
 		supplier.name = "DeepSeek"
-		supplier.api_base = "https://api.deepseek.com"
+		supplier.base_url = "https://api.deepseek.com"
 		supplier.api_key = ""
 		supplier.provider = "openai"
 		suppliers.append(supplier)
@@ -119,8 +122,9 @@ class ModelManager:
 		chat_model.model_name = "deepseek-chat"
 		chat_model.supports_thinking = false
 		chat_model.supports_tools = true
-		chat_model.max_tokens = 8 * 1204
+		chat_model.max_tokens = 8 * 1024
 		chat_model.active = false
+		chat_model.supplier_id = supplier.id
 		supplier.models.append(chat_model)
 
 		var reasoner_model = ModelInfo.new()
@@ -128,14 +132,15 @@ class ModelManager:
 		reasoner_model.model_name = "deepseek-reasoner"
 		reasoner_model.supports_thinking = true
 		reasoner_model.supports_tools = true
-		reasoner_model.max_tokens = 64 * 1204
+		reasoner_model.max_tokens = 64 * 1024
 		reasoner_model.active = false
+		reasoner_model.supplier_id = supplier.id
 		supplier.models.append(reasoner_model)
 
 		current_supplier_id = supplier.id
-		current_model_id = chat_model.id
+		current_model_id = reasoner_model.id
 
-		save_models()
+		save_datas()
 
 
 	func load_models():
@@ -155,7 +160,7 @@ class ModelManager:
 		for supplier_data in suppliers_data:
 			suppliers.append(SupplierInfo.from_dict(supplier_data))
 
-	func save_models():
+	func save_datas():
 		var data = {
 			"current_supplier_id": current_supplier_id,
 			"current_model_id": current_model_id,
@@ -197,11 +202,11 @@ class ModelManager:
 	func set_current_model(supplier_id: String, model_id: String):
 		current_supplier_id = supplier_id
 		current_model_id = model_id
-		save_models()
+		save_datas()
 
 	func add_model(supplier_id: String, model: ModelInfo):
 		get_supplier_by_id(supplier_id).models.append(model)
-		save_models()
+		save_datas()
 
 	func update_model(supplier_id: String, model_id: String, updated_model: ModelInfo):
 		var supplier = get_supplier_by_id(supplier_id)
@@ -209,8 +214,16 @@ class ModelManager:
 			var model = supplier.models[i]
 			if model.id == model_id:
 				supplier.models[i] = updated_model
-				save_models()
+				save_datas()
 				return
+
+	func update_supplier(supplier_id: String, supplier: SupplierInfo):
+		var old_supplier = get_supplier_by_id(supplier_id)
+		old_supplier.name = supplier.name
+		old_supplier.base_url = supplier.base_url
+		old_supplier.api_key = supplier.api_key
+		old_supplier.provider = supplier.provider
+		save_datas()
 
 	func remove_model(supplier_id: String, model_id: String):
 		var supplier = get_supplier_by_id(supplier_id)
@@ -221,12 +234,19 @@ class ModelManager:
 				# 如果删除的是当前模型，切换到第一个
 				if current_model_id == model_id and not supplier.models.is_empty():
 					current_model_id = supplier.models[0].id
-				save_models()
+				save_datas()
 				return
 
-	func get_model_by_id(supplier_id: String, model_id: String) -> ModelInfo:
-		var supplier = get_supplier_by_id(supplier_id)
-		for model in supplier.models:
-			if model.id == model_id:
-				return model
+	func get_model_by_id(model_id: String) -> ModelInfo:
+		for supplier in suppliers:
+			for model in supplier.models:
+				if model.id == model_id:
+					return model
 		return null
+	func add_supplier(supplier: SupplierInfo):
+		suppliers.append(supplier)
+		save_datas()
+
+	func remove_supplier(supplier: SupplierInfo):
+		suppliers.remove_at(suppliers.find(supplier))
+		save_datas()

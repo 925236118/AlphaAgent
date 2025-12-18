@@ -1,5 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://t8tpl55g2wg0"]
+[gd_scene load_steps=8 format=3 uid="uid://t8tpl55g2wg0"]
 
+[ext_resource type="Script" uid="uid://vgb4qn2q0f7c" path="res://addons/agent/ui/models/setting_model_item.gd" id="1_cxaef"]
 [ext_resource type="Texture2D" uid="uid://c7k1lmqcefawo" path="res://addons/agent/icons/newicon/Icon_done.svg" id="1_ub8p6"]
 [ext_resource type="Texture2D" uid="uid://b7gbtprb74gr4" path="res://addons/agent/icons/newicon/Icon_switch_on.svg" id="2_3clfn"]
 [ext_resource type="Texture2D" uid="uid://c4c6o1lp046gh" path="res://addons/agent/icons/newicon/Icon_switch_off.svg" id="3_cxaef"]
@@ -31,6 +32,7 @@ anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 72.0
 grow_horizontal = 2
+script = ExtResource("1_cxaef")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
@@ -47,11 +49,13 @@ layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_ub8p6")
 text = "模型"
 
-[node name="Label2" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="ModelName" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "DeepSeek Chat"
 
-[node name="TextureRect" type="TextureRect" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="IsCurrentModel" type="TextureRect" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 self_modulate = Color(0.13725491, 0.8156863, 0.6313726, 1)
 custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
@@ -62,7 +66,8 @@ stretch_mode = 5
 [node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
+[node name="ModelID" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "deepseek-chat"
 
@@ -71,15 +76,18 @@ layout_mode = 2
 theme_override_constants/separation = 5
 theme_override_styles/separator = SubResource("StyleBoxLine_3clfn")
 
-[node name="Label2" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
+[node name="SupportReasoner" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "支持工具"
 
-[node name="Label3" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
+[node name="SupportTool" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "支持思考"
 
-[node name="CheckButton" type="CheckButton" parent="HBoxContainer"]
+[node name="IsActive" type="CheckButton" parent="HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_3clfn")

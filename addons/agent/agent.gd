@@ -25,6 +25,7 @@ class PlanItem:
 
 
 signal update_plan_list(plan_list)
+signal models_changed
 
 func _enable_plugin() -> void:
 	pass

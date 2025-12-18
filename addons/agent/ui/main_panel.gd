@@ -46,15 +46,12 @@ enum MoreButtonIds {
 }
 
 var help_window: Window = null
-var model_manager_window: Window = null
 
 @onready var CONFIG = preload("uid://b4bcww0bmnxt0")
 
 const MESSAGE_ITEM = preload("uid://cjytvn2j0yi3s")
 
 const HELP = preload("uid://b83qwags1ffo8")
-
-const MODEL_MANAGER = preload("uid://dr7g6mrkb8u3e")
 
 var messages: Array[Dictionary] = []
 
@@ -78,6 +75,8 @@ var current_title_chat = null
 func _ready() -> void:
 	show_container(chat_container)
 	AlphaAgentPlugin.instance.update_plan_list.connect(on_update_plan_list)
+	AlphaAgentPlugin.instance.models_changed.connect(_on_models_changed)
+
 	# 展示欢迎语
 	welcome_message.show()
 	message_container.hide()
@@ -121,13 +120,11 @@ func _ready() -> void:
 	input_container.show_memory.connect(on_show_memory)
 	input_container.stop_chat.connect(on_stop_chat)
 	input_container.model_changed.connect(_on_model_selected)
-	input_container.manage_models_requested.connect(_on_manage_models_pressed)
 
 	history_and_title.recovery.connect(on_recovery_history)
 
 	setting_tab_memory.pressed.connect(func(): show_container(memory_container))
 	setting_tab_setting.pressed.connect(func(): show_container(setting_container))
-	setting_container.config_model.connect(_on_manage_models_pressed)
 
 # 初始化模型选择器
 func _init_model_selector():
@@ -141,7 +138,7 @@ func _init_model_selector():
 
 	# 更新输入容器中的模型选择器
 	input_container.update_model_selector(
-		model_manager.models,
+		model_manager.suppliers,
 		model_manager.current_model_id,
 		current_model_name
 	)
@@ -154,7 +151,7 @@ func _switch_to_current_model():
 		current_chat_stream = openai_chat_stream
 		current_title_chat = title_generate_openai_chat
 		return
-
+	var supplier = model_manager.get_current_supplier()
 	var model = model_manager.get_current_model()
 	if model == null:
 		current_chat_stream = openai_chat_stream
@@ -162,60 +159,44 @@ func _switch_to_current_model():
 		return
 
 	# 根据模型配置切换客户端
-	if model.provider == "ollama":
+	if supplier.provider == "ollama":
 		# 使用 Ollama 客户端
 		current_chat_stream = ollama_chat_stream
 		current_title_chat = title_generate_ollama_chat
-		ollama_chat_stream.api_base = model.api_base
+		ollama_chat_stream.api_base = supplier.base_url
 		ollama_chat_stream.model_name = model.model_name
 		ollama_chat_stream.max_tokens = model.max_tokens
 
-		title_generate_ollama_chat.api_base = model.api_base
+		title_generate_ollama_chat.api_base = supplier.base_url
 		title_generate_ollama_chat.model_name = model.model_name
 		title_generate_ollama_chat.max_tokens = model.max_tokens
 	else:
 		# OpenAI 及其他兼容提供商（包括 DeepSeek）
 		current_chat_stream = openai_chat_stream
 		current_title_chat = title_generate_openai_chat
-		openai_chat_stream.api_base = model.api_base
-		openai_chat_stream.secret_key = model.api_key
+		openai_chat_stream.api_base = supplier.base_url
+		openai_chat_stream.secret_key = supplier.api_key
+		openai_chat_stream.provider = supplier.provider
 		openai_chat_stream.model_name = model.model_name
 		openai_chat_stream.max_tokens = model.max_tokens
-		openai_chat_stream.provider = model.provider
 
-		title_generate_openai_chat.api_base = model.api_base
-		title_generate_openai_chat.secret_key = model.api_key
+		title_generate_openai_chat.api_base = supplier.base_url
+		title_generate_openai_chat.secret_key = supplier.api_key
+		title_generate_openai_chat.provider = supplier.provider
 		title_generate_openai_chat.model_name = model.model_name
-		title_generate_openai_chat.provider = model.provider
 
 # 模型选择回调
-func _on_model_selected(model_id: String):
+func _on_model_selected(supplier_id: String, model_id: String):
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if model_manager == null:
 		return
 
-	model_manager.set_current_model(model_id)
+	model_manager.set_current_model(supplier_id, model_id)
 	_switch_to_current_model()
 
 	# 更新输入容器的模型选择器显示
 	_init_model_selector()
 
-# 打开模型管理窗口
-func _on_manage_models_pressed():
-	if model_manager_window and is_instance_valid(model_manager_window):
-		# 确保窗口可见并居中
-		model_manager_window.popup_centered(Vector2i(600, 500))
-		return
-
-	model_manager_window = MODEL_MANAGER.instantiate()
-	get_tree().root.add_child(model_manager_window)
-	model_manager_window.set_model_manager(AlphaAgentPlugin.global_setting.model_manager)
-	model_manager_window.models_changed.connect(_on_models_changed)
-	model_manager_window.popup_centered(Vector2i(600, 500))
-	# 当窗口关闭时，只隐藏不销毁
-	model_manager_window.close_requested.connect(func():
-		model_manager_window.hide()
-	)
 
 # 模型配置变更回调
 func _on_models_changed():

@@ -104,25 +104,6 @@ unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "例如: GPT-4, Claude, DeepSeek"
 
-[node name="ApiBaseLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
-layout_mode = 2
-text = "API 基础 URL："
-
-[node name="ApiBaseEdit" type="LineEdit" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-placeholder_text = "例如: https://api.openai.com"
-
-[node name="ApiKeyLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
-layout_mode = 2
-text = "API Key："
-
-[node name="ApiKeyEdit" type="LineEdit" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-placeholder_text = "输入你的API密钥"
-secret = true
-
 [node name="ModelIdLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
 layout_mode = 2
 text = "模型ID："
@@ -144,27 +125,19 @@ max_value = 131072.0
 step = 1024.0
 value = 8192.0
 
-[node name="ProviderLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
-layout_mode = 2
-text = "提供商类型："
-
-[node name="ProviderOption" type="OptionButton" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-selected = 0
-item_count = 3
-popup/item_0/text = "OpenAI"
-popup/item_0/id = 0
-popup/item_1/text = "DeepSeek"
-popup/item_1/id = 1
-popup/item_2/text = "Ollama"
-popup/item_2/id = 2
-
 [node name="ThinkingLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
 layout_mode = 2
 text = "支持 Thinking："
 
 [node name="ThinkingCheckBox" type="CheckBox" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ToolLabal" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+layout_mode = 2
+text = "支持工具调用："
+
+[node name="ToolCheckBox" type="CheckBox" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 

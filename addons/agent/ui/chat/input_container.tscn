@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://dqkrjn0mak6lh"]
+[gd_scene load_steps=20 format=3 uid="uid://dqkrjn0mak6lh"]
 
 [ext_resource type="Script" uid="uid://c0gayflg4ovas" path="res://addons/agent/ui/chat/input_container.gd" id="1_xi1dg"]
 [ext_resource type="PackedScene" uid="uid://cr0rgr6uojjsh" path="res://addons/agent/ui/customdropdown/custom_dropdown.tscn" id="2_c3kby"]
@@ -7,6 +7,20 @@
 bg_color = Color(0.04303915, 0.043039158, 0.043039113, 0.38039216)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1ot7o"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gy7k7"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.14901961, 0.45882353, 0.8509804, 1)
+border_width_top = 3
+border_width_bottom = 3
+border_color = Color(0.8, 0.8, 0.8, 0)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_c3kby"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5v6i3"]
 
@@ -38,18 +52,6 @@ font_color = Color(0.46666667, 0.46666667, 0.46666667, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_coixe"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_c8smv"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gy7k7"]
-content_margin_left = 8.0
-content_margin_right = 8.0
-bg_color = Color(0.14901961, 0.45882353, 0.8509804, 1)
-border_width_top = 3
-border_width_bottom = 3
-border_color = Color(0.8, 0.8, 0.8, 0)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5t7oo"]
 
@@ -105,7 +107,34 @@ auto_height = true
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="UserInput" type="TextEdit" parent="VBoxContainer"]
+[node name="ConfigModelTip" type="VBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/ConfigModelTip"]
+layout_mode = 2
+text = "目前没有任何已经启用的模型，
+需要在设置中配置后才能使用"
+horizontal_alignment = 1
+
+[node name="ConfigModelButton" type="Button" parent="VBoxContainer/ConfigModelTip"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "目前没有任何已经启用的模型，
+需要在设置中配置后才能使用"
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_gy7k7")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_gy7k7")
+theme_override_styles/hover = SubResource("StyleBoxFlat_gy7k7")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_gy7k7")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_c3kby")
+text = "配置模型"
+
+[node name="InputBox" type="VBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="UserInput" type="TextEdit" parent="VBoxContainer/InputBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
@@ -120,22 +149,22 @@ scroll_fit_content_height = true
 caret_blink = true
 caret_multiple = false
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/InputBox"]
 layout_mode = 2
 size_flags_vertical = 4
 alignment = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/InputBox/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 
-[node name="CustomDropdown" parent="VBoxContainer/HBoxContainer/HBoxContainer" instance=ExtResource("2_c3kby")]
+[node name="CustomDropdown" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer" instance=ExtResource("2_c3kby")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(96, 30)
 layout_mode = 2
 
-[node name="InputModeSelect" type="OptionButton" parent="VBoxContainer/HBoxContainer/HBoxContainer"]
+[node name="InputModeSelect" type="OptionButton" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -151,7 +180,7 @@ popup/item_0/id = 0
 popup/item_1/text = "Ask"
 popup/item_1/id = 1
 
-[node name="ModelButton" type="OptionButton" parent="VBoxContainer/HBoxContainer/HBoxContainer"]
+[node name="ModelButton" type="OptionButton" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "选择AI模型"
@@ -160,8 +189,10 @@ theme_override_constants/h_separation = 2
 theme_override_font_sizes/font_size = 13
 theme_override_styles/focus = SubResource("StyleBoxEmpty_model_button")
 flat = true
+item_count = 1
+popup/item_0/id = 0
 
-[node name="UseThinking" type="CheckButton" parent="VBoxContainer/HBoxContainer/HBoxContainer"]
+[node name="UseThinking" type="CheckButton" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_default_cursor_shape = 2
@@ -170,19 +201,19 @@ button_pressed = true
 text = "思考"
 flat = true
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/HBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/InputBox/HBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_constants/separation = 6
 
-[node name="UsageLabel" type="Label" parent="VBoxContainer/HBoxContainer/HBoxContainer2"]
+[node name="UsageLabel" type="Label" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 mouse_filter = 0
 label_settings = SubResource("LabelSettings_gy7k7")
 
-[node name="ClearButton" type="Button" parent="VBoxContainer/HBoxContainer/HBoxContainer2"]
+[node name="ClearButton" type="Button" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
@@ -196,7 +227,7 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_c8smv")
 text = "清空"
 flat = true
 
-[node name="SendButton" type="Button" parent="VBoxContainer/HBoxContainer/HBoxContainer2"]
+[node name="SendButton" type="Button" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
@@ -209,7 +240,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_gy7k7")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_5t7oo")
 text = "发送"
 
-[node name="StopButton" type="Button" parent="VBoxContainer/HBoxContainer/HBoxContainer2"]
+[node name="StopButton" type="Button" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -225,9 +256,9 @@ text = "停止"
 icon_alignment = 1
 expand_icon = true
 
-[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer/HBoxContainer2"]
+[node name="Control" type="Control" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]
 custom_minimum_size = Vector2(2, 0)
 layout_mode = 2
 
-[connection signal="gui_input" from="VBoxContainer/UserInput" to="." method="_on_user_input_gui_input"]
-[connection signal="item_selected" from="VBoxContainer/HBoxContainer/HBoxContainer/InputModeSelect" to="." method="_on_input_mode_select_item_selected"]
+[connection signal="gui_input" from="VBoxContainer/InputBox/UserInput" to="." method="_on_user_input_gui_input"]
+[connection signal="item_selected" from="VBoxContainer/InputBox/HBoxContainer/HBoxContainer/InputModeSelect" to="." method="_on_input_mode_select_item_selected"]

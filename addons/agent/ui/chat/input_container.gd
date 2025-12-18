@@ -13,7 +13,9 @@ extends MarginContainer
 @onready var stop_button: Button = %StopButton
 @onready var model_button: OptionButton = %ModelButton
 @onready var custom_dropdown: CustomDropdown = %CustomDropdown
-
+@onready var config_model_button: Button = %ConfigModelButton
+@onready var config_model_tip: VBoxContainer = %ConfigModelTip
+@onready var input_box: VBoxContainer = %InputBox
 
 const REFERENCE_ITEM = preload("uid://bewckbivwp036")
 
@@ -23,7 +25,7 @@ signal show_help
 signal show_setting
 signal show_memory
 signal model_changed(model_id: String)
-signal manage_models_requested
+# signal manage_models_requested
 
 enum MenuListType {
 	None,
@@ -56,6 +58,8 @@ var disable: bool = false:
 
 var menu_list = []
 
+var model_id_list = {}
+
 func _ready() -> void:
 	update_user_input_placeholder()
 
@@ -66,7 +70,7 @@ func _ready() -> void:
 	user_input.text_changed.connect(on_user_input_text_changed)
 	input_menu_list.item_selected.connect(on_input_menu_list_item_selected)
 	custom_dropdown.is_action_mode.connect(update_user_input_placeholder)
-
+	config_model_button.pressed.connect(show_setting.emit)
 
 	# 初始化模型选择器
 	if model_button:
@@ -79,32 +83,44 @@ func _ready() -> void:
 	)
 
 # 更新模型选择器
-func update_model_selector(models: Array, current_model_id: String, current_model_name: String):
+func update_model_selector(suppliers: Array, current_model_id: String, current_model_name: String):
 	if not model_button:
 		return
 
 	model_button.clear()
 
 	var current_idx = 0
+	var supplier_idx = 0
 	var idx = 0
-	for model in models:
-		model_button.add_item(model.name)
-		if model.id == current_model_id:
-			current_idx = idx
-			var supports_thinking: bool = model.supports_thinking
-			use_thinking.visible = supports_thinking
-			use_thinking.button_pressed = supports_thinking
+
+	for supplier in suppliers:
+		var models = supplier.models.filter(func(m): return m.active)
+		if models.size() == 0:
+			continue
+		# 添加分隔符根据供应商分组
+		model_button.add_separator(supplier.name)
 		idx += 1
+		# 添加模型
+		for model in models:
+			model_button.add_item(model.name)
+			if model.id == current_model_id:
+				current_idx = idx
+				var supports_thinking: bool = model.supports_thinking
+				use_thinking.visible = supports_thinking
+				use_thinking.button_pressed = supports_thinking
+			model_id_list[idx] = model.id
+			idx += 1
 
-	# 添加分隔符和 "Manage Models..." 选项
-	model_button.add_separator()
-	var manage_idx = model_button.item_count
-	model_button.add_item("Manage Models...")
-	# 将 "Manage Models..." 设置为禁用状态（不可选中，但可点击）
-	model_button.set_item_disabled(manage_idx, false)
-
-	# 设置当前选中的模型
-	model_button.selected = current_idx
+	#print("model_id_list: ", model_id_list)
+	if model_button.item_count == 0:
+		config_model_tip.show()
+		input_box.hide()
+	else:
+		input_box.show()
+		config_model_tip.hide()
+		
+		# 设置当前选中的模型
+		model_button.selected = current_idx
 
 # 模型选择回调
 func _on_model_selected(idx: int):
@@ -113,23 +129,26 @@ func _on_model_selected(idx: int):
 		return
 
 	# 检查是否是最后一项（Manage Models...）
-	if idx == model_button.item_count - 1:
-		# 触发打开模型管理窗口
-		manage_models_requested.emit()
-		# 恢复之前的选择（防止选中 "Manage Models..."）
-		var current_model = model_manager.get_current_model()
-		if current_model:
-			for i in range(model_manager.models.size()):
-				if model_manager.models[i].id == current_model.id:
-					model_button.selected = i
-					break
-	else:
-		# 获取选中的模型ID
-		if idx < model_manager.models.size():
-			var supports_thinking: bool = model_manager.models[idx].supports_thinking
-			use_thinking.visible = supports_thinking
-			use_thinking.button_pressed = supports_thinking
-			model_changed.emit(model_manager.models[idx].id)
+	#if idx == model_button.get_item_index(1):
+		## 触发打开模型管理窗口
+		#show_setting.emit()
+		#model_button.select(-1)
+		## 恢复之前的选择（防止选中 "Manage Models..."）
+		##var current_model = model_manager.get_current_model()
+		##if current_model:
+			##for i in range(model_manager.models.size()):
+				##if model_manager.models[i].id == current_model.id:
+					##model_button.selected = i
+					##break
+	#else:
+	var model_id = model_id_list[idx]
+	var model := model_manager.get_model_by_id(model_id)
+	if model:
+		var supplier_id = model.supplier_id
+		var supports_thinking: bool = model.supports_thinking
+		use_thinking.visible = supports_thinking
+		use_thinking.button_pressed = supports_thinking
+		model_changed.emit(supplier_id, model_id)
 
 ## 是否可以将数据拖放到输入框
 func user_input_can_drop (at_position: Vector2, data: Variant):

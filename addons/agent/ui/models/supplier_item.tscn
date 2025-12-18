@@ -4,7 +4,6 @@
 [ext_resource type="Texture2D" uid="uid://btnh1plrm3etf" path="res://addons/agent/icons/newicon/Icon_arrowdown.svg" id="1_vka0h"]
 [ext_resource type="Texture2D" uid="uid://yhceflqqddt3" path="res://addons/agent/icons/newicon/Icon_more.svg" id="2_vka0h"]
 [ext_resource type="Texture2D" uid="uid://dv0l7ve7m51jf" path="res://addons/agent/icons/newicon/Icon_edit.svg" id="3_omc8c"]
-[ext_resource type="PackedScene" uid="uid://t8tpl55g2wg0" path="res://addons/agent/ui/models/setting_model_item.tscn" id="3_vka0h"]
 [ext_resource type="Texture2D" uid="uid://b2el7xc75pfe7" path="res://addons/agent/icons/newicon/Icon_bin.svg" id="4_cxw2j"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_omc8c"]
@@ -47,6 +46,8 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cxw2j"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_omc8c"]
 
@@ -108,10 +109,11 @@ layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_3c5pc")
 text = "供应商"
 
-[node name="Label2" type="Label" parent="SupplierShow/HBoxContainer"]
+[node name="SupplierTitle" type="Label" parent="SupplierShow/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-text = "DeepSeek"
+text = "未命名供应商"
 
 [node name="MoreActionButton" type="MenuButton" parent="SupplierShow/HBoxContainer"]
 unique_name_in_owner = true
@@ -132,12 +134,6 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 
-[node name="SettingModelItem" parent="SupplierShow/SettingModelList" instance=ExtResource("3_vka0h")]
-layout_mode = 2
-
-[node name="SettingModelItem2" parent="SupplierShow/SettingModelList" instance=ExtResource("3_vka0h")]
-layout_mode = 2
-
 [node name="SupplierEdit" type="VBoxContainer" parent="."]
 unique_name_in_owner = true
 visible = false
@@ -150,6 +146,16 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 text = "编辑供应商"
+
+[node name="EditModelButton" type="Button" parent="SupplierEdit/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_d56vv")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_d56vv")
+theme_override_styles/hover = SubResource("StyleBoxFlat_d56vv")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_d56vv")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_cxw2j")
+text = "编辑模型"
 
 [node name="CancelSaveButton" type="Button" parent="SupplierEdit/HBoxContainer"]
 unique_name_in_owner = true
@@ -190,11 +196,13 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_cxw2j")
 selected = 0
-item_count = 2
+item_count = 3
 popup/item_0/text = "Open AI"
 popup/item_0/id = 0
-popup/item_1/text = "Ollama"
+popup/item_1/text = "DeepSeek"
 popup/item_1/id = 1
+popup/item_2/text = "Ollama"
+popup/item_2/id = 2
 
 [node name="Label2" type="Label" parent="SupplierEdit"]
 layout_mode = 2

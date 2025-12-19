@@ -1,30 +1,101 @@
-[gd_scene load_steps=3 format=3 uid="uid://fycl6xlfw8r5"]
+[gd_scene load_steps=8 format=3 uid="uid://fycl6xlfw8r5"]
 
-[ext_resource type="PackedScene" uid="uid://58ryyxbn0dby" path="res://addons/agent/ui/plan/plan_item.tscn" id="1_8cy4d"]
 [ext_resource type="Script" uid="uid://dismjo4ye3i3w" path="res://addons/agent/ui/plan/plan_list.gd" id="1_lbtd4"]
+[ext_resource type="Texture2D" uid="uid://bcnbim8kp3niv" path="res://addons/agent/icons/newicon/Icon_showtree.svg" id="2_lbtd4"]
+[ext_resource type="Texture2D" uid="uid://c7k1lmqcefawo" path="res://addons/agent/icons/newicon/Icon_done.svg" id="3_dc6at"]
+[ext_resource type="Texture2D" uid="uid://btnh1plrm3etf" path="res://addons/agent/icons/newicon/Icon_arrowdown.svg" id="4_ic3dk"]
 
-[node name="PlanList" type="MarginContainer"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dc6at"]
+bg_color = Color(0.13333334, 0.13333334, 0.13333334, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ic3dk"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dc6at"]
+
+[node name="PanelContainer" type="PanelContainer"]
 visible = false
-anchors_preset = 15
+anchors_preset = 10
 anchor_right = 1.0
-anchor_bottom = 1.0
+offset_bottom = 24.0
 grow_horizontal = 2
-grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dc6at")
 script = ExtResource("1_lbtd4")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="PlanList" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PlanList"]
 layout_mode = 2
 
-[node name="ExpandButton" type="Button" parent="VBoxContainer"]
+[node name="ShowPlan" type="VBoxContainer" parent="PlanList/VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="PlanItemScrollContainer" type="ScrollContainer" parent="PlanList/VBoxContainer/ShowPlan"]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="PlanItemContainer" type="VBoxContainer" parent="PlanList/VBoxContainer/ShowPlan/PlanItemScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HSeparator" type="HSeparator" parent="PlanList/VBoxContainer/ShowPlan"]
+layout_mode = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="PlanList/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_ic3dk")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PlanList/VBoxContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="PlanList/VBoxContainer/PanelContainer/HBoxContainer"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+texture = ExtResource("2_lbtd4")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="AllFinishedIcon" type="TextureRect" parent="PlanList/VBoxContainer/PanelContainer/HBoxContainer"]
+unique_name_in_owner = true
+visible = false
+modulate = Color(0.18431373, 0.69411767, 0.54509807, 1)
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+texture = ExtResource("3_dc6at")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PlanText" type="Label" parent="PlanList/VBoxContainer/PanelContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ExpandIcon" type="TextureRect" parent="PlanList/VBoxContainer/PanelContainer/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+texture = ExtResource("4_ic3dk")
+expand_mode = 1
+stretch_mode = 5
+flip_v = true
+
+[node name="ExpandButton" type="Button" parent="PlanList/VBoxContainer/PanelContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
 mouse_default_cursor_shape = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_dc6at")
 flat = true
 alignment = 0
-
-[node name="PlanItemContainer" type="VBoxContainer" parent="VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="PlanItem" parent="VBoxContainer/PlanItemContainer" instance=ExtResource("1_8cy4d")]
-layout_mode = 2

@@ -306,6 +306,10 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="PlanList" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer" instance=ExtResource("8_1ot7o")]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="MarginContainer" type="MarginContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer"]
 layout_mode = 2
 
@@ -314,10 +318,6 @@ layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_5v6i3")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/MarginContainer/PanelContainer"]
-layout_mode = 2
-
-[node name="PlanList" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/MarginContainer/PanelContainer/VBoxContainer" instance=ExtResource("8_1ot7o")]
-unique_name_in_owner = true
 layout_mode = 2
 
 [node name="InputContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/MarginContainer/PanelContainer/VBoxContainer" instance=ExtResource("4_2dutf")]
@@ -377,16 +377,18 @@ uri = "https://godotvillage.github.io/"
 unique_name_in_owner = true
 script = ExtResource("13_wlmmt")
 api_base = "https://api.deepseek.com"
-secret_key = "sk-078ec588fe384842a339e5db806120dc"
+secret_key = "sk-cfbdcb2675534c569c83ba59100c0fba"
 model_name = "deepseek-chat"
 max_tokens = 8192
+provider = "deepseek"
 
 [node name="TitleGenerateOpenAIChat" type="Node" parent="ChatModels"]
 unique_name_in_owner = true
 script = ExtResource("14_q7ex6")
 api_base = "https://api.deepseek.com"
-secret_key = "sk-078ec588fe384842a339e5db806120dc"
+secret_key = "sk-cfbdcb2675534c569c83ba59100c0fba"
 model_name = "deepseek-chat"
+provider = "deepseek"
 
 [node name="OllamaChatStream" type="Node" parent="ChatModels"]
 unique_name_in_owner = true

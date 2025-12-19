@@ -585,11 +585,12 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 
 			var interation := int(json.get("interation", -1))
 
-			var ignore_files = [".godot", "*.uid", "addons"]
+			var ignore_files = [".alpha", ".godot", "*.uid", "addons"]
 			var queue = [{
 				"path": start_path,
 				"interation": interation
 			}]
+
 			var file_list = []
 			while queue.size():
 				var current_item = queue.pop_front()

@@ -363,6 +363,7 @@ func on_click_new_chat_button():
 	clear()
 	input_container.disable = false
 	show_container(chat_container)
+	plan_list.update_list([])
 
 func clear():
 	welcome_message.show()

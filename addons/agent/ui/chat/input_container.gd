@@ -118,7 +118,7 @@ func update_model_selector(suppliers: Array, current_model_id: String, current_m
 	else:
 		input_box.show()
 		config_model_tip.hide()
-		
+
 		# 设置当前选中的模型
 		model_button.selected = current_idx
 
@@ -360,7 +360,7 @@ func update_user_input_placeholder():
 			user_input.placeholder_text = "输入问题，不使用工具，获得更安全的体验。"
 		"Agent":
 			user_input.placeholder_text = "输入问题，或拖拽添加引用。"
-	print(get_input_mode())
+	#print(get_input_mode())
 
 
 

@@ -59,7 +59,7 @@ func init_models_supplier():
 		supplier_list.add_child(new_supplier)
 		new_supplier.set_supplier_info(supplier)
 		suppliers.append(new_supplier)
-		
+
 func _on_show_setting():
 	if visible:
 		for supplier in suppliers:

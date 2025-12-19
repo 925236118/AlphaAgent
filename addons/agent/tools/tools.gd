@@ -3,6 +3,18 @@ extends Node
 
 @export_tool_button("测试") var test_action = test
 
+# 只读工具列表
+var readonly_tools_list: Array[String] = [
+	"get_project_info",
+	"get_editor_info",
+	"get_project_file_list",
+	"get_class_doc",
+	"get_image_info",
+	"get_tileset_info",
+	"read_file",
+	"check_script_error"
+]
+
 func test():
 	var tool = AgentModelUtils.ToolCallsInfo.new()
 	tool.function.name = "update_scene_node_property"
@@ -13,8 +25,15 @@ func test():
 	#var process_id = OS.create_instance(["--headless", "--script", "res://game.gd"])
 	pass
 
+# 获取只读工具列表
+func get_readonly_tools_list() -> Array[Dictionary]:
+	var tool_list: Array[Dictionary] = []
+	for tool in get_tools_list():
+		if readonly_tools_list.has(tool.function.name):
+			tool_list.push_back(tool)
+	return tool_list
 
-
+# 获取工具列表
 func get_tools_list() -> Array[Dictionary]:
 	return [
 #region 生成相关
@@ -478,7 +497,7 @@ func get_tools_list() -> Array[Dictionary]:
 #endregion
 	]
 
-
+# 使用工具
 func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 	var result = {}
 	match tool_call.function.name:
@@ -950,7 +969,7 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 					result = {
 						"error": "创建进程失败"
 					}
-		
+
 		#本工具目前具有较大不确定性，暂不提供调用
 		"editor_script_feature":
 			var json = JSON.parse_string(tool_call.function.arguments)
@@ -1066,7 +1085,7 @@ func set_resource_property(resource_path: String, scene_path: String, node_path:
 	if resource == null:
 		print("错误: 无法加载资源文件: ", resource_path)
 		return false
-	
+
 	# 加载场景
 	var opened_scene = ResourceLoader.load(scene_path, "PackedScene") as PackedScene
 	if not opened_scene:
@@ -1074,27 +1093,27 @@ func set_resource_property(resource_path: String, scene_path: String, node_path:
 		return false# 如果场景打开失败，则终止脚本
 	else:
 		EditorInterface.open_scene_from_path(scene_path)
-	
+
 	# 获取场景的根节点
 	var scene_root = EditorInterface.get_edited_scene_root()
 	if scene_root == null:
 		print("错误：场景打开后，无法获取其根节点。")
 		return false
-	
+
 	# 获取目标节点
 	var target_node = scene_root.get_node(node_path)
 	if target_node == null:
 		print("错误: 在场景中找不到节点路径: ", node_path)
 		return false
-	
+
 	EditorInterface.get_selection().clear()
 	EditorInterface.get_selection().add_node(target_node)
-	
+
 	var array := property_name.split("/")
 	if set_res(target_node, array, resource):
 		# 刷新编辑器以显示更改
 		EditorInterface.edit_node(target_node)
-		
+
 		print("成功在编辑器中将资源挂载到节点属性")
 		return true
 	else:
@@ -1124,14 +1143,14 @@ func execute_command(command: String, args: Array = [], blocking: bool = true) -
 		"output": [],
 		"info": {}
 	}
-	
+
 	# 获取项目目录
 	var working_dir = ProjectSettings.globalize_path("res://")
-	
+
 	# 在Linux/Mac上使用bash，Windows上使用cmd
 	var shell = "bash" if OS.get_name() != "Windows" else "cmd"
 	var shell_args = []
-	
+
 	if OS.get_name() != "Windows":
 		 # 使用bash，先切换目录，然后执行命令
 		var full_command = "cd '" + working_dir + "' && " + command + " " + " ".join(args)
@@ -1140,13 +1159,13 @@ func execute_command(command: String, args: Array = [], blocking: bool = true) -
 		# 使用cmd，先切换目录，然后执行命令
 		var full_command = "cd /d \"" + working_dir + "\" && " + command + " " + " ".join(args)
 		shell_args = ["/c", full_command]
-	
+
 	# 执行命令
 	var info = OS.execute_with_pipe(shell, shell_args, blocking)
-	
+
 	result.info = info
 	result.success = true if info else false
-	
+
 	return result
 
 #运行EditorScript
@@ -1159,17 +1178,17 @@ func run_editor_script(script_path: String) -> bool:
 		return false
 	# 创建脚本实例
 	var script_instance = script.new()
-	
+
 	# 检查实例是否成功创建
 	if not script_instance:
 		push_error("无法创建脚本实例: " + script_path)
 		return false
-	
+
 	#检查是否EditorScript
 	if not script_instance is EditorScript:
 		printerr("脚本非EditorScript：" + script_path)
 		return false
-	
+
 	# 如果脚本有_run方法，则调用它
 	if script_instance.has_method("_run"):
 		script_instance._run()
@@ -1180,7 +1199,7 @@ func run_editor_script(script_path: String) -> bool:
 
 #获取TileSet数据工具
 func get_tileset_info(tileset: TileSet) -> Dictionary:
-	
+
 	var tileset_data = {}
 	for source_index in tileset.get_source_count():
 		var source = tileset.get_source(tileset.get_source_id(source_index))
@@ -1189,7 +1208,7 @@ func get_tileset_info(tileset: TileSet) -> Dictionary:
 			for tile_index in source.get_tiles_count():
 				var tile_data = source.get_tile_data(source.get_tile_id(tile_index), 0)
 				atlas_data[source.get_tile_id(tile_index)] = tile_data_to_dict(tile_data, tileset)
-			
+
 			tileset_data[tileset.get_source_id(source_index)] = atlas_data
 		tileset_data["texture/" + str(tileset.get_source_id(source_index))] = source.texture.resource_path
 	return tileset_data
@@ -1201,7 +1220,7 @@ func tile_data_to_dict(tile_data: TileData, tileset: TileSet, source_texture: Te
 	var navigation_layers_count = tileset.get_navigation_layers_count()
 	var custom_data_layers_count = tileset.get_custom_data_layers_count()
 	var occlusion_layers_count = tileset.get_occlusion_layers_count()
-	
+
 	# 1. 基础属性
 	dict["flip_h"] = tile_data.flip_h
 	dict["flip_v"] = tile_data.flip_v
@@ -1209,13 +1228,13 @@ func tile_data_to_dict(tile_data: TileData, tileset: TileSet, source_texture: Te
 	dict["z_index"] = tile_data.get_z_index()
 	dict["y_sort_origin"] = tile_data.get_y_sort_origin()
 	dict["material"] = str(tile_data.material.resource_path) if tile_data.material else ""
-	
+
 	# 2. 纹理相关
 	dict["texture_origin"] = tile_data.texture_origin
-	
+
 	# 3. 颜色
 	dict["modulate"] = var_to_str(tile_data.get_modulate())
-	
+
 	# 4. 物理层（碰撞形状）
 	var physics_layers := []
 	for layer_index in physics_layers_count:
@@ -1231,28 +1250,28 @@ func tile_data_to_dict(tile_data: TileData, tileset: TileSet, source_texture: Te
 			physic_layer["polygons:"+str(polygons_index)] = polygons_info
 		physics_layers.append(physic_layer)
 	dict["physics_layers"] = physics_layers
-	
+
 	# 5. 导航层
 	var navigation_layers := []
 	for layer_index in navigation_layers_count:
 		navigation_layers.append(tile_data.get_navigation_polygon(layer_index))
 	dict["navigation_layers"] = navigation_layers
-	
+
 	# 6. 自定义数据层
 	var custom_data := {}
 	for layer_index in custom_data_layers_count:
 		var layer_name = tileset.get_custom_data_layer_name(layer_index)
 		custom_data[layer_name] = tile_data.get_custom_data(layer_name)
 	dict["custom_data"] = custom_data
-	
+
 	# 7. 地形与翻转
 	dict["terrain_set"] = tile_data.terrain_set
 	dict["terrain"] = tile_data.terrain
 	dict["probability"] = tile_data.probability
-	
+
 	# 8. 备用属性（备用贴图）
 	dict["alternative_tile"] = tile_data.alternative_tile if "alternative_tile" in tile_data else -1
-	
+
 	# 9. 光照遮挡
 	var occlusion_layers := []
 	for layer_index in occlusion_layers_count:
@@ -1264,7 +1283,7 @@ func tile_data_to_dict(tile_data: TileData, tileset: TileSet, source_texture: Te
 			occlusion_layer["occlusion:"+str(occlusion_index)] = occlusion_info
 		occlusion_layers.append(occlusion_layer)
 	dict["occlusion_layers"] = occlusion_layers
-	
+
 	return dict
 
 #获取目标节点
@@ -1278,7 +1297,7 @@ func get_target_node(scene_path: String, node_path: String) -> Node:
 		return null# 如果场景打开失败，则终止脚本
 	else:
 		EditorInterface.open_scene_from_path(scene_path)
-	
+
 	var instance = opened_scene.instantiate()
 	if instance is Node2D:
 		print("这是一个2D场景")
@@ -1290,7 +1309,7 @@ func get_target_node(scene_path: String, node_path: String) -> Node:
 		print("该场景非2D也非3D")
 		EditorInterface.set_main_screen_editor("2D")
 	instance.call_deferred("queue_free")
-	
+
 	var scene_root = EditorInterface.get_edited_scene_root()
 	if not scene_root:
 		printerr("错误：场景打开后，无法获取其根节点。")
@@ -1307,5 +1326,5 @@ func get_target_node(scene_path: String, node_path: String) -> Node:
 	# 选中节点，这会自动在检查器中显示它
 	EditorInterface.get_selection().clear()
 	EditorInterface.get_selection().add_node(target_node)
-	
+
 	return target_node

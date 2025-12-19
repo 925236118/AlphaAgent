@@ -114,7 +114,7 @@ class ModelManager:
 		supplier.name = "DeepSeek"
 		supplier.base_url = "https://api.deepseek.com"
 		supplier.api_key = ""
-		supplier.provider = "openai"
+		supplier.provider = "deepseek"
 		suppliers.append(supplier)
 
 		var chat_model = ModelInfo.new()

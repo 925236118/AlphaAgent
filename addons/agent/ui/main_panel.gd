@@ -250,11 +250,10 @@ func send_messages():
 	var use_thinking = input_container.get_use_thinking()
 	# 设置工具和模式
 	match input_container.get_input_mode():
-		"Ask":
-			current_chat_stream.tools = []
+		"ASK":
+			current_chat_stream.tools = tools.get_readonly_tools_list()
 		"Agent":
 			current_chat_stream.tools = tools.get_tools_list()
-
 	# 使用模型配置的max_tokens 和 thinking
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if model_manager:

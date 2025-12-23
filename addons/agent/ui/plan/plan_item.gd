@@ -6,8 +6,9 @@ extends HBoxContainer
 @onready var state_active: TextureRect = %StateActive
 @onready var state_finish: TextureRect = %StateFinish
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
+@onready var label: RichTextLabel = $RichTextLabel
 
-@onready var label: Label = $Label
+#@onready var label: Label = $Label
 
 func set_text(text: String):
 	label.text = text

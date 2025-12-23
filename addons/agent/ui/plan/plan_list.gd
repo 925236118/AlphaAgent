@@ -28,7 +28,7 @@ func update_list(list: Array[AlphaAgentPlugin.PlanItem]):
 	if list.size() <= 4:
 		plan_item_scroll_container.custom_minimum_size.y = list.size() * (32 + 4) - 4
 	else:
-		plan_item_scroll_container.custom_minimum_size.y = 4 * (32 + 4) + 12
+		plan_item_scroll_container.custom_minimum_size.y = 4 * (25 + 4) + 12
 
 	for index in list.size():
 		var item = list[index]

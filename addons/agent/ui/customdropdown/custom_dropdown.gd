@@ -58,17 +58,3 @@ func get_now_mode() -> String:
 func check_is_action_mode():
 	is_action_mode.emit()
 	print("now click")
-
-
-
-
-
-
-
-
-
-
-
-
-
-#down#

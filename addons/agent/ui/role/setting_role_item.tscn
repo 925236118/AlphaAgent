@@ -1,0 +1,106 @@
+[gd_scene load_steps=8 format=3 uid="uid://dwlfm5aqjw7f4"]
+
+[ext_resource type="Texture2D" uid="uid://btnh1plrm3etf" path="res://addons/agent/icons/newicon/Icon_arrowdown.svg" id="1_dna4v"]
+[ext_resource type="Script" uid="uid://cwuo1odm1jv5w" path="res://addons/agent/ui/role/setting_role_item.gd" id="1_qpv8x"]
+[ext_resource type="Texture2D" uid="uid://yhceflqqddt3" path="res://addons/agent/icons/newicon/Icon_more.svg" id="2_qpv8x"]
+[ext_resource type="Texture2D" uid="uid://dv0l7ve7m51jf" path="res://addons/agent/icons/newicon/Icon_edit.svg" id="3_06syx"]
+[ext_resource type="Texture2D" uid="uid://b2el7xc75pfe7" path="res://addons/agent/icons/newicon/Icon_bin.svg" id="4_4mqmd"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_abj0b"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.15686275, 0.15686275, 0.15686275, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.2, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qpv8x"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.078431375, 0.078431375, 0.078431375, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="SettingRoleItem" type="PanelContainer"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 53.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_abj0b")
+script = ExtResource("1_qpv8x")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="ExpendModelButton" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+toggle_mode = true
+texture_normal = ExtResource("1_dna4v")
+stretch_mode = 5
+
+[node name="RoleName" type="Label" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "默认角色"
+
+[node name="MoreActionButton" type="MenuButton" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+icon = ExtResource("2_qpv8x")
+item_count = 2
+popup/item_0/text = "编辑"
+popup/item_0/icon = ExtResource("3_06syx")
+popup/item_0/id = 0
+popup/item_1/text = "删除"
+popup/item_1/icon = ExtResource("4_4mqmd")
+popup/item_1/id = 1
+
+[node name="DetailContainer" type="VBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/DetailContainer"]
+layout_mode = 2
+text = "用户提示词"
+
+[node name="CustomPrompt" type="Label" parent="VBoxContainer/DetailContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 65)
+layout_mode = 2
+mouse_filter = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_qpv8x")
+text = "没有用户提示词"
+autowrap_mode = 3
+clip_text = true
+text_overrun_behavior = 6
+
+[node name="Label2" type="Label" parent="VBoxContainer/DetailContainer"]
+layout_mode = 2
+text = "可以调用的工具列表"
+
+[node name="FunctionCallContainer" type="HFlowContainer" parent="VBoxContainer/DetailContainer"]
+unique_name_in_owner = true
+layout_mode = 2

@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=32 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Texture2D" uid="uid://dd5t0pwniqnr1" path="res://addons/agent/icons/history.svg" id="2_6rfr6"]
@@ -18,6 +18,53 @@
 [ext_resource type="Script" uid="uid://dwv814ayqkkbf" path="res://addons/agent/scripts/openai_chat.gd" id="14_q7ex6"]
 [ext_resource type="Script" uid="uid://cyh2gqd0jea8s" path="res://addons/agent/scripts/ollama_chat_stream.gd" id="15_cd0et"]
 [ext_resource type="Script" uid="uid://drxphw7kybfrr" path="res://addons/agent/scripts/ollama_chat.gd" id="16_i5act"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cd0et"]
+bg_color = Color(0.0885599, 0.08855992, 0.08855986, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pcyt6"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 8
+border_width_top = 8
+border_width_right = 8
+border_width_bottom = 8
+border_color = Color(0.8, 0.8, 0.8, 0)
+
+[sub_resource type="Theme" id="Theme_cd0et"]
+PopupMenu/colors/font_accelerator_color = Color(0, 0, 0, 1)
+PopupMenu/colors/font_color = Color(0.76862746, 0.76862746, 0.76862746, 1)
+PopupMenu/colors/font_disabled_color = Color(0, 0, 0, 1)
+PopupMenu/colors/font_hover_color = Color(0.76862746, 0.76862746, 0.76862746, 1)
+PopupMenu/colors/font_outline_color = Color(0, 0, 0, 1)
+PopupMenu/colors/font_separator_color = Color(0, 0, 0, 1)
+PopupMenu/colors/font_separator_outline_color = Color(0, 0, 0, 1)
+PopupMenu/constants/h_separation = 4
+PopupMenu/constants/icon_max_width = 16
+PopupMenu/constants/indent = 0
+PopupMenu/constants/item_end_padding = 8
+PopupMenu/constants/item_start_padding = 8
+PopupMenu/constants/outline_size = 0
+PopupMenu/constants/separator_outline_size = 0
+PopupMenu/constants/v_separation = 4
+PopupMenu/font_sizes/font_separator_size = 16
+PopupMenu/font_sizes/font_size = 16
+PopupMenu/fonts/font = null
+PopupMenu/fonts/font_separator = null
+PopupMenu/icons/checked = null
+PopupMenu/icons/checked_disabled = null
+PopupMenu/icons/radio_checked = null
+PopupMenu/icons/radio_checked_disabled = null
+PopupMenu/icons/radio_unchecked = null
+PopupMenu/icons/radio_unchecked_disabled = null
+PopupMenu/icons/submenu = null
+PopupMenu/icons/submenu_mirrored = null
+PopupMenu/icons/unchecked = null
+PopupMenu/icons/unchecked_disabled = null
+PopupMenu/styles/hover = SubResource("StyleBoxFlat_cd0et")
+PopupMenu/styles/labeled_separator_left = null
+PopupMenu/styles/labeled_separator_right = null
+PopupMenu/styles/panel = SubResource("StyleBoxFlat_pcyt6")
+PopupMenu/styles/separator = null
 
 [sub_resource type="Theme" id="Theme_aabuu"]
 
@@ -76,6 +123,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = SubResource("Theme_cd0et")
 script = ExtResource("1_c4fjy")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="."]
@@ -377,18 +425,16 @@ uri = "https://godotvillage.github.io/"
 unique_name_in_owner = true
 script = ExtResource("13_wlmmt")
 api_base = "https://api.deepseek.com"
-secret_key = "sk-cfbdcb2675534c569c83ba59100c0fba"
+secret_key = "sk-7c646af2e5054dfabaf6b2ac65180f69"
 model_name = "deepseek-chat"
 max_tokens = 8192
-provider = "deepseek"
 
 [node name="TitleGenerateOpenAIChat" type="Node" parent="ChatModels"]
 unique_name_in_owner = true
 script = ExtResource("14_q7ex6")
 api_base = "https://api.deepseek.com"
-secret_key = "sk-cfbdcb2675534c569c83ba59100c0fba"
+secret_key = "sk-7c646af2e5054dfabaf6b2ac65180f69"
 model_name = "deepseek-chat"
-provider = "deepseek"
 
 [node name="OllamaChatStream" type="Node" parent="ChatModels"]
 unique_name_in_owner = true

@@ -16,6 +16,7 @@ extends MarginContainer
 @onready var config_model_button: Button = %ConfigModelButton
 @onready var config_model_tip: VBoxContainer = %ConfigModelTip
 @onready var input_box: VBoxContainer = %InputBox
+@onready var role_button: OptionButton = %RoleButton
 
 const REFERENCE_ITEM = preload("uid://bewckbivwp036")
 
@@ -59,6 +60,7 @@ var disable: bool = false:
 var menu_list = []
 
 var model_id_list = {}
+var role_id_list = {}
 
 func _ready() -> void:
 	update_user_input_placeholder()
@@ -75,6 +77,9 @@ func _ready() -> void:
 	# 初始化模型选择器
 	if model_button:
 		model_button.item_selected.connect(_on_model_selected)
+
+	if role_button:
+		role_button.item_selected.connect(_on_role_selected)
 
 	user_input.set_drag_forwarding(
 		Callable(),
@@ -149,6 +154,25 @@ func _on_model_selected(idx: int):
 		use_thinking.visible = supports_thinking
 		use_thinking.button_pressed = supports_thinking
 		model_changed.emit(supplier_id, model_id)
+
+func update_role_selector(roles: Array, current_role_id: String):
+	if not role_button:
+		return
+	role_button.clear()
+	var idx = 0
+	for role in roles:
+		role_button.add_item(role.name)
+		role_id_list[idx] = role.id
+		if role.id == current_role_id:
+			role_button.select(idx)
+		idx += 1
+
+func _on_role_selected(idx: int):
+	var role_manager = AlphaAgentPlugin.global_setting.role_manager
+	if not role_manager:
+		return
+	var role_id = role_id_list[idx]
+	role_manager.set_current_role(role_id)
 
 ## 是否可以将数据拖放到输入框
 func user_input_can_drop (at_position: Vector2, data: Variant):

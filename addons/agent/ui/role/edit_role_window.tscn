@@ -1,0 +1,171 @@
+[gd_scene load_steps=11 format=3 uid="uid://cx0yeuxsc2kui"]
+
+[ext_resource type="Script" uid="uid://c0aloouufynjd" path="res://addons/agent/ui/role/edit_role_window.gd" id="1_yvfk6"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yvfk6"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.2, 0.2, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ga12p"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.2, 0.2, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bjrh0"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.2, 0.2, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bamjv"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.2, 0.2, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_s3o1i"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dawp3"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.14901961, 0.45882353, 0.8509804, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_m1x5d"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s3o1i"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.14901961, 0.45882353, 0.8509804, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dawp3"]
+
+[node name="EditRoleWindow" type="Window"]
+oversampling_override = 1.0
+size = Vector2i(600, 600)
+script = ExtResource("1_yvfk6")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/MarginContainer"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Control/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/MarginContainer/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Control/MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+text = "角色名称"
+
+[node name="RoleNameEdit" type="LineEdit" parent="Control/MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="Control/MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+text = "角色提示词"
+
+[node name="PromptEdit" type="TextEdit" parent="Control/MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+placeholder_text = "请输入自定义的角色提示词"
+
+[node name="Label3" type="Label" parent="Control/MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+text = "可使用的工具列表"
+
+[node name="EditFunctionContainer" type="VBoxContainer" parent="Control/MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="CancelButton" type="Button" parent="Control/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_yvfk6")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_ga12p")
+theme_override_styles/hover = SubResource("StyleBoxFlat_bjrh0")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_bamjv")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_s3o1i")
+text = "取消"
+
+[node name="CreateButton" type="Button" parent="Control/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_dawp3")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_dawp3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dawp3")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_dawp3")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_m1x5d")
+text = "确认创建"
+
+[node name="UpdateButton" type="Button" parent="Control/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_s3o1i")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_s3o1i")
+theme_override_styles/hover = SubResource("StyleBoxFlat_s3o1i")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_s3o1i")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_dawp3")
+text = "确认编辑"

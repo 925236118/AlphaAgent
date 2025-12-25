@@ -159,8 +159,13 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 
+[node name="RoleButton" type="OptionButton" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="CustomDropdown" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer" instance=ExtResource("2_c3kby")]
 unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(96, 30)
 layout_mode = 2
 

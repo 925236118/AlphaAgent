@@ -1,4 +1,5 @@
 @tool
+class_name AgentMainPanel
 extends Control
 
 # OpenAI 兼容客户端（支持 OpenAI, DeepSeek 等）
@@ -22,7 +23,7 @@ extends Control
 @onready var setting_tab_setting: Button = %SettingTabSetting
 @onready var history_and_title: PanelContainer = %HistoryAndTitle
 
-@onready var tools: Node = $Tools
+@onready var tools: AgentTools = $Tools
 @onready var message_container: ScrollContainer = %MessageContainer
 
 @onready var chat_container: VBoxContainer = %ChatContainer
@@ -76,7 +77,7 @@ func _ready() -> void:
 	show_container(chat_container)
 	AlphaAgentPlugin.instance.update_plan_list.connect(on_update_plan_list)
 	AlphaAgentPlugin.instance.models_changed.connect(_on_models_changed)
-
+	AlphaAgentPlugin.instance.roles_changed.connect(_on_roles_changed)
 	# 展示欢迎语
 	welcome_message.show()
 	message_container.hide()
@@ -87,7 +88,10 @@ func _ready() -> void:
 
 	# 初始化AI模型相关信息
 	# init_message_list()
-
+	
+	# 初始化角色选择
+	_init_role_selector()
+	
 	# 初始化OpenAI客户端
 	openai_chat_stream.think.connect(on_agent_think)
 	openai_chat_stream.message.connect(on_agent_message)
@@ -142,6 +146,19 @@ func _init_model_selector():
 		model_manager.current_model_id,
 		current_model_name
 	)
+	
+func _init_role_selector():
+	await get_tree().process_frame
+	var role_manager = AlphaAgentPlugin.global_setting.role_manager
+	if role_manager == null:
+		return
+	var current_role = role_manager.get_current_role()
+	var current_role_id = current_role.id if current_role else ""
+	input_container.update_role_selector(
+		role_manager.roles, 
+		current_role_id
+	)
+
 
 # 切换到当前模型
 func _switch_to_current_model():
@@ -203,6 +220,9 @@ func _on_models_changed():
 	_init_model_selector()
 	_switch_to_current_model()
 
+func _on_roles_changed():
+	_init_role_selector()
+
 func reset_message_info():
 	current_message_item = null
 	current_think = ""
@@ -217,7 +237,8 @@ func init_message_list():
 			"role": "system",
 			"content": CONFIG.system_prompt.format({
 				"project_memory": ''.join(AlphaAgentPlugin.instance.project_memory.map(func(m): return "-" + m + "\n")),
-				"global_memory": ''.join(AlphaAgentPlugin.instance.global_memory.map(func(m): return "-" + m + "\n"))
+				"global_memory": ''.join(AlphaAgentPlugin.instance.global_memory.map(func(m): return "-" + m + "\n")),
+				"role_prompt": AlphaAgentPlugin.instance.global_setting.role_manager.get_current_role().prompt
 			}),
 			"id": generate_random_string(16)
 		}

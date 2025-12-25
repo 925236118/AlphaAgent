@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://bmp5ld88trplg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_06syx"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.078431375, 0.078431375, 0.078431375, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="ToolNameItem" type="Label"]
+mouse_filter = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_06syx")

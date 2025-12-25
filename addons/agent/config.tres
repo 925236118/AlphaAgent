@@ -81,5 +81,10 @@ system_prompt = "# 角色
 ## 项目记忆
 {project_memory}
 ## 全局记忆
-{global_memory}"
+{global_memory}
+
+## 用户自定义提示词
+以下的所有内容为用户自定义提示词。
+{role_prompt}
+"
 metadata/_custom_type_script = "uid://dtwv8jouiscev"

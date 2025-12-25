@@ -1,4 +1,5 @@
 @tool
+class_name AgentTools
 extends Node
 
 @export_tool_button("测试") var test_action = test
@@ -24,6 +25,106 @@ func test():
 	#print(ProjectSettings.get_setting("input"))
 	#var process_id = OS.create_instance(["--headless", "--script", "res://game.gd"])
 	pass
+
+# 获取工具名称列表
+func get_function_name_list():
+	return {
+		"update_plan_list": {
+			"readonly": false,
+			"group": "Agent",
+			"description": "用于管理Agent的计划列表"
+		},
+		"get_project_info": {
+			"readonly": true,
+			"group": "查询操作",
+			"description": "获取当前的引擎信息和项目配置信息。"
+		},
+		"get_editor_info": {
+			"readonly": true,
+			"group": "查询操作",
+			"description": "获取当前编辑器相关信息。"
+		},
+		"get_project_file_list": {
+			"readonly": true,
+			"group": "查询操作",
+			"description": "获取当前项目中文件以及其UID列表。"
+		},
+		"get_class_doc": {
+			"readonly": true,
+			"group": "查询操作",
+			"description": "获取Godot原生类的文档信息。"
+		},
+		"get_image_info": {
+			"readonly": true,
+			"group": "查询操作",
+			"description": "获取图片文件信息。"
+		},
+		"get_tileset_info": {
+			"readonly": true,
+			"group": "查询操作",
+			"description": "获取TileSet信息。"
+		},
+		"read_file": {
+			"readonly": true,
+			"group": "文件操作",
+			"description": "读取文件内容。"
+		},
+		"create_folder": {
+			"readonly": false,
+			"group": "文件操作",
+			"description": "创建文件夹。"
+		},
+		"write_file": {
+			"readonly": false,
+			"group": "文件操作",
+			"description": "全量替换写入文件内容。"
+		},
+		"add_script_to_scene": {
+			"readonly": false,
+			"group": "场景操作",
+			"description": "将脚本加载到节点上。"
+		},
+		"sep_script_to_scene": {
+			"readonly": false,
+			"group": "场景操作",
+			"description": "将节点上的脚本分离。"
+		},
+		"check_script_error": {
+			"readonly": true,
+			"group": "调试操作",
+			"description": "检查脚本中的语法错误。"
+		},
+		"open_resource": {
+			"readonly": false,
+			"group": "编辑器操作",
+			"description": "使用编辑器打开资源文件。"
+		},
+		"update_script_file_content": {
+			"readonly": false,
+			"group": "编辑器操作",
+			"description": "调用编辑器接口更新脚本文件的内容。"
+		},
+		"update_scene_node_property": {
+			"readonly": false,
+			"group": "编辑器操作",
+			"description": "调用编辑器接口设置场景中的节点的属性。"
+		},
+		"set_resource_property": {
+			"readonly": false,
+			"group": "编辑器操作",
+			"description": "调用编辑器接口设置资源属性。"
+		},
+		"set_singleton": {
+			"readonly": false,
+			"group": "编辑器操作",
+			"description": "调用编辑器接口设置自动加载脚本或场景。"
+		},
+		"execute_command": {
+			"readonly": false,
+			"group": "命令行操作",
+			"description": "执行命令行命令。"
+		},
+	}
 
 # 获取只读工具列表
 func get_readonly_tools_list() -> Array[Dictionary]:

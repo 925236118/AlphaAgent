@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://bxe6hto0vk8fu"]
+[gd_scene load_steps=7 format=3 uid="uid://bxe6hto0vk8fu"]
 
 [ext_resource type="Script" uid="uid://dry1n6m67ku3q" path="res://addons/agent/ui/setting/setting.gd" id="1_c2l6f"]
 [ext_resource type="PackedScene" uid="uid://c2ei06dd8phsw" path="res://addons/agent/ui/setting/setting_item_bool.tscn" id="1_ca3bj"]
@@ -6,6 +6,10 @@
 
 [sub_resource type="LabelSettings" id="LabelSettings_83qt4"]
 font_size = 20
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_c2l6f"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_83qt4"]
 
 [node name="SettingContainer" type="ScrollContainer"]
 anchors_preset = 15
@@ -82,11 +86,6 @@ layout_mode = 2
 text = "模型设置"
 label_settings = SubResource("LabelSettings_83qt4")
 
-[node name="ConfigModelButton" type="Button" parent="SettingPanel/SettingItemsContainer"]
-visible = false
-layout_mode = 2
-text = "配置模型"
-
 [node name="ModelSetting" type="VBoxContainer" parent="SettingPanel/SettingItemsContainer"]
 layout_mode = 2
 
@@ -97,6 +96,30 @@ layout_mode = 2
 [node name="AddSupplierButton" type="Button" parent="SettingPanel/SettingItemsContainer/ModelSetting/SupplierList"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_c2l6f")
 text = "添加供应商"
+
+[node name="HSeparator2" type="HSeparator" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MarginContainer3" type="MarginContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+theme_override_constants/margin_bottom = 12
+
+[node name="Label" type="Label" parent="SettingPanel/SettingItemsContainer/MarginContainer3"]
+layout_mode = 2
+text = "角色管理"
+label_settings = SubResource("LabelSettings_83qt4")
+
+[node name="RoleList" type="VBoxContainer" parent="SettingPanel/SettingItemsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="AddRoleButton" type="Button" parent="SettingPanel/SettingItemsContainer/RoleList"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_83qt4")
+text = "添加角色"
 
 [editable path="SettingPanel/SettingItemsContainer/SendShotCut"]

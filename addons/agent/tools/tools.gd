@@ -149,7 +149,7 @@ func get_tools_list() -> Array[Dictionary]:
 					"properties": {
 						"tasks": {
 							"type": "array",
-							"description": "拆分后的阶段任务项，数量在5到10个之间。按照执行顺序排序。列表中应只有一个任务为active状态。",
+							"description": "拆分后的阶段任务项，数量在5到10个之间。按照执行顺序排序。**注意**:列表中应只有一个任务为active状态。",
 							"items": {
 								"type": "object",
 								"properties": {
@@ -205,7 +205,7 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "get_project_file_list",
-				"description": "获取当前项目中所有文件以及其UID列表。尽量不要使用全量读取目录",
+				"description": "获取当前项目中所有文件以及其UID列表。**限制**：部分项目文件会很多，非用户明确说明，不要全量读取目录列表。",
 				"parameters": {
 					"type": "object",
 					"properties": {
@@ -215,7 +215,7 @@ func get_tools_list() -> Array[Dictionary]:
 						},
 						"interation": {
 							"type": "number",
-							"description": "迭代的次数，只有start_path参数有值时才会生效。如果返回1，就只会查询一层文件。默认为-1，查询全部层级",
+							"description": "迭代的次数，只有start_path参数有值时才会生效。如果为1，就只会查询一层文件和目录。默认为-1，会查询全部层级。",
 						}
 					},
 					"required": []
@@ -227,7 +227,7 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "get_class_doc",
-				"description": "获得Godot原生的类的文档，文档中包含这个类的属性、方法以及参数和返回值、信号、枚举常量、父类、派生类等信息。直接查询为请求信息的列表。可以单独查询某些数据。",
+				"description": "获得Godot原生的类的文档，文档中包含这个类的属性、方法以及参数和返回值、信号、枚举常量、父类、派生类等信息。直接查询为请求信息的列表。可以单独查询某些数据。**注意**：默认情况应尽量查询部分信息。除非对这个类没有了解。**限制**：只能查询Godot的原生类。如果是用户自定义的类，应读取文件内容分析。",
 				"parameters": {
 					"type": "object",
 					"properties": {
@@ -299,16 +299,24 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "read_file",
-				"description": "读取文件内容。",
+				"description": "读取文件内容。可以指定读取的开始行号和结束行号，默认是0和-1，表示读取到文件末尾。**限制**：此工具最多会读取500行文件内容。返回内容中包含总行数和开始行号和结束行号。",
 				"parameters": {
 					"type": "object",
 					"properties": {
 						"path": {
 							"type": "string",
 							"description": "需要读取的文件目录，必须是以res://开头的绝对路径。",
+						},
+						"start": {
+							"type": "integer",
+							"description": "需要读取的文件的开始行号，默认是0。",
+						},
+						"end": {
+							"type": "integer",
+							"description": "需要读取的文件的结束行号，默认是-1，表示读取到文件末尾。**注意**：返回时不会返回结束行号的内容。",
 						}
 					},
-					"required": ["path"]
+					"required": ["path", "start", "end"]
 				}
 			}
 		},
@@ -317,7 +325,7 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "create_folder",
-				"description": "创建文件夹。在给定的目录下创建一个指定称的空的文件夹。如果不给名称就叫新建文件夹，有重复的就后缀写上（数字），每次创建的文件夹应存在上级。",
+				"description": "创建文件夹。在给定的目录下创建一个指定称的空的文件夹。如果不给名称就叫新建文件夹，有重复的就后缀写上（数字）。**限制**：每次创建的文件夹应存在上级文件夹。",
 				"parameters": {
 					"type": "object",
 					"properties": {
@@ -336,7 +344,7 @@ func get_tools_list() -> Array[Dictionary]:
 			"function": {
 				"name": "write_file",
 				#"description": "写入文件内容。文件格式应为资源文件(.tres)或者脚本文件(.gd)、Godot着色器(.gdshader)、场景文件(.tscn)、文本文件(.txt或.md)、CSV文件(.csv)，当明确提及创建或修改文件时再调用该工具",
-				"description": "全量替换写入文件内容。文件格式应为资源文件(.tres)、Godot着色器(.gdshader)、文本文件(.txt或.md)、CSV文件(.csv)，当明确提及创建或修改文件时再调用该工具。不应使用本工具处理脚本和场景文件。",
+				"description": "全量替换写入文件内容。文件格式应为资源文件(.tres)、Godot着色器(.gdshader)、文本文件(.txt或.md)、CSV文件(.csv)，当明确提及创建或修改文件时再调用该工具。**限制**：不应使用本工具修改脚本和场景文件。",
 				"parameters": {
 					"type": "object",
 					"properties": {
@@ -346,7 +354,7 @@ func get_tools_list() -> Array[Dictionary]:
 						},
 						"content": {
 							"type": "string",
-							"description": "需要写入的文件内容。"
+							"description": "需要写入的文件内容。以\n换行的字符串。"
 						}
 					},
 					"required": ["path", "content"]
@@ -686,7 +694,7 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 
 			var interation := int(json.get("interation", -1))
 
-			var ignore_files = [".alpha", ".godot", "*.uid", "addons"]
+			var ignore_files = [".alpha", ".godot", "*.uid", "addons", "*.import"]
 			var queue = [{
 				"path": start_path,
 				"interation": interation
@@ -706,12 +714,9 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 					while file_name != "":
 						var match_result = true
 						for reg in ignore_files:
-							#print(reg, file_name)
-							#print(file_name.match(reg))
 							match_result = match_result and (not file_name.match(reg))
 						if match_result:
 							if dir.current_is_dir():
-								#print("发现目录：" + current_dir + file_name + '/')
 								file_list.push_back({
 									"path": current_dir + file_name,
 									"type": "directory"
@@ -726,7 +731,6 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 									"uid": ResourceUID.path_to_uid(current_dir + file_name),
 									"type": "file"
 								})
-								#print("发现文件" + current_dir + file_name)
 						file_name = dir.get_next()
 				else:
 					print("尝试访问路径时出错。")
@@ -735,21 +739,40 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 			}
 		"read_file":
 			var json = JSON.parse_string(tool_call.function.arguments)
-			if not json == null and json.has("path"):
+			if not json == null and json.has("path") and json.has("start") and json.has("end"):
 				var path: String = json.path
+				var start: int = json.get("start", 0)
+				var end: int = json.get("end", -1)
+				
 				var file_string = FileAccess.get_file_as_string(path)
 				if file_string == "":
 					result = {
 						"file_path": path,
 						"file_uid": ResourceUID.path_to_uid(path),
 						"file_content": "",
+						"start": 1,
+						"end": 1,
+						"total_lines": 1,
 						"open_error": FileAccess.get_open_error()
 					}
 				else:
+					var file_lines = file_string.split("\n")
+					var total_lines = file_lines.size()
+					var start_line = max(0, start)
+					start_line = min(start_line, total_lines)
+					if end == -1:
+						end = total_lines
+					else:
+						end = min(total_lines, end)
+					end = min(total_lines + 1, end + 1, start_line + 501)
+					var file_content = "\n".join(file_lines.slice(start_line - 1, end))
 					result = {
 						"file_path": path,
 						"file_uid": ResourceUID.path_to_uid(path),
-						"file_content": file_string
+						"file_content": file_content,
+						"start": start_line,
+						"end": end,
+						"total_lines": total_lines
 					}
 
 		"create_folder":

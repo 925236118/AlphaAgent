@@ -3,7 +3,7 @@ class_name AgentSettingRoleItem
 extends PanelContainer
 
 @onready var expend_model_button: TextureButton = %ExpendModelButton
-@onready var role_name: Label = %RoleName
+@onready var role_name_label: Label = %RoleName
 @onready var more_action_button: MenuButton = %MoreActionButton
 @onready var detail_container: VBoxContainer = %DetailContainer
 @onready var custom_prompt: Label = %CustomPrompt
@@ -44,8 +44,9 @@ func on_click_more_button(id: MoreActionType):
 			queue_free()
 
 func set_role_info(_role_info: AgentRoleConfig.RoleInfo):
+	await AlphaAgentPlugin.instance.get_tree().process_frame
 	role_info = _role_info
-	role_name.text = role_info.name
+	role_name_label.text = role_info.name
 	custom_prompt.text = role_info.prompt if role_info.prompt != "" else "没有用户提示词"
 	custom_prompt.tooltip_text = custom_prompt.text
 	for function_item in function_call_container.get_children():

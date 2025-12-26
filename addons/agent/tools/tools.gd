@@ -134,6 +134,12 @@ func get_readonly_tools_list() -> Array[Dictionary]:
 			tool_list.push_back(tool)
 	return tool_list
 
+# 获取筛选后的工具列表
+func get_filtered_tools_list(filter_list: Array) -> Array[Dictionary]:
+	return get_tools_list().filter(func(tool: Dictionary) -> bool:
+		return filter_list.has(tool.function.name)
+	)
+
 # 获取工具列表
 func get_tools_list() -> Array[Dictionary]:
 	return [

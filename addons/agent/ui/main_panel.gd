@@ -88,10 +88,10 @@ func _ready() -> void:
 
 	# 初始化AI模型相关信息
 	# init_message_list()
-	
+
 	# 初始化角色选择
 	_init_role_selector()
-	
+
 	# 初始化OpenAI客户端
 	openai_chat_stream.think.connect(on_agent_think)
 	openai_chat_stream.message.connect(on_agent_message)
@@ -132,7 +132,7 @@ func _ready() -> void:
 
 # 初始化模型选择器
 func _init_model_selector():
-	await get_tree().process_frame
+	await AlphaAgentPlugin.instance.get_tree().process_frame
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if model_manager == null:
 		return
@@ -146,23 +146,23 @@ func _init_model_selector():
 		model_manager.current_model_id,
 		current_model_name
 	)
-	
+
 func _init_role_selector():
-	await get_tree().process_frame
+	await AlphaAgentPlugin.instance.get_tree().process_frame
 	var role_manager = AlphaAgentPlugin.global_setting.role_manager
 	if role_manager == null:
 		return
 	var current_role = role_manager.get_current_role()
 	var current_role_id = current_role.id if current_role else ""
 	input_container.update_role_selector(
-		role_manager.roles, 
+		role_manager.roles,
 		current_role_id
 	)
 
 
 # 切换到当前模型
 func _switch_to_current_model():
-	await get_tree().process_frame
+	await AlphaAgentPlugin.instance.get_tree().process_frame
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if model_manager == null:
 		current_chat_stream = openai_chat_stream
@@ -231,14 +231,14 @@ func reset_message_info():
 # 初始化消息列表，添加系统提示词
 func init_message_list():
 	CONFIG = load("uid://b4bcww0bmnxt0")
-
+	var current_role = AlphaAgentPlugin.instance.global_setting.role_manager.get_current_role()
 	messages = [
 		{
 			"role": "system",
 			"content": CONFIG.system_prompt.format({
 				"project_memory": ''.join(AlphaAgentPlugin.instance.project_memory.map(func(m): return "-" + m + "\n")),
 				"global_memory": ''.join(AlphaAgentPlugin.instance.global_memory.map(func(m): return "-" + m + "\n")),
-				"role_prompt": AlphaAgentPlugin.instance.global_setting.role_manager.get_current_role().prompt
+				"role_prompt": current_role.prompt if current_role else "无"
 			}),
 			"id": generate_random_string(16)
 		}
@@ -269,12 +269,17 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 
 func send_messages():
 	var use_thinking = input_container.get_use_thinking()
-	# 设置工具和模式
-	match input_container.get_input_mode():
-		"ASK":
-			current_chat_stream.tools = tools.get_readonly_tools_list()
-		"Agent":
+
+	# 根据角色设置工具列表
+	var role_manager = AlphaAgentPlugin.global_setting.role_manager
+	if role_manager:
+		var role = role_manager.get_current_role()
+		if role:
+			current_chat_stream.tools = tools.get_filtered_tools_list(role.tools)
+		else:
+			# 没有角色时，默认使用所有工具
 			current_chat_stream.tools = tools.get_tools_list()
+
 	# 使用模型配置的max_tokens 和 thinking
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if model_manager:

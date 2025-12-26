@@ -293,6 +293,7 @@ func set_input_mode(name: String):
 func set_input_mode_disable(disabled: bool):
 	input_mode_select.disabled = disabled
 
+# 完全初始化输入框
 func init():
 	user_input.text = ""
 	usage_label.text = ""
@@ -300,6 +301,7 @@ func init():
 	set_input_mode_disable(false)
 	switch_button_to("Send")
 	input_menu_list.hide()
+	role_button.disabled = false
 
 ## 清空引用列表
 func clear_reference_list():
@@ -331,6 +333,8 @@ func on_click_send_message():
 
 	# 正常消息处理
 	self.disable = true
+	role_button.disabled = true
+
 	switch_button_to("Stop")
 	set_input_mode_disable(true)
 	var info_list = reference_list.get_children().map(func(node): return node.info)

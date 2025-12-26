@@ -83,7 +83,7 @@ class GlobalSetting:
 
 		# 初始化模型管理器
 		model_manager = ModelConfig.ModelManager.new(models_file)
-		
+
 		# 初始化角色管理器
 		role_manager = AgentRoleConfig.RoleManager.new(roles_file)
 

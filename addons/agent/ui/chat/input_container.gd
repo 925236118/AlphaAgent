@@ -426,24 +426,36 @@ func _on_user_input_gui_input(event: InputEvent) -> void:
 	if disable:
 		return
 	var send_shortcut = AlphaAgentPlugin.global_setting.send_shortcut
-	if send_shortcut == AlphaAgentPlugin.SendShotcut.None:
-		return
-	elif send_shortcut == AlphaAgentPlugin.SendShotcut.Enter:
-		if event is InputEventKey:
-			if event.keycode == KEY_ENTER and \
-				not event.alt_pressed and \
-				not event.shift_pressed and \
-				not event.ctrl_pressed and \
-				not event.meta_pressed and \
-			event.pressed:
+	if event is InputEventKey:
+		# 普通enter键
+		if event.keycode == KEY_ENTER and \
+			not event.alt_pressed and \
+			not event.shift_pressed and \
+			not event.ctrl_pressed and \
+			not event.meta_pressed and \
+		event.pressed:
+
+			if send_shortcut == AlphaAgentPlugin.SendShotcut.None:
+				return
+			elif send_shortcut == AlphaAgentPlugin.SendShotcut.Enter:
 				on_click_send_message()
-	elif send_shortcut == AlphaAgentPlugin.SendShotcut.CtrlEnter:
-		if event is InputEventKey:
-			if event.is_command_or_control_pressed() and \
-				not event.alt_pressed and \
-				not event.shift_pressed and \
-				event.keycode == KEY_ENTER and \
-				event.pressed:
+						
+			elif send_shortcut == AlphaAgentPlugin.SendShotcut.CtrlEnter:
+				user_input.insert_text_at_caret("\n")
+
+	# ctrl+enter键 添加回车
+	if event.is_command_or_control_pressed() and \
+		not event.alt_pressed and \
+		not event.shift_pressed and \
+		event.keycode == KEY_ENTER and \
+		event.pressed:
+			
+
+			if send_shortcut == AlphaAgentPlugin.SendShotcut.None:
+				return
+			elif send_shortcut == AlphaAgentPlugin.SendShotcut.Enter:
+				return
+			elif send_shortcut == AlphaAgentPlugin.SendShotcut.CtrlEnter:
 				on_click_send_message()
 
 func switch_button_to(button_name: String):

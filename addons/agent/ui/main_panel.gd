@@ -422,6 +422,7 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 			"id": current_random_message_id
 		})
 		current_message_item.update_finished_message("Success")
+		await get_tree().process_frame
 		message_container.scroll_vertical = 100000
 		current_message_item.resend.connect(on_resend_user_message.bind(current_message_item), CONNECT_ONE_SHOT)
 		current_message_item.copy.connect(on_copy_output_message.bind(current_message_item))

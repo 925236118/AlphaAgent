@@ -4,6 +4,8 @@ extends Node
 
 @export_tool_button("测试") var test_action = test
 
+var thread: Thread = null
+
 # 只读工具列表
 var readonly_tools_list: Array[String] = [
 	"get_project_info",
@@ -18,8 +20,8 @@ var readonly_tools_list: Array[String] = [
 
 func test():
 	var tool = AgentModelUtils.ToolCallsInfo.new()
-	tool.function.name = "update_scene_node_property"
-	tool.function.arguments = JSON.stringify({"scene_path":"res://test/node2d.tscn", "node_path":"Node2D/AT", "property_name":"position", "property_value":"Vector2(50, 50)"})
+	tool.function.name = "execute_command"
+	tool.function.arguments = JSON.stringify({"command":"dir", "args": []})
 	#var image = load("res://icon.svg")
 	print(await use_tool(tool))
 	#print(ProjectSettings.get_setting("input"))
@@ -416,7 +418,7 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "check_script_error",
-				"description": "使用Godot脚本引擎检查脚本中的语法错误，只能检查gd脚本。",
+				"description": "使用Godot脚本引擎检查脚本中的语法错误，只能检查gd脚本。**依赖**：需要检查的脚本文件必须存在。",
 				"parameters": {
 					"type": "object",
 					"properties": {
@@ -436,7 +438,7 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "open_resource",
-				"description": "使用Godot编辑器立刻打开或切换到对应资源，资源应是场景文件（.tscn）或脚本文件（.gd）。",
+				"description": "使用Godot编辑器立刻打开或切换到对应资源，资源应是场景文件（.tscn）或脚本文件（.gd）。**依赖**：需要打开的场景或资源文件必须存在。",
 				"parameters": {
 					"type": "object",
 					"properties": {
@@ -467,13 +469,13 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "update_script_file_content",
-				"description": "直接调用编辑器接口更新脚本文件的内容。根据行号和删除的行数量，在对应位置删除若干行后插入内容。如果不删除，则会在对应行之前添加一行内容。可以使用本工具添加、删除、替换文件中的行内容。文件内容是以\n换行的字符串。",
+				"description": "直接调用编辑器接口更新脚本文件的内容。根据行号和删除的行数量，在对应位置删除若干行后插入内容。如果不删除，则会在对应行之前添加一行内容。可以使用本工具添加、删除、替换文件中的行内容。文件内容是以\n换行的字符串。**依赖**：需要打开的脚本文件必须存在。",
 				"parameters": {
 					"type": "object",
 					"properties": {
 						"script_path": {
 							"type": "string",
-							"description": "需要打开的资源路径，必须是以res://开头的绝对路径。",
+							"description": "需要打开的资源路径，必须是以res://开头的绝对路径。**依赖**：需要打开的脚本文件必须存在。",
 						},
 						"content": {
 							"type": "string",
@@ -569,11 +571,11 @@ func get_tools_list() -> Array[Dictionary]:
 					"properties": {
 						"name": {
 							"type": "string",
-							"description": "需要设置的自动加载名称，需要以大驼峰的方式命名。一般可以和脚本或场景文件同名。",
+							"description": "需要设置的自动加载名称，需要以大驼峰的方式命名。一般可以和脚本或场景文件同名。**依赖**：设置的自动加载脚本或场景文件必须存在。且不能和已有的自动加载名称重复。",
 						},
 						"path": {
 							"type": "string",
-							"description": "需要设置为自动加载的脚本或场景路径，必须是以res://开头的绝对路径。如果为空时则会删除该自动加载",
+							"description": "需要设置为自动加载的脚本或场景路径，必须是以res://开头的绝对路径。如果为空时则会删除该自动加载。**依赖**：设置的自动加载脚本或场景文件必须存在。",
 						},
 					},
 					"required": ["name"]
@@ -588,22 +590,18 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "execute_command",
-				"description": "创建一个独立于 Godot 运行的命令行工具，该工具运行在项目目录下。调用本工具需要提醒用户，以防止造成无法预料的后果。",
+				"description": "创建一个独立于 Godot 运行的命令行工具，该工具运行在项目目录下。调用本工具需要提醒用户，以防止造成无法预料的后果。**限制**：需要预先知道当前的系统。windows中使用的是cmd命令。linux中使用的是bash命令。不要出现当前系统下没有的命令。",
 				"parameters": {
 					"type": "object",
 					"properties": {
 						"command": {
 							"type": "string",
-							"description": "需要执行的命令名称",
+							"description": "需要执行的命令名称，不需要指定bash或者cmd，可以直接输入命令名称。",
 						},
 						"args": {
 							"type": "array",
-							"description": "需要执行的命令的参数，会按给定顺序执行。",
-						},
-						"blocking": {
-							"type": "boolean",
-							"description": "如果 blocking 为 false，则创建的管道使用非阻塞模式，即读写操作会立即返回。默认为ture。",
-						},
+							"description": "需要执行的命令的参数，会按给定顺序执行。不需要/c或者-Command参数。",
+						}
 					},
 					"required": ["command", "args"]
 				}
@@ -759,7 +757,7 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 						"start": 1,
 						"end": 1,
 						"total_lines": 1,
-						"open_error": FileAccess.get_open_error()
+						"open_error": error_string(FileAccess.get_open_error())
 					}
 				else:
 					var file_lines = file_string.split("\n")
@@ -932,11 +930,11 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 						"file_path": path,
 						"file_uid": ResourceUID.path_to_uid(path),
 						"file_content": FileAccess.get_file_as_string(path),
-						"open_error": FileAccess.get_open_error()
+						"open_error": error_string(FileAccess.get_open_error())
 					}
 				else:
 					result = {
-						"open_error": FileAccess.get_open_error()
+						"open_error": error_string(FileAccess.get_open_error())
 					}
 		"get_image_info":
 			var json = JSON.parse_string(tool_call.function.arguments)
@@ -1090,16 +1088,25 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 		"execute_command":
 			var json = JSON.parse_string(tool_call.function.arguments)
 
-			if not json == null and json.has("command") and json.has("args") and json.has("blocking"):
-				var command_result = execute_command(json.command, json.args, json.blocking)
-				if command_result.success:
-					result = {
-						"success": "成功执行命令，信息如下：" + str(command_result.info)
-					}
-				else:
-					result = {
-						"error": "创建进程失败"
-					}
+			if not json == null and json.has("command") and json.has("args"):
+				thread = Thread.new()
+				thread.start(execute_command.bind(json.command, json.args))
+				while not thread.is_started():
+					# 等待线程启动
+					await get_tree().process_frame
+				
+				while thread.is_alive():
+					# 等待线程结束
+					# print("thread alive")
+					await get_tree().process_frame
+
+				# 获取结果并释放线程
+				var command_result = thread.wait_to_finish()
+				# 清除数据，防止内存泄漏
+				thread = null
+				# print("command_result: ", command_result)
+				
+				result = command_result
 
 		#本工具目前具有较大不确定性，暂不提供调用
 		"editor_script_feature":
@@ -1268,11 +1275,10 @@ func set_res(target: Object, property_target: Array[String], res: Resource):
 			return false
 
 #命令行调用工具
-func execute_command(command: String, args: Array = [], blocking: bool = true) -> Dictionary:
+func execute_command(command: String, args: Array = []) -> Dictionary:
 	var result = {
 		"success": false,
-		"output": [],
-		"info": {}
+		"output": []
 	}
 
 	# 获取项目目录
@@ -1292,12 +1298,16 @@ func execute_command(command: String, args: Array = [], blocking: bool = true) -
 		shell_args = ["/c", full_command]
 
 	# 执行命令
-	var info = OS.execute_with_pipe(shell, shell_args, blocking)
+	var error_code = OS.execute(shell, shell_args, result.output, true, false)
 
-	result.info = info
-	result.success = true if info else false
+	if error_code == -1:
+		result.error = "命令执行失败"
+		return result
+	else:
+		result.output = result.output
+		result.success = true
 
-	return result
+		return result
 
 #运行EditorScript
 func run_editor_script(script_path: String) -> bool:
@@ -1459,3 +1469,8 @@ func get_target_node(scene_path: String, node_path: String) -> Node:
 	EditorInterface.get_selection().add_node(target_node)
 
 	return target_node
+
+func _exit_tree():
+	if thread != null:
+		thread.wait_to_finish()
+		thread = null

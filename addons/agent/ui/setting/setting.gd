@@ -76,10 +76,13 @@ func init_roles():
 	if role_manager == null:
 		return
 
+	for role in role_list.get_children():
+		role.queue_free()
+
 	for role in role_manager.roles:
 		var new_role := SETTING_ROLE_ITEM.instantiate() as AgentSettingRoleItem
 		role_list.add_child(new_role)
-		new_role.set_role_info(role)
+		new_role.call_deferred("set_role_info", role)
 
 func on_click_add_role_button():
 	var edit_role_window := EDIT_ROLE_WINDOW.instantiate() as AgentEditRoleWindow

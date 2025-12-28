@@ -44,16 +44,18 @@ func on_click_more_button(id: MoreActionType):
 			queue_free()
 
 func set_role_info(_role_info: AgentRoleConfig.RoleInfo):
-	await AlphaAgentPlugin.instance.get_tree().process_frame
 	role_info = _role_info
-	role_name_label.text = role_info.name
-	custom_prompt.text = role_info.prompt if role_info.prompt != "" else "没有用户提示词"
-	custom_prompt.tooltip_text = custom_prompt.text
-	for function_item in function_call_container.get_children():
-		function_item.queue_free()
-	function_call_container.visible = role_info.tools.size() > 0
-	for tool in role_info.tools:
-		var tool_item := TOOL_NAME_ITEM.instantiate() as Label
-		tool_item.text = tool
-		tool_item.tooltip_text = AlphaAgentPlugin.instance.main_panel.tools.get_function_name_list()[tool].description
-		function_call_container.add_child(tool_item)
+	if role_name_label:
+		role_name_label.text = role_info.name
+	if custom_prompt:
+		custom_prompt.text = role_info.prompt if role_info.prompt != "" else "没有用户提示词"
+		custom_prompt.tooltip_text = custom_prompt.text
+	if function_call_container:
+		for function_item in function_call_container.get_children():
+			function_item.queue_free()
+		function_call_container.visible = role_info.tools.size() > 0
+		for tool in role_info.tools:
+			var tool_item := TOOL_NAME_ITEM.instantiate() as Label
+			tool_item.text = tool
+			tool_item.tooltip_text = AlphaAgentPlugin.instance.main_panel.tools.get_function_name_list()[tool].description
+			function_call_container.add_child(tool_item)

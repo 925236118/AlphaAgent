@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://dqkrjn0mak6lh"]
+[gd_scene load_steps=23 format=3 uid="uid://dqkrjn0mak6lh"]
 
 [ext_resource type="Script" uid="uid://c0gayflg4ovas" path="res://addons/agent/ui/chat/input_container.gd" id="1_xi1dg"]
 [ext_resource type="PackedScene" uid="uid://cr0rgr6uojjsh" path="res://addons/agent/ui/customdropdown/custom_dropdown.tscn" id="2_c3kby"]
@@ -28,6 +28,9 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_elhta"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vh1vc"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_k8r8m"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c3kby"]
@@ -45,6 +48,9 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xi1dg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0yucd"]
+content_margin_bottom = 6.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_model_button"]
 
@@ -164,6 +170,7 @@ size_flags_vertical = 4
 [node name="RoleButton" type="OptionButton" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_vh1vc")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_k8r8m")
 
 [node name="CustomDropdown" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer" instance=ExtResource("2_c3kby")]
@@ -194,7 +201,8 @@ layout_mode = 2
 tooltip_text = "选择AI模型"
 mouse_default_cursor_shape = 2
 theme_override_constants/h_separation = 2
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_0yucd")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_model_button")
 flat = true
 item_count = 1

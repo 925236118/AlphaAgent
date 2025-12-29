@@ -75,9 +75,8 @@ var current_title_chat = null
 
 func _ready() -> void:
 	show_container(chat_container)
-	AlphaAgentPlugin.instance.update_plan_list.connect(on_update_plan_list)
-	AlphaAgentPlugin.instance.models_changed.connect(_on_models_changed)
-	AlphaAgentPlugin.instance.roles_changed.connect(_on_roles_changed)
+	# 等待插件实例可用后再连接信号
+	_connect_plugin_signals()
 	# 展示欢迎语
 	welcome_message.show()
 	message_container.hide()
@@ -130,9 +129,20 @@ func _ready() -> void:
 	setting_tab_memory.pressed.connect(func(): show_container(memory_container))
 	setting_tab_setting.pressed.connect(func(): show_container(setting_container))
 
+# 连接插件信号（等待 instance 可用）
+func _connect_plugin_signals():
+	var plugin = await AlphaAgentPlugin.wait_for_instance()
+	if plugin == null:
+		push_error("插件实例未初始化，无法连接信号")
+		return
+	
+	plugin.update_plan_list.connect(on_update_plan_list)
+	plugin.models_changed.connect(_on_models_changed)
+	plugin.roles_changed.connect(_on_roles_changed)
+
 # 初始化模型选择器
 func _init_model_selector():
-	await AlphaAgentPlugin.instance.get_tree().process_frame
+	await AlphaAgentPlugin.wait_for_scene_tree_frame()
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if model_manager == null:
 		return
@@ -148,7 +158,7 @@ func _init_model_selector():
 	)
 
 func _init_role_selector():
-	await AlphaAgentPlugin.instance.get_tree().process_frame
+	await AlphaAgentPlugin.wait_for_scene_tree_frame()
 	var role_manager = AlphaAgentPlugin.global_setting.role_manager
 	if role_manager == null:
 		return
@@ -162,7 +172,7 @@ func _init_role_selector():
 
 # 切换到当前模型
 func _switch_to_current_model():
-	await AlphaAgentPlugin.instance.get_tree().process_frame
+	await AlphaAgentPlugin.wait_for_scene_tree_frame()
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if model_manager == null:
 		current_chat_stream = openai_chat_stream
@@ -231,13 +241,13 @@ func reset_message_info():
 # 初始化消息列表，添加系统提示词
 func init_message_list():
 	CONFIG = load("uid://b4bcww0bmnxt0")
-	var current_role = AlphaAgentPlugin.instance.global_setting.role_manager.get_current_role()
+	var current_role = AlphaAgentPlugin.global_setting.role_manager.get_current_role()
 	messages = [
 		{
 			"role": "system",
 			"content": CONFIG.system_prompt.format({
-				"project_memory": ''.join(AlphaAgentPlugin.instance.project_memory.map(func(m): return "-" + m + "\n")),
-				"global_memory": ''.join(AlphaAgentPlugin.instance.global_memory.map(func(m): return "-" + m + "\n")),
+				"project_memory": ''.join(AlphaAgentPlugin.project_memory.map(func(m): return "-" + m + "\n")),
+				"global_memory": ''.join(AlphaAgentPlugin.global_memory.map(func(m): return "-" + m + "\n")),
 				"role_prompt": current_role.prompt if current_role else "无"
 			}),
 			"id": generate_random_string(16)

@@ -128,28 +128,48 @@ class RoleManager:
 		roles = json.get("roles", []).map(func(r: Dictionary): return RoleInfo.from_dict(r))
 	
 	func add_default_roles():
-		# 等待帧结束，确保工具列表已加载
-		await AlphaAgentPlugin.instance.get_tree().process_frame
+		# 等待插件实例和场景树可用
+		var plugin = await AlphaAgentPlugin.wait_for_instance()
+		if plugin == null:
+			push_error("插件实例未初始化")
+			return
+		
+		# 等待 main_panel 初始化（在 _enter_tree 中创建）
+		var max_wait_time = 10.0
+		var elapsed_time = 0.0
+		var check_interval = 0.1
+		var start_time = Time.get_ticks_msec()
+		
+		while plugin.main_panel == null:
+			await AlphaAgentPlugin.wait_for_scene_tree_frame()
+			elapsed_time = (Time.get_ticks_msec() - start_time) / 1000.0
+			if elapsed_time >= max_wait_time:
+				push_error("等待 main_panel 初始化超时")
+				return
+		
+		# 等待一帧，确保工具列表已加载
+		await AlphaAgentPlugin.wait_for_scene_tree_frame()
 
 		# 添加默认角色
 		var default_role = RoleInfo.new()
 		default_role.name = "默认角色"
 		default_role.prompt = ""
-		default_role.tools = AlphaAgentPlugin.instance.main_panel.tools.get_function_name_list().keys()
+		default_role.tools = plugin.main_panel.tools.get_function_name_list().keys()
 		roles.append(default_role)
 
 		# 添加只读角色
 		var readonly_role = RoleInfo.new()
 		readonly_role.name = "只读角色"
 		readonly_role.prompt = "你只能使用只读的工具。无法编辑、修改、删除项目内容或文件。"
-		readonly_role.tools = AlphaAgentPlugin.instance.main_panel.tools.get_function_name_list().keys().filter(func(key): return AlphaAgentPlugin.instance.main_panel.tools.get_function_name_list()[key].readonly)
+		var tools_dict = plugin.main_panel.tools.get_function_name_list()
+		readonly_role.tools = tools_dict.keys().filter(func(key): return tools_dict[key].readonly)
 		roles.append(readonly_role)
 
 		# 添加工作流角色
 		var workflow_role = RoleInfo.new()
 		workflow_role.name = "工作流"
 		workflow_role.prompt = WORKFLOW_PROMPT
-		workflow_role.tools = AlphaAgentPlugin.instance.main_panel.tools.get_function_name_list().keys()
+		workflow_role.tools = plugin.main_panel.tools.get_function_name_list().keys()
 		roles.append(workflow_role)
 
 		# 设置默认角色为当前角色

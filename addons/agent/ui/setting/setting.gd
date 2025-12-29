@@ -98,4 +98,6 @@ func on_create_role_window_created(role_info: AgentRoleConfig.RoleInfo):
 	var new_role := SETTING_ROLE_ITEM.instantiate() as AgentSettingRoleItem
 	role_list.add_child(new_role)
 	new_role.set_role_info(role_info)
-	AlphaAgentPlugin.instance.roles_changed.emit()
+	var plugin = AlphaAgentPlugin.get_instance()
+	if plugin != null:
+		plugin.roles_changed.emit()

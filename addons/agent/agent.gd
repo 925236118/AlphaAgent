@@ -51,7 +51,7 @@ enum SendShotcut {
 }
 
 class GlobalSetting:
-	var setting_dir = EditorInterface.get_editor_paths().get_config_dir() + "/.alpha/"
+	var setting_dir = OS.get_user_data_dir() + "/.alpha/"
 	var setting_file: String = setting_dir + "setting.json"
 	var models_file: String = setting_dir + "models.json"
 	var roles_file: String = setting_dir + "roles.json"
@@ -77,7 +77,7 @@ class GlobalSetting:
 			json = JSON.parse_string(setting_string)
 
 		self.auto_clear = json.get("auto_clear", false)
-		self.auto_expand_think = json.get("auto_clear", false)
+		self.auto_expand_think = json.get("auto_expand_think", false)
 		self.auto_add_file_ref = json.get("auto_add_file_ref", true)
 		self.send_shortcut = json.get("send_shortcut", SendShotcut.Enter)
 
@@ -98,7 +98,70 @@ class GlobalSetting:
 		file.store_string(JSON.stringify(dict))
 		file.close()
 
-static var global_setting := GlobalSetting.new()
+static  var global_setting := GlobalSetting.new()
 
 static var project_memory: Array[String] = []
 static var global_memory: Array[String] = []
+
+# ========== 统一的实例访问辅助函数 ==========
+
+# 获取插件实例（直接返回，不等待）
+static func get_instance() -> AlphaAgentPlugin:
+	return instance
+
+# 等待插件实例可用并返回（用于编辑器调试和异步初始化）
+static func wait_for_instance() -> AlphaAgentPlugin:
+	# 如果实例已可用，直接返回
+	if instance != null:
+		return instance
+	
+	# 等待实例初始化
+	var main_loop = Engine.get_main_loop()
+	if main_loop == null:
+		push_error("无法获取主循环")
+		return null
+	
+	var scene_tree = main_loop as SceneTree
+	if scene_tree == null:
+		push_error("主循环不是 SceneTree")
+		return null
+	
+	# 等待实例初始化
+	var max_wait_time = 10.0  # 最多等待10秒
+	var elapsed_time = 0.0
+	var check_interval = 0.1  # 每0.1秒检查一次
+	
+	var start_time = Time.get_ticks_msec()
+	while instance == null:
+		await scene_tree.process_frame
+		elapsed_time = (Time.get_ticks_msec() - start_time) / 1000.0
+		if elapsed_time >= max_wait_time:
+			push_error("等待插件实例超时（已等待 " + str(elapsed_time) + " 秒）")
+			return null
+	
+	return instance
+
+# 安全地获取场景树（用于等待帧，兼容编辑器和插件运行）
+static func get_scene_tree() -> SceneTree:
+	# 优先使用 instance 的场景树
+	if instance != null:
+		var tree = instance.get_tree()
+		if tree != null:
+			return tree
+	
+	# 如果 instance 的场景树不可用，使用主循环的场景树
+	var main_loop = Engine.get_main_loop()
+	if main_loop != null:
+		var scene_tree = main_loop as SceneTree
+		if scene_tree != null:
+			return scene_tree
+	
+	return null
+
+# 等待场景树可用并等待一帧（统一处理，用于编辑器调试）
+static func wait_for_scene_tree_frame():
+	var tree = get_scene_tree()
+	if tree == null:
+		push_error("无法获取场景树")
+		return
+	await tree.process_frame

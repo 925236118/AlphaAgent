@@ -18,10 +18,12 @@ func _ready() -> void:
 
 func set_function_name(_function_name: String):
 	function_name = _function_name
-	function_info = AlphaAgentPlugin.instance.main_panel.tools.get_function_name_list()[_function_name]
-	function_name_label.text = _function_name
-	function_readonly.visible = function_info.readonly
-	function_description.text = function_info.description
+	var plugin = AlphaAgentPlugin.get_instance()
+	if plugin != null and plugin.main_panel != null:
+		function_info = plugin.main_panel.tools.get_function_name_list()[_function_name]
+		function_name_label.text = _function_name
+		function_readonly.visible = function_info.readonly
+		function_description.text = function_info.description
 
 func set_active(_active: bool):
 	active = _active

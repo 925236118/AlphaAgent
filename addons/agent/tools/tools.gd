@@ -969,14 +969,18 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 				var singleton_name = json.name
 				var singleton_path = json.get("path", "")
 				if singleton_path:
-					AlphaAgentPlugin.instance.add_autoload_singleton(singleton_name, singleton_path)
+					var plugin = AlphaAgentPlugin.get_instance()
+					if plugin != null:
+						plugin.add_autoload_singleton(singleton_name, singleton_path)
 					result = {
 						"name": singleton_name,
 						"path": singleton_path,
 						"success": "添加自动加载成功"
 					}
 				else:
-					AlphaAgentPlugin.instance.remove_autoload_singleton(singleton_name)
+					var plugin = AlphaAgentPlugin.get_instance()
+					if plugin != null:
+						plugin.remove_autoload_singleton(singleton_name)
 					result = {
 						"name": singleton_name,
 						"success": "删除自动加载成功"
@@ -1153,7 +1157,9 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 							plan_state = AlphaAgentPlugin.PlanState.Finish
 							all_plan = false
 					list.push_back(AlphaAgentPlugin.PlanItem.new(task_name, plan_state))
-				AlphaAgentPlugin.instance.update_plan_list.emit(list)
+				var plugin = AlphaAgentPlugin.get_instance()
+				if plugin != null:
+					plugin.update_plan_list.emit(list)
 				if active_index == 0:
 					result = {
 						"success": "更新任务列表成功。开始执行当前任务。"

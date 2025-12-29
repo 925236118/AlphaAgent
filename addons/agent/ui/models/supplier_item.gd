@@ -94,7 +94,9 @@ func on_click_save_button():
 		AlphaAgentPlugin.global_setting.model_manager.add_supplier(supplier_info)
 	else:
 		AlphaAgentPlugin.global_setting.model_manager.update_supplier(supplier_info.id, supplier_info)
-	AlphaAgentPlugin.instance.models_changed.emit()
+	var plugin = AlphaAgentPlugin.get_instance()
+	if plugin != null:
+		plugin.models_changed.emit()
 
 func refresh_setting_model_list():
 	var model_count = setting_model_list.get_child_count()
@@ -137,7 +139,9 @@ func on_click_edit_model_button():
 	get_tree().root.add_child(model_manager_window)
 	model_manager_window.set_supplier_info(supplier_info)
 	# 绑定信号，当修改模型后，触发全局模型变化信号
-	model_manager_window.models_changed.connect(AlphaAgentPlugin.instance.models_changed.emit)
+	var plugin = AlphaAgentPlugin.get_instance()
+	if plugin != null:
+		model_manager_window.models_changed.connect(plugin.models_changed.emit)
 	
 	model_manager_window.popup_centered(Vector2i(600, 500))
 	# 当窗口关闭时，销毁

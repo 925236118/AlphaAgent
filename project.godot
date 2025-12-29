@@ -19,6 +19,10 @@ config/icon="res://icon.svg"
 window/size/viewport_width=648
 window/size/viewport_height=1152
 
+[dotnet]
+
+project/assembly_name="GodotAiAgent"
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/agent/plugin.cfg")

@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=26 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_i5act"]
@@ -15,10 +15,6 @@
 [ext_resource type="PackedScene" uid="uid://bxe6hto0vk8fu" path="res://addons/agent/ui/setting/setting.tscn" id="8_5t7oo"]
 [ext_resource type="ButtonGroup" uid="uid://4cfowu05scrd" path="res://addons/agent/ui/resource/setting_tab_group.tres" id="8_i5act"]
 [ext_resource type="PackedScene" uid="uid://b66g7g3ydkkeb" path="res://addons/agent/ui/memory/memory_container.tscn" id="10_n876e"]
-[ext_resource type="Script" uid="uid://ceok2hodt360c" path="res://addons/agent/scripts/openai_chat_stream.gd" id="13_wlmmt"]
-[ext_resource type="Script" uid="uid://dwv814ayqkkbf" path="res://addons/agent/scripts/openai_chat.gd" id="14_q7ex6"]
-[ext_resource type="Script" uid="uid://cyh2gqd0jea8s" path="res://addons/agent/scripts/ollama_chat_stream.gd" id="15_cd0et"]
-[ext_resource type="Script" uid="uid://drxphw7kybfrr" path="res://addons/agent/scripts/ollama_chat.gd" id="16_i5act"]
 
 [sub_resource type="Theme" id="Theme_aabuu"]
 
@@ -374,28 +370,4 @@ uri = "https://godotvillage.github.io/"
 [node name="Tools" parent="." instance=ExtResource("3_2usmi")]
 
 [node name="ChatModels" type="Node" parent="."]
-
-[node name="OpenAIChatStream" type="Node" parent="ChatModels"]
 unique_name_in_owner = true
-script = ExtResource("13_wlmmt")
-api_base = "https://api.deepseek.com"
-secret_key = ""
-model_name = "deepseek-chat"
-max_tokens = 8192
-provider = "deepseek"
-
-[node name="TitleGenerateOpenAIChat" type="Node" parent="ChatModels"]
-unique_name_in_owner = true
-script = ExtResource("14_q7ex6")
-api_base = "https://api.deepseek.com"
-secret_key = ""
-model_name = "deepseek-chat"
-provider = "deepseek"
-
-[node name="OllamaChatStream" type="Node" parent="ChatModels"]
-unique_name_in_owner = true
-script = ExtResource("15_cd0et")
-
-[node name="TitleGenerateOllamaChat" type="Node" parent="ChatModels"]
-unique_name_in_owner = true
-script = ExtResource("16_i5act")

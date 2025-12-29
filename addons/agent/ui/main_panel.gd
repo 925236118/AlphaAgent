@@ -2,13 +2,7 @@
 class_name AgentMainPanel
 extends Control
 
-# OpenAI 兼容客户端（支持 OpenAI, DeepSeek 等）
-@onready var openai_chat_stream: OpenAIChatStream = %OpenAIChatStream
-@onready var title_generate_openai_chat: OpenAIChat = %TitleGenerateOpenAIChat
-
-# 新增：Ollama客户端
-@onready var ollama_chat_stream: OllamaChatStream = %OllamaChatStream
-@onready var title_generate_ollama_chat: OllamaChat = %TitleGenerateOllamaChat
+@onready var chat_models: Node = %ChatModels
 
 @onready var message_list: VBoxContainer = %MessageList
 @onready var new_chat_button: Button = %NewChatButton
@@ -83,33 +77,9 @@ func _ready() -> void:
 
 	# 初始化模型选择
 	_init_model_selector()
-	_switch_to_current_model()
-
-	# 初始化AI模型相关信息
-	# init_message_list()
 
 	# 初始化角色选择
 	_init_role_selector()
-
-	# 初始化OpenAI客户端
-	openai_chat_stream.think.connect(on_agent_think)
-	openai_chat_stream.message.connect(on_agent_message)
-	openai_chat_stream.use_tool.connect(on_use_tool)
-	openai_chat_stream.generate_finish.connect(on_agent_finish)
-	openai_chat_stream.response_use_tool.connect(on_response_use_tool)
-	openai_chat_stream.error.connect(on_generate_error)
-
-	# 初始化Ollama客户端
-	ollama_chat_stream.think.connect(on_agent_think)
-	ollama_chat_stream.message.connect(on_agent_message)
-	ollama_chat_stream.use_tool.connect(on_use_tool)
-	ollama_chat_stream.generate_finish.connect(on_agent_finish)
-	ollama_chat_stream.response_use_tool.connect(on_response_use_tool)
-	ollama_chat_stream.error.connect(on_generate_error)
-
-	# 初始化标题生成客户端
-	title_generate_openai_chat.generate_finish.connect(on_title_generate_finish)
-	title_generate_ollama_chat.generate_finish.connect(on_title_generate_finish)
 
 	back_chat_button.pressed.connect(on_click_back_chat_button)
 	new_chat_button.pressed.connect(on_click_new_chat_button)
@@ -165,49 +135,6 @@ func _init_role_selector():
 		current_role_id
 	)
 
-
-# 切换到当前模型
-func _switch_to_current_model():
-	await AlphaAgentPlugin.wait_for_scene_tree_frame()
-	var model_manager = AlphaAgentPlugin.global_setting.model_manager
-	if model_manager == null:
-		current_chat_stream = openai_chat_stream
-		current_title_chat = title_generate_openai_chat
-		return
-	var supplier = model_manager.get_current_supplier()
-	var model = model_manager.get_current_model()
-	if model == null:
-		current_chat_stream = openai_chat_stream
-		current_title_chat = title_generate_openai_chat
-		return
-
-	# 根据模型配置切换客户端
-	if supplier.provider == "ollama":
-		# 使用 Ollama 客户端
-		current_chat_stream = ollama_chat_stream
-		current_title_chat = title_generate_ollama_chat
-		ollama_chat_stream.api_base = supplier.base_url
-		ollama_chat_stream.model_name = model.model_name
-		ollama_chat_stream.max_tokens = model.max_tokens
-
-		title_generate_ollama_chat.api_base = supplier.base_url
-		title_generate_ollama_chat.model_name = model.model_name
-		title_generate_ollama_chat.max_tokens = model.max_tokens
-	else:
-		# OpenAI 及其他兼容提供商（包括 DeepSeek）
-		current_chat_stream = openai_chat_stream
-		current_title_chat = title_generate_openai_chat
-		openai_chat_stream.api_base = supplier.base_url
-		openai_chat_stream.secret_key = supplier.api_key
-		openai_chat_stream.provider = supplier.provider
-		openai_chat_stream.model_name = model.model_name
-		openai_chat_stream.max_tokens = model.max_tokens
-
-		title_generate_openai_chat.api_base = supplier.base_url
-		title_generate_openai_chat.secret_key = supplier.api_key
-		title_generate_openai_chat.provider = supplier.provider
-		title_generate_openai_chat.model_name = model.model_name
-
 # 模型选择回调
 func _on_model_selected(supplier_id: String, model_id: String):
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
@@ -215,7 +142,6 @@ func _on_model_selected(supplier_id: String, model_id: String):
 		return
 
 	model_manager.set_current_model(supplier_id, model_id)
-	_switch_to_current_model()
 
 	# 更新输入容器的模型选择器显示
 	_init_model_selector()
@@ -224,7 +150,6 @@ func _on_model_selected(supplier_id: String, model_id: String):
 # 模型配置变更回调
 func _on_models_changed():
 	_init_model_selector()
-	_switch_to_current_model()
 
 func _on_roles_changed():
 	_init_role_selector()
@@ -275,6 +200,50 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 
 func send_messages():
 	var use_thinking = input_container.get_use_thinking()
+	var model_manager = AlphaAgentPlugin.global_setting.model_manager
+	
+	# 使用模型配置的max_tokens 和 thinking
+	if model_manager:
+		var supplier = model_manager.get_current_supplier()
+		var model = model_manager.get_current_model()
+		# 生成模型节点
+		if supplier.provider == "ollama":
+			current_chat_stream = OllamaChatStream.new()
+			current_title_chat = OllamaChat.new()
+		elif supplier.provider == "openai" or supplier.provider == "deepseek":
+			current_chat_stream = OpenAIChatStream.new()
+			current_title_chat = OpenAIChat.new()
+			current_chat_stream.secret_key = supplier.api_key
+			current_title_chat.secret_key = supplier.api_key
+		else:
+			printerr("不支持的供应商：", supplier.to_dict())
+
+		# 设置属性
+		current_chat_stream.api_base = supplier.base_url
+		current_chat_stream.model_name = model.model_name
+		current_chat_stream.max_tokens = model.max_tokens
+		current_chat_stream.use_thinking = model.supports_thinking and use_thinking
+
+		current_title_chat.api_base = supplier.base_url
+		current_title_chat.model_name = model.model_name
+		current_title_chat.max_tokens = model.max_tokens
+		
+	else:
+		printerr("无法获取model_manager，请检查")
+		return
+	
+	# 绑定模型事件
+	current_chat_stream.think.connect(on_agent_think)
+	current_chat_stream.message.connect(on_agent_message)
+	current_chat_stream.use_tool.connect(on_use_tool)
+	current_chat_stream.generate_finish.connect(on_agent_finish)
+	current_chat_stream.response_use_tool.connect(on_response_use_tool)
+	current_chat_stream.error.connect(on_generate_error)
+
+	current_title_chat.generate_finish.connect(on_title_generate_finish)
+
+	chat_models.add_child(current_chat_stream)
+	chat_models.add_child(current_title_chat)
 
 	# 根据角色设置工具列表
 	var role_manager = AlphaAgentPlugin.global_setting.role_manager
@@ -286,19 +255,6 @@ func send_messages():
 			# 没有角色时，默认使用所有工具
 			current_chat_stream.tools = tools.get_tools_list()
 
-	# 使用模型配置的max_tokens 和 thinking
-	var model_manager = AlphaAgentPlugin.global_setting.model_manager
-	if model_manager:
-		var model = model_manager.get_current_model()
-		if model:
-			current_chat_stream.max_tokens = model.max_tokens
-			current_chat_stream.use_thinking = model.supports_thinking and use_thinking
-		else:
-			current_chat_stream.max_tokens = 8 * 1024
-			current_chat_stream.use_thinking = use_thinking
-	else:
-		current_chat_stream.max_tokens = 8 * 1024
-		current_chat_stream.use_thinking = use_thinking
 
 	current_random_message_id = generate_random_string(16)
 	current_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
@@ -381,7 +337,7 @@ func on_use_tool(tool_calls: Array):
 
 func on_generate_error(error_info: Dictionary):
 	#printerr("发生错误")
-	#printerr(error_info.error_msg)
+	printerr(error_info.error_msg)
 	printerr(error_info.data)
 	#current_message_item.update_think_content(current_think, false)
 	current_message_item.update_error_message(error_info.error_msg, error_info.data)
@@ -413,6 +369,11 @@ func clear():
 	var message_count = message_list.get_child_count()
 	for i in message_count:
 		message_list.get_child(message_count - i - 1).queue_free()
+	
+	if current_chat_stream:
+		current_chat_stream.queue_free()
+	if current_title_chat:
+		current_title_chat.queue_free()
 
 func on_agent_finish(finish_reason: String, total_tokens: float):
 	#print("finish_reason ", finish_reason)
@@ -434,6 +395,10 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 		current_message_item.copy.connect(on_copy_output_message.bind(current_message_item))
 
 		reset_message_info()
+		if current_chat_stream:
+			current_chat_stream.queue_free()
+		if current_title_chat:
+			current_title_chat.queue_free()
 
 	input_container.set_usage_label(total_tokens, 128)
 	#print(messages)

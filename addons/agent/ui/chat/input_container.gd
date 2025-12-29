@@ -63,7 +63,7 @@ var model_id_list = {}
 var role_id_list = {}
 
 func _ready() -> void:
-	update_user_input_placeholder()
+	#update_user_input_placeholder()
 
 	send_button.pressed.connect(on_click_send_message)
 	clear_button.pressed.connect(on_click_clear_button)
@@ -71,7 +71,7 @@ func _ready() -> void:
 
 	user_input.text_changed.connect(on_user_input_text_changed)
 	input_menu_list.item_selected.connect(on_input_menu_list_item_selected)
-	custom_dropdown.is_action_mode.connect(update_user_input_placeholder)
+	#custom_dropdown.is_action_mode.connect(update_user_input_placeholder)
 	config_model_button.pressed.connect(show_setting.emit)
 
 	# 初始化模型选择器
@@ -365,7 +365,17 @@ func handle_command(command: String, args: PackedStringArray):
 					show_memory.emit()
 					init()
 			elif args[0] == "global":
-				print("暂时不支持全局记忆")
+				if args.size() == 2:
+					var memory_file = OS.get_user_data_dir() + "/.alpha/memory.json"
+					AlphaAgentPlugin.global_memory.push_back(args[1])
+
+					var file = FileAccess.open(memory_file, FileAccess.WRITE)
+					file.store_string(JSON.stringify(AlphaAgentPlugin.global_memory))
+					file.close()
+					init()
+				else:
+					show_memory.emit()
+					init()
 			else:
 				show_memory.emit()
 				init()
@@ -381,19 +391,6 @@ func handle_command(command: String, args: PackedStringArray):
 func set_usage_label(total_tokens: float, max_content_length: float):
 	usage_label.text = "%.2f" % (total_tokens / (max_content_length * 1024)) + "%"
 	usage_label.tooltip_text = ("%.2f" % (total_tokens / (max_content_length * 1024))) + "%" + " | " + ("%d / 128k usage tokens" % total_tokens)
-
-func update_user_input_placeholder():
-	match get_input_mode():
-		"Ask":
-			user_input.placeholder_text = "输入问题，不使用工具，获得更安全的体验。"
-		"Agent":
-			user_input.placeholder_text = "输入问题，或拖拽添加引用。"
-	#print(get_input_mode())
-
-
-
-func _on_input_mode_select_item_selected(index: int) -> void:
-	update_user_input_placeholder()
 
 func check_disallowed_char(text: String) -> bool:
 	var disallowed_char = [" ", ",", ".", "，", "。"]

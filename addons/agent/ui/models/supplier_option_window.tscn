@@ -48,12 +48,12 @@ layout_mode = 2
 [node name="AddNewSupplierButton" type="Button" parent="MarginContainer/PanelContainer/HSplitContainer/SupplierList/VBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_type_variation = &"PrimaryButton"
 text = "新增供应商"
 
 [node name="ResetSupplierButton" type="Button" parent="MarginContainer/PanelContainer/HSplitContainer/SupplierList/VBoxContainer2"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 theme_type_variation = &"DangerButton"
 text = "重置"

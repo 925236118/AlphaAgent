@@ -18,6 +18,7 @@ func _ready() -> void:
 	visibility_changed.connect(on_visibility_changed)
 	add_global_memory.pressed.connect(on_add_global_memory)
 	add_project_memory.pressed.connect(on_add_project_memory)
+
 func on_visibility_changed():
 	if visible:
 		add_memory_nodes()

@@ -129,12 +129,14 @@ popup/item_1/id = 1
 [node name="CheckModelButton" type="Button" parent="VBoxContainer/SupplierShow/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_type_variation = &"SecondaryButton"
 text = "检测"
 
 [node name="RemoveSupplierButton" type="Button" parent="VBoxContainer/SupplierShow/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_type_variation = &"DangerButton"
 text = "删除"
 
@@ -157,6 +159,7 @@ text = "编辑供应商"
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_d56vv")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_d56vv")
 theme_override_styles/hover = SubResource("StyleBoxFlat_d56vv")
@@ -168,6 +171,7 @@ text = "编辑模型"
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_d56vv")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_d56vv")
 theme_override_styles/hover = SubResource("StyleBoxFlat_d56vv")
@@ -178,6 +182,7 @@ text = "取消"
 [node name="SaveButton" type="Button" parent="VBoxContainer/SupplierEdit/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_type_variation = &"PrimaryButton"
 text = "保存"
 
@@ -245,6 +250,7 @@ text = "模型列表"
 [node name="AddModelButton" type="Button" parent="VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_type_variation = &"PrimaryButton"
 text = "添加模型"
 

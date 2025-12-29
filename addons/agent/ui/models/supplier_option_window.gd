@@ -15,11 +15,15 @@ func _ready() -> void:
 	supplier_item.save.connect(on_supplier_item_save)
 	supplier_item.hide()
 	add_new_supplier_button.pressed.connect(on_add_new_supplier_button_pressed)
+	reset_supplier_button.pressed.connect(on_reset_supplier)
 
 func init_models_supplier():
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if model_manager == null:
 		return
+
+	for button in supplier_button_list.get_children():
+		button.queue_free()
 
 	for supplier: ModelConfig.SupplierInfo in model_manager.suppliers:
 		var button = Button.new()
@@ -75,3 +79,12 @@ func on_add_new_supplier_button_pressed():
 	supplier_button_list.add_child(new_button)
 	AlphaAgentPlugin.global_setting.model_manager.add_supplier(new_supplier)
 	select_supplier(supplier_button_list.get_child_count() - 1)
+
+func on_reset_supplier():
+	var model_manager = AlphaAgentPlugin.global_setting.model_manager
+	if model_manager == null:
+		return
+
+	model_manager.clear_all_supplier()
+	model_manager.add_default_suppliers()
+	init_models_supplier()

@@ -108,14 +108,18 @@ class ModelManager:
 		if not DirAccess.dir_exists_absolute(dir_path):
 			DirAccess.make_dir_recursive_absolute(dir_path)
 
+	func clear_all_supplier():
+		suppliers = []
+		save_datas()
+
 	func add_default_suppliers():
 		# 添加默认DeepSeek供应商
-		var supplier = SupplierInfo.new()
-		supplier.name = "DeepSeek"
-		supplier.base_url = "https://api.deepseek.com"
-		supplier.api_key = ""
-		supplier.provider = "deepseek"
-		suppliers.append(supplier)
+		var deepseek_supplier = SupplierInfo.new()
+		deepseek_supplier.name = "DeepSeek"
+		deepseek_supplier.base_url = "https://api.deepseek.com"
+		deepseek_supplier.api_key = ""
+		deepseek_supplier.provider = "deepseek"
+		suppliers.append(deepseek_supplier)
 
 		var chat_model = ModelInfo.new()
 		chat_model.name = "DeepSeek Chat"
@@ -124,8 +128,8 @@ class ModelManager:
 		chat_model.supports_tools = true
 		chat_model.max_tokens = 8 * 1024
 		chat_model.active = false
-		chat_model.supplier_id = supplier.id
-		supplier.models.append(chat_model)
+		chat_model.supplier_id = deepseek_supplier.id
+		deepseek_supplier.models.append(chat_model)
 
 		var reasoner_model = ModelInfo.new()
 		reasoner_model.name = "DeepSeek Reasoner"
@@ -134,11 +138,87 @@ class ModelManager:
 		reasoner_model.supports_tools = true
 		reasoner_model.max_tokens = 64 * 1024
 		reasoner_model.active = false
-		reasoner_model.supplier_id = supplier.id
-		supplier.models.append(reasoner_model)
+		reasoner_model.supplier_id = deepseek_supplier.id
+		deepseek_supplier.models.append(reasoner_model)
 
-		current_supplier_id = supplier.id
+		current_supplier_id = deepseek_supplier.id
 		current_model_id = reasoner_model.id
+
+		# 添加默认MoonShot供应商
+		var moonshot_supplier = SupplierInfo.new()
+		moonshot_supplier.name = "MoonShot"
+		moonshot_supplier.base_url = "https://api.moonshot.cn"
+		moonshot_supplier.api_key = ""
+		moonshot_supplier.provider = "openai"
+		suppliers.append(moonshot_supplier)
+
+		var kimi_k2_turbo_preview_model = ModelInfo.new()
+		kimi_k2_turbo_preview_model.name = "Kimi K2 Turbo Preview"
+		kimi_k2_turbo_preview_model.model_name = "kimi-k2-turbo-preview"
+		kimi_k2_turbo_preview_model.supports_thinking = false
+		kimi_k2_turbo_preview_model.supports_tools = true
+		kimi_k2_turbo_preview_model.max_tokens = 8 * 1024
+		kimi_k2_turbo_preview_model.active = false
+		kimi_k2_turbo_preview_model.supplier_id = moonshot_supplier.id
+		moonshot_supplier.models.append(kimi_k2_turbo_preview_model)
+
+		var kimi_k2_0905_preview_model = ModelInfo.new()
+		kimi_k2_0905_preview_model.name = "Kimi K2 0905 Preview"
+		kimi_k2_0905_preview_model.model_name = "kimi-k2-0905-preview"
+		kimi_k2_0905_preview_model.supports_thinking = false
+		kimi_k2_0905_preview_model.supports_tools = true
+		kimi_k2_0905_preview_model.max_tokens = 8 * 1024
+		kimi_k2_0905_preview_model.active = false
+		kimi_k2_0905_preview_model.supplier_id = moonshot_supplier.id
+		moonshot_supplier.models.append(kimi_k2_0905_preview_model)
+
+		var kimi_k2_thinking_model = ModelInfo.new()
+		kimi_k2_thinking_model.name = "Kimi K2 Thinking"
+		kimi_k2_thinking_model.model_name = "kimi-k2-thinking"
+		kimi_k2_thinking_model.supports_thinking = true
+		kimi_k2_thinking_model.supports_tools = true
+		kimi_k2_thinking_model.max_tokens = 64 * 1024
+		kimi_k2_thinking_model.active = false
+		kimi_k2_thinking_model.supplier_id = moonshot_supplier.id
+		moonshot_supplier.models.append(kimi_k2_thinking_model)
+
+		var kimi_k2_thinking_turbo_model = ModelInfo.new()
+		kimi_k2_thinking_turbo_model.name = "Kimi K2 Thinking Turbo"
+		kimi_k2_thinking_turbo_model.model_name = "kimi-k2-thinking-turbo"
+		kimi_k2_thinking_turbo_model.supports_thinking = true
+		kimi_k2_thinking_turbo_model.supports_tools = true
+		kimi_k2_thinking_turbo_model.max_tokens = 64 * 1024
+		kimi_k2_thinking_turbo_model.active = false
+		kimi_k2_thinking_turbo_model.supplier_id = moonshot_supplier.id
+		moonshot_supplier.models.append(kimi_k2_thinking_turbo_model)
+
+		# 添加默认硅基流动供应商
+		var siliconflow_supplier = SupplierInfo.new()
+		siliconflow_supplier.name = "硅基流动"
+		siliconflow_supplier.base_url = "https://api.siliconflow.cn"
+		siliconflow_supplier.api_key = ""
+		siliconflow_supplier.provider = "openai"
+		suppliers.append(siliconflow_supplier)
+
+		var deepseek_v3_2_model = ModelInfo.new()
+		deepseek_v3_2_model.name = "DeepSeek-V3.2"
+		deepseek_v3_2_model.model_name = "deepseek-ai/DeepSeek-V3.2"
+		deepseek_v3_2_model.supports_thinking = true
+		deepseek_v3_2_model.supports_tools = true
+		deepseek_v3_2_model.max_tokens = 64 * 1024
+		deepseek_v3_2_model.active = false
+		deepseek_v3_2_model.supplier_id = siliconflow_supplier.id
+		siliconflow_supplier.models.append(deepseek_v3_2_model)
+
+		var qwen_next_80b_a3b_thinking = ModelInfo.new()
+		qwen_next_80b_a3b_thinking.name = "Qwen3 Next 80B A3B Thinking"
+		qwen_next_80b_a3b_thinking.model_name = "Qwen/Qwen3-Next-80B-A3B-Thinking"
+		qwen_next_80b_a3b_thinking.supports_thinking = true
+		qwen_next_80b_a3b_thinking.supports_tools = true
+		qwen_next_80b_a3b_thinking.max_tokens = 64 * 1024
+		qwen_next_80b_a3b_thinking.active = false
+		qwen_next_80b_a3b_thinking.supplier_id = siliconflow_supplier.id
+		siliconflow_supplier.models.append(qwen_next_80b_a3b_thinking)
 
 		save_datas()
 

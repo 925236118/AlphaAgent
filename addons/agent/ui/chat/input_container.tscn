@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://dqkrjn0mak6lh"]
+[gd_scene load_steps=17 format=3 uid="uid://dqkrjn0mak6lh"]
 
 [ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_k8r8m"]
 [ext_resource type="Script" uid="uid://c0gayflg4ovas" path="res://addons/agent/ui/chat/input_container.gd" id="1_xi1dg"]
@@ -43,32 +43,6 @@ content_margin_bottom = 6.0
 
 [sub_resource type="LabelSettings" id="LabelSettings_gy7k7"]
 font_color = Color(0.46666667, 0.46666667, 0.46666667, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k8r8m"]
-content_margin_left = 10.0
-content_margin_right = 10.0
-bg_color = Color(0.87058824, 0.3019608, 0.11372549, 1)
-border_width_top = 3
-border_width_bottom = 3
-border_color = Color(0.8, 0.8, 0.8, 0)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pm5wc"]
-content_margin_left = 8.0
-content_margin_right = 8.0
-bg_color = Color(0.92156863, 0.4392157, 0.27058825, 1)
-border_width_top = 3
-border_width_bottom = 3
-border_color = Color(0.8, 0.8, 0.8, 0)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5t7oo"]
 
 [node name="InputContainer" type="MarginContainer"]
 anchors_preset = 15
@@ -203,7 +177,6 @@ theme_override_constants/separation = 6
 
 [node name="UsageLabel" type="Label" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 mouse_filter = 0
 label_settings = SubResource("LabelSettings_gy7k7")
@@ -234,19 +207,14 @@ text = "发送"
 
 [node name="StopButton" type="Button" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 tooltip_text = "发送"
 mouse_default_cursor_shape = 2
-theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_k8r8m")
-theme_override_styles/hover = SubResource("StyleBoxFlat_pm5wc")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_5t7oo")
+theme_type_variation = &"DangerButton"
+theme_override_font_sizes/font_size = 14
 text = "停止"
-icon_alignment = 1
-expand_icon = true
 
 [node name="Control" type="Control" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]
 custom_minimum_size = Vector2(2, 0)

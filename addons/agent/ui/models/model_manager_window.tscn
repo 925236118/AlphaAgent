@@ -169,6 +169,7 @@ size_flags_horizontal = 3
 [node name="RemoveButton" type="Button" parent="EditPanel/MarginContainer/VBoxContainer/ButtonContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_35oay")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_35oay")
 theme_override_styles/hover = SubResource("StyleBoxFlat_35oay")
@@ -178,11 +179,13 @@ text = "删除模型"
 [node name="CancelButton" type="Button" parent="EditPanel/MarginContainer/VBoxContainer/ButtonContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_type_variation = &"SecondaryButton"
 text = "取消"
 
 [node name="SaveButton" type="Button" parent="EditPanel/MarginContainer/VBoxContainer/ButtonContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_type_variation = &"PrimaryButton"
 text = "保存"

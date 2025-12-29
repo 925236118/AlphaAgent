@@ -24,7 +24,7 @@ var model_info: ModelConfig.ModelInfo = null
 
 signal create_model
 
-const MODEL_ITEM = preload("res://addons/agent/ui/models/model_item.tscn")
+#const MODEL_ITEM = preload("res://addons/agent/ui/models/model_item.tscn")
 
 func _ready() -> void:
 	model_manager = AlphaAgentPlugin.global_setting.model_manager

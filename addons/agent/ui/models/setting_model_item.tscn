@@ -115,6 +115,7 @@ layout_mode = 2
 [node name="EditButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_cxaef")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_cxaef")
 theme_override_styles/hover = SubResource("StyleBoxFlat_cxaef")
@@ -125,5 +126,6 @@ text = "编辑"
 [node name="RemoveButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_type_variation = &"DangerButton"
 text = "删除"

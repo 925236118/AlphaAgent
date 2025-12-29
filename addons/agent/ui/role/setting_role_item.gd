@@ -40,9 +40,8 @@ func on_click_more_button(id: MoreActionType):
 		MoreActionType.Remove:
 			if AlphaAgentPlugin.global_setting.role_manager.get_role_by_id(role_info.id) != null:
 				AlphaAgentPlugin.global_setting.role_manager.remove_role(role_info)
-			var plugin = AlphaAgentPlugin.get_instance()
-			if plugin != null:
-				plugin.roles_changed.emit()
+			var singleton = AlphaAgentSingleton.get_instance()
+			singleton.roles_changed.emit()
 			queue_free()
 
 func set_role_info(_role_info: AgentRoleConfig.RoleInfo):
@@ -59,7 +58,7 @@ func set_role_info(_role_info: AgentRoleConfig.RoleInfo):
 		for tool in role_info.tools:
 			var tool_item := TOOL_NAME_ITEM.instantiate() as Label
 			tool_item.text = tool
-			var plugin = AlphaAgentPlugin.get_instance()
-			if plugin != null and plugin.main_panel != null:
-				tool_item.tooltip_text = plugin.main_panel.tools.get_function_name_list()[tool].description
+			var singleton = AlphaAgentSingleton.get_instance()
+			if singleton.main_panel != null:
+				tool_item.tooltip_text = singleton.main_panel.tools.get_function_name_list()[tool].description
 			function_call_container.add_child(tool_item)

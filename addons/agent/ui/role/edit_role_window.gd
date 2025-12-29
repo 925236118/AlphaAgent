@@ -36,11 +36,11 @@ func set_role_info(role_info: AgentRoleConfig.RoleInfo):
 
 
 func init_function_list():
-	var plugin = AlphaAgentPlugin.get_instance()
-	if plugin == null or plugin.main_panel == null:
-		push_error("插件实例或主面板未初始化")
+	var singleton = AlphaAgentSingleton.get_instance()
+	if singleton.main_panel == null:
+		push_error("主面板未初始化")
 		return
-	var function_name_list = plugin.main_panel.tools.get_function_name_list().keys()
+	var function_name_list = singleton.main_panel.tools.get_function_name_list().keys()
 	for function_name in function_name_list:
 		var function_item := EDIT_FUNCTION_ITEM.instantiate() as AgentEditFunctionItem
 		edit_function_container.add_child(function_item)
@@ -71,9 +71,8 @@ func on_click_update_button():
 	AlphaAgentPlugin.global_setting.role_manager.update_role(role_info)
 	if edit_role_node:
 		edit_role_node.set_role_info(role_info)
-	var plugin = AlphaAgentPlugin.get_instance()
-	if plugin != null:
-		plugin.roles_changed.emit()
+		var singleton = AlphaAgentSingleton.get_instance()
+		singleton.roles_changed.emit()
 	queue_free()
 
 func set_window_mode(mode: WindowMode):

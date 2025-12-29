@@ -969,18 +969,16 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 				var singleton_name = json.name
 				var singleton_path = json.get("path", "")
 				if singleton_path:
-					var plugin = AlphaAgentPlugin.get_instance()
-					if plugin != null:
-						plugin.add_autoload_singleton(singleton_name, singleton_path)
+					var singleton = AlphaAgentSingleton.get_instance()
+					singleton.add_autoload_singleton(singleton_name, singleton_path)
 					result = {
 						"name": singleton_name,
 						"path": singleton_path,
 						"success": "添加自动加载成功"
 					}
 				else:
-					var plugin = AlphaAgentPlugin.get_instance()
-					if plugin != null:
-						plugin.remove_autoload_singleton(singleton_name)
+					var singleton = AlphaAgentSingleton.get_instance()
+					singleton.remove_autoload_singleton(singleton_name)
 					result = {
 						"name": singleton_name,
 						"success": "删除自动加载成功"
@@ -1135,7 +1133,7 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 			var json = JSON.parse_string(tool_call.function.arguments)
 			if not json == null and json.has("tasks"):
 				var tasks = json.get("tasks")
-				var list: Array[AlphaAgentPlugin.PlanItem] = []
+				var list: Array[AlphaAgentSingleton.PlanItem] = []
 				var active_index = -1
 				var all_finished = true
 				var all_plan = true
@@ -1143,23 +1141,22 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 					var task: Dictionary = tasks[index]
 					var task_name = task.get("name", "")
 					var task_state = task.get("state", "plan")
-					var plan_state: AlphaAgentPlugin.PlanState
+					var plan_state: AlphaAgentSingleton.PlanState
 					match task_state:
 						"plan":
-							plan_state = AlphaAgentPlugin.PlanState.Plan
+							plan_state = AlphaAgentSingleton.PlanState.Plan
 							all_finished = false
 						"active":
-							plan_state = AlphaAgentPlugin.PlanState.Active
+							plan_state = AlphaAgentSingleton.PlanState.Active
 							all_finished = false
 							active_index = index
 							all_plan = false
 						"finish":
-							plan_state = AlphaAgentPlugin.PlanState.Finish
+							plan_state = AlphaAgentSingleton.PlanState.Finish
 							all_plan = false
-					list.push_back(AlphaAgentPlugin.PlanItem.new(task_name, plan_state))
-				var plugin = AlphaAgentPlugin.get_instance()
-				if plugin != null:
-					plugin.update_plan_list.emit(list)
+					list.push_back(AlphaAgentSingleton.PlanItem.new(task_name, plan_state))
+				var singleton = AlphaAgentSingleton.get_instance()
+				singleton.update_plan_list.emit(list)
 				if active_index == 0:
 					result = {
 						"success": "更新任务列表成功。开始执行当前任务。"

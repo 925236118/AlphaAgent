@@ -13,18 +13,18 @@ extends HBoxContainer
 func set_text(text: String):
 	label.text = text
 
-func set_state(state: AlphaAgentPlugin.PlanState):
+func set_state(state: AlphaAgentSingleton.PlanState):
 	state_plan.hide()
 	state_active.hide()
 	state_finish.hide()
 	label.modulate = Color("#ffffff")
 	animation_player.stop()
 	match state:
-		AlphaAgentPlugin.PlanState.Plan:
+		AlphaAgentSingleton.PlanState.Plan:
 			state_plan.show()
-		AlphaAgentPlugin.PlanState.Active:
+		AlphaAgentSingleton.PlanState.Active:
 			state_active.show()
 			animation_player.play("loop")
-		AlphaAgentPlugin.PlanState.Finish:
+		AlphaAgentSingleton.PlanState.Finish:
 			state_finish.show()
 			label.modulate = Color("#5B5B5B")

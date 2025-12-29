@@ -443,13 +443,12 @@ func _on_user_input_gui_input(event: InputEvent) -> void:
 			elif send_shortcut == AlphaAgentPlugin.SendShotcut.CtrlEnter:
 				user_input.insert_text_at_caret("\n")
 
-	# ctrl+enter键 添加回车
-	if event.is_command_or_control_pressed() and \
-		not event.alt_pressed and \
-		not event.shift_pressed and \
-		event.keycode == KEY_ENTER and \
-		event.pressed:
-			
+		# ctrl+enter键 发送消息
+		if event.is_command_or_control_pressed() and \
+			not event.alt_pressed and \
+			not event.shift_pressed and \
+			event.keycode == KEY_ENTER and \
+			event.pressed:
 
 			if send_shortcut == AlphaAgentPlugin.SendShotcut.None:
 				return

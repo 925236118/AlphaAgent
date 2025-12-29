@@ -55,6 +55,8 @@ func _ready() -> void:
 	add_history_nodes()
 	history_expand_button.pressed.connect(on_click_history_expand_button)
 	history_list_window.close_requested.connect(on_close_history_list)
+	# 监听窗口失去焦点事件
+	history_list_window.focus_exited.connect(_on_window_focus_exited)
 
 func refresh_list():
 	clear_history_nodes()
@@ -68,12 +70,30 @@ func on_click_history_expand_button():
 	var window_pos = get_tree().root.position
 	var window_width = 296
 	var window_height = min(162 + history_list.size() * 32 + 16, 500)
-	history_list_window.popup(Rect2i(Vector2i(global_position) + popup_offset + window_pos, Vector2i(window_width, window_height)))
+	
+	var popup_pos = Vector2i(global_position) + popup_offset + window_pos
+	# 判断是否在编辑器环境中
+	var singleton = AlphaAgentSingleton.get_instance()
+	# 如果是编辑器运行，限制位置在窗体大小内
+	if singleton.editor_plugin == null:
+		popup_pos = Vector2i(global_position) + popup_offset
+	
+	history_list_window.popup(Rect2i(popup_pos, Vector2i(window_width, window_height)))
+	# 在编辑器模式下，需要手动设置窗口可获取焦点
+	if singleton.editor_plugin == null:
+		history_list_window.unfocusable = false
+		history_list_window.grab_focus()
 	expand_icon.flip_v = true
 
 func on_close_history_list():
 	history_list_window.hide()
 	expand_icon.flip_v = false
+
+# 处理窗口失去焦点事件
+func _on_window_focus_exited() -> void:
+	# 当窗口失去焦点时，关闭窗口
+	if history_list_window.visible:
+		on_close_history_list()
 
 var history_list: Array = []
 

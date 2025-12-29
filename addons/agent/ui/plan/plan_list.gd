@@ -15,7 +15,7 @@ const PLAN_ITEM = preload("uid://58ryyxbn0dby")
 func _ready() -> void:
 	expand_button.pressed.connect(show_plan_list)
 
-func update_list(list: Array[AlphaAgentPlugin.PlanItem]):
+func update_list(list: Array[AlphaAgentSingleton.PlanItem]):
 	if list.size():
 		show()
 	else:
@@ -36,10 +36,10 @@ func update_list(list: Array[AlphaAgentPlugin.PlanItem]):
 		plan_item_container.add_child(plan_item)
 		plan_item.set_text(item.name)
 		plan_item.set_state(item.state)
-		if item.state == AlphaAgentPlugin.PlanState.Active:
+		if item.state == AlphaAgentSingleton.PlanState.Active:
 			active_index = index
 			all_finished = false
-		elif item.state == AlphaAgentPlugin.PlanState.Plan:
+		elif item.state == AlphaAgentSingleton.PlanState.Plan:
 			all_finished = false
 
 	if all_finished:

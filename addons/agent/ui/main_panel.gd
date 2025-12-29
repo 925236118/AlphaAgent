@@ -129,16 +129,12 @@ func _ready() -> void:
 	setting_tab_memory.pressed.connect(func(): show_container(memory_container))
 	setting_tab_setting.pressed.connect(func(): show_container(setting_container))
 
-# 连接插件信号（等待 instance 可用）
+# 连接插件信号（使用单例，始终可用）
 func _connect_plugin_signals():
-	var plugin = await AlphaAgentPlugin.wait_for_instance()
-	if plugin == null:
-		push_error("插件实例未初始化，无法连接信号")
-		return
-	
-	plugin.update_plan_list.connect(on_update_plan_list)
-	plugin.models_changed.connect(_on_models_changed)
-	plugin.roles_changed.connect(_on_roles_changed)
+	var singleton = AlphaAgentSingleton.get_instance()
+	singleton.update_plan_list.connect(on_update_plan_list)
+	singleton.models_changed.connect(_on_models_changed)
+	singleton.roles_changed.connect(_on_roles_changed)
 
 # 初始化模型选择器
 func _init_model_selector():
@@ -604,7 +600,7 @@ func on_stop_chat():
 	message_container.scroll_vertical = 100000
 	reset_message_info()
 
-func on_update_plan_list(plan_array: Array[AlphaAgentPlugin.PlanItem]):
+func on_update_plan_list(plan_array: Array[AlphaAgentSingleton.PlanItem]):
 	plan_list.update_list(plan_array)
 
 func on_resend_user_message(message_item_node: AgentChatMessageItem):

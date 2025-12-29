@@ -26,9 +26,8 @@ func set_setting_model_info(model: ModelConfig.ModelInfo):
 func on_toggled_is_active_button(toggled_on: bool):
 	model_info.active = toggled_on
 	AlphaAgentPlugin.global_setting.model_manager.update_model(model_info.supplier_id, model_info.id, model_info)
-	var plugin = AlphaAgentPlugin.get_instance()
-	if plugin != null:
-		plugin.models_changed.emit()
+	var singleton = AlphaAgentSingleton.get_instance()
+	singleton.models_changed.emit()
 
 func update_current_model():
 	is_current_model.visible = model_info.id == AlphaAgentPlugin.global_setting.model_manager.current_model_id

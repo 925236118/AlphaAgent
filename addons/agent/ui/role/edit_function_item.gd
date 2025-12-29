@@ -18,9 +18,9 @@ func _ready() -> void:
 
 func set_function_name(_function_name: String):
 	function_name = _function_name
-	var plugin = AlphaAgentPlugin.get_instance()
-	if plugin != null and plugin.main_panel != null:
-		function_info = plugin.main_panel.tools.get_function_name_list()[_function_name]
+	var singleton = AlphaAgentSingleton.get_instance()
+	if singleton.main_panel != null:
+		function_info = singleton.main_panel.tools.get_function_name_list()[_function_name]
 		function_name_label.text = _function_name
 		function_readonly.visible = function_info.readonly
 		function_description.text = function_info.description

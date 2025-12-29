@@ -104,7 +104,7 @@ corner_radius_bottom_left = 10
 
 [sub_resource type="LabelSettings" id="LabelSettings_6rfr6"]
 line_spacing = 6.0
-font_size = 24
+font_size = 18
 font_color = Color(0.7666196, 0.76661956, 0.76661956, 0.5254902)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5v6i3"]
@@ -425,16 +425,18 @@ uri = "https://godotvillage.github.io/"
 unique_name_in_owner = true
 script = ExtResource("13_wlmmt")
 api_base = "https://api.deepseek.com"
-secret_key = ""
-model_name = "deepseek-chat"
-max_tokens = 8192
+secret_key = "sk-7cf1838237534cb4b23384ed3da9381e"
+model_name = "deepseek-reasoner"
+max_tokens = 65536
+provider = "deepseek"
 
 [node name="TitleGenerateOpenAIChat" type="Node" parent="ChatModels"]
 unique_name_in_owner = true
 script = ExtResource("14_q7ex6")
 api_base = "https://api.deepseek.com"
-secret_key = ""
-model_name = "deepseek-chat"
+secret_key = "sk-7cf1838237534cb4b23384ed3da9381e"
+model_name = "deepseek-reasoner"
+provider = "deepseek"
 
 [node name="OllamaChatStream" type="Node" parent="ChatModels"]
 unique_name_in_owner = true

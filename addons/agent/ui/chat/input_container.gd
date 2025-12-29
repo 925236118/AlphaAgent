@@ -7,7 +7,6 @@ extends MarginContainer
 @onready var clear_button: Button = %ClearButton
 @onready var usage_label: Label = %UsageLabel
 @onready var reference_list: HFlowContainer = %ReferenceList
-@onready var input_mode_select: OptionButton = %InputModeSelect
 @onready var input_menu_list: ItemList = %InputMenuList
 @onready var use_thinking: CheckButton = %UseThinking
 @onready var stop_button: Button = %StopButton
@@ -26,7 +25,6 @@ signal show_help
 signal show_setting
 signal show_memory
 signal model_changed(model_id: String)
-# signal manage_models_requested
 
 enum MenuListType {
 	None,
@@ -116,7 +114,6 @@ func update_model_selector(suppliers: Array, current_model_id: String, current_m
 			model_id_list[idx] = model.id
 			idx += 1
 
-	#print("model_id_list: ", model_id_list)
 	if model_button.item_count == 0:
 		config_model_tip.show()
 		input_box.hide()
@@ -133,19 +130,6 @@ func _on_model_selected(idx: int):
 	if not model_manager:
 		return
 
-	# 检查是否是最后一项（Manage Models...）
-	#if idx == model_button.get_item_index(1):
-		## 触发打开模型管理窗口
-		#show_setting.emit()
-		#model_button.select(-1)
-		## 恢复之前的选择（防止选中 "Manage Models..."）
-		##var current_model = model_manager.get_current_model()
-		##if current_model:
-			##for i in range(model_manager.models.size()):
-				##if model_manager.models[i].id == current_model.id:
-					##model_button.selected = i
-					##break
-	#else:
 	var model_id = model_id_list[idx]
 	var model := model_manager.get_model_by_id(model_id)
 	if model:
@@ -181,7 +165,6 @@ func user_input_can_drop (at_position: Vector2, data: Variant):
 
 ## 将数据拖放到输入框后处理数据
 func user_input_drop_data(at_position: Vector2, data: Variant):
-	#print(data)
 	var info_list = reference_list.get_children().map(func(node): return node.info)
 	match data.type:
 		"files":
@@ -270,35 +253,14 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 				user_input.insert_text_at_caret(file.get_file() + " ")
 		"shader_list_element":
 			print("暂时不支持拖拽shader，请从文件系统中拖入。")
-			#var shader_editor =
 			pass
-
-#获取当前下拉框选择条目Agent、ASK#
-func get_input_mode() -> String:
-	#新重写，获取自定义控件文本#
-	return custom_dropdown.get_now_mode()
-
-	#return input_mode_select.get_item_text(input_mode_select.get_selected_id())
-
-#修改基础按钮字样Agent、ASK#
-func set_input_mode(name: String):
-	var id = -1
-	for i in input_mode_select.item_count:
-		if input_mode_select.get_item_text(i) == name:
-			id = input_mode_select.get_item_id(i)
-
-	input_mode_select.select(id)
-
-#控制禁用#
-func set_input_mode_disable(disabled: bool):
-	input_mode_select.disabled = disabled
 
 # 完全初始化输入框
 func init():
 	user_input.text = ""
 	usage_label.text = ""
 	clear_reference_list()
-	set_input_mode_disable(false)
+	#set_input_mode_disable(false)
 	switch_button_to("Send")
 	input_menu_list.hide()
 	role_button.disabled = false
@@ -336,7 +298,7 @@ func on_click_send_message():
 	role_button.disabled = true
 
 	switch_button_to("Stop")
-	set_input_mode_disable(true)
+	#set_input_mode_disable(true)
 	var info_list = reference_list.get_children().map(func(node): return node.info)
 	var info_list_string = JSON.stringify(info_list)
 	send_message.emit({

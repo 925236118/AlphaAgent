@@ -203,7 +203,7 @@ class ModelManager:
 		var deepseek_v3_2_model = ModelInfo.new()
 		deepseek_v3_2_model.name = "DeepSeek-V3.2"
 		deepseek_v3_2_model.model_name = "deepseek-ai/DeepSeek-V3.2"
-		deepseek_v3_2_model.supports_thinking = true
+		deepseek_v3_2_model.supports_thinking = false
 		deepseek_v3_2_model.supports_tools = true
 		deepseek_v3_2_model.max_tokens = 64 * 1024
 		deepseek_v3_2_model.active = false

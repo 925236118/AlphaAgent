@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=9 format=3 uid="uid://dwqhs78076qut"]
+[gd_resource type="Theme" load_steps=11 format=3 uid="uid://dwqhs78076qut"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wxfrk"]
 content_margin_left = 8.0
@@ -16,6 +16,17 @@ corner_radius_bottom_left = 4
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y7gfy"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_gxox1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gxox1"]
+bg_color = Color(0.0885599, 0.08855992, 0.08855986, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b2y4o"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 8
+border_width_top = 8
+border_width_right = 8
+border_width_bottom = 8
+border_color = Color(0.8, 0.8, 0.8, 0)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o5vi5"]
 content_margin_left = 8.0
@@ -58,6 +69,40 @@ GhostButton/styles/hover = SubResource("StyleBoxFlat_y7gfy")
 GhostButton/styles/hover_pressed = SubResource("StyleBoxFlat_y7gfy")
 GhostButton/styles/normal = SubResource("StyleBoxFlat_y7gfy")
 GhostButton/styles/pressed = SubResource("StyleBoxFlat_y7gfy")
+PopupMenu/colors/font_accelerator_color = Color(0, 0, 0, 1)
+PopupMenu/colors/font_color = Color(0.76862746, 0.76862746, 0.76862746, 1)
+PopupMenu/colors/font_disabled_color = Color(0, 0, 0, 1)
+PopupMenu/colors/font_hover_color = Color(0.76862746, 0.76862746, 0.76862746, 1)
+PopupMenu/colors/font_outline_color = Color(0, 0, 0, 1)
+PopupMenu/colors/font_separator_color = Color(0.76862746, 0.76862746, 0.76862746, 1)
+PopupMenu/colors/font_separator_outline_color = Color(0, 0, 0, 1)
+PopupMenu/constants/h_separation = 4
+PopupMenu/constants/icon_max_width = 16
+PopupMenu/constants/indent = 0
+PopupMenu/constants/item_end_padding = 8
+PopupMenu/constants/item_start_padding = 8
+PopupMenu/constants/outline_size = 0
+PopupMenu/constants/separator_outline_size = 0
+PopupMenu/constants/v_separation = 4
+PopupMenu/font_sizes/font_separator_size = 14
+PopupMenu/font_sizes/font_size = 14
+PopupMenu/fonts/font = null
+PopupMenu/fonts/font_separator = null
+PopupMenu/icons/checked = null
+PopupMenu/icons/checked_disabled = null
+PopupMenu/icons/radio_checked = null
+PopupMenu/icons/radio_checked_disabled = null
+PopupMenu/icons/radio_unchecked = null
+PopupMenu/icons/radio_unchecked_disabled = null
+PopupMenu/icons/submenu = null
+PopupMenu/icons/submenu_mirrored = null
+PopupMenu/icons/unchecked = null
+PopupMenu/icons/unchecked_disabled = null
+PopupMenu/styles/hover = SubResource("StyleBoxFlat_gxox1")
+PopupMenu/styles/labeled_separator_left = null
+PopupMenu/styles/labeled_separator_right = null
+PopupMenu/styles/panel = SubResource("StyleBoxFlat_b2y4o")
+PopupMenu/styles/separator = null
 PrimaryButton/base_type = &"Button"
 PrimaryButton/styles/disabled = SubResource("StyleBoxFlat_o5vi5")
 PrimaryButton/styles/focus = SubResource("StyleBoxEmpty_wxfrk")

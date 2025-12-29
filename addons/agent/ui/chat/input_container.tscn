@@ -159,6 +159,7 @@ theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBoxFlat_0yucd")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_model_button")
 flat = true
+fit_to_longest_item = false
 
 [node name="UseThinking" type="CheckButton" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
@@ -207,6 +208,7 @@ text = "发送"
 
 [node name="StopButton" type="Button" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4

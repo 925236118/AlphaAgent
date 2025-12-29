@@ -457,7 +457,7 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 		]
 		current_title_chat.post_message(title_messages)
 
-	current_history_item.mode = input_container.get_input_mode()
+	#current_history_item.mode = input_container.get_input_mode()
 	current_history_item.use_thinking = current_chat_stream.use_thinking
 	current_history_item.id = current_id
 	current_history_item.message = messages
@@ -470,7 +470,8 @@ func on_title_generate_finish(message: String, _think_msg: String):
 	current_title = message
 	#print("标题是 ", current_title)
 	first_chat = false
-	current_history_item.title = current_title
+	if current_history_item:
+		current_history_item.title = current_title
 	history_and_title.update_history(current_id, current_history_item)
 
 # 生成随机字符串函数
@@ -497,7 +498,7 @@ func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
 	current_title = history_item.title
 	current_time = history_item.time
 	messages = history_item.message
-	input_container.set_input_mode(history_item.mode)
+	#input_container.set_input_mode(history_item.mode)
 
 	var message_item = null
 	var last_message_item = null

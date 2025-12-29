@@ -94,12 +94,12 @@ theme_override_styles/separator = SubResource("StyleBoxLine_3clfn")
 [node name="SupportReasoner" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "支持工具"
+text = "支持思考"
 
 [node name="SupportTool" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "支持思考"
+text = "支持工具"
 
 [node name="IsActive" type="CheckButton" parent="HBoxContainer"]
 unique_name_in_owner = true

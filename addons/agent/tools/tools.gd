@@ -747,7 +747,7 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 				var path: String = json.path
 				var start: int = json.get("start", 0)
 				var end: int = json.get("end", -1)
-				
+
 				var file_string = FileAccess.get_file_as_string(path)
 				if file_string == "":
 					result = {
@@ -1096,7 +1096,7 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 				while not thread.is_started():
 					# 等待线程启动
 					await get_tree().process_frame
-				
+
 				while thread.is_alive():
 					# 等待线程结束
 					# print("thread alive")
@@ -1107,7 +1107,7 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 				# 清除数据，防止内存泄漏
 				thread = null
 				# print("command_result: ", command_result)
-				
+
 				result = command_result
 
 		#本工具目前具有较大不确定性，暂不提供调用

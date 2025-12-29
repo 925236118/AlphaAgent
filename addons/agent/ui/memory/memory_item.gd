@@ -19,7 +19,7 @@ func _ready() -> void:
 	remove_button.pressed.connect(func(): remove.emit())
 	edit_button.pressed.connect(on_edit)
 	finish_edit_button.pressed.connect(on_save)
-	
+
 func set_text(text):
 	label.text = text
 

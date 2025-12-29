@@ -41,7 +41,7 @@ func load_from_global():
 	var json = []
 	if memory_string != "":
 		json = JSON.parse_string(memory_string)
-	
+
 	await get_tree().physics_frame
 	AlphaAgentPlugin.global_memory = json as Array[String]
 
@@ -88,7 +88,7 @@ func on_save_global_memory(content, item: Control):
 	var index = item.get_index()
 	AlphaAgentPlugin.global_memory[index] = content
 	save_global_memory_file()
-	
+
 func on_save_project_memory(content, item: Control):
 	var index = item.get_index()
 	AlphaAgentPlugin.project_memory[index] = content

@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://bxe6hto0vk8fu"]
+[gd_scene load_steps=8 format=3 uid="uid://bxe6hto0vk8fu"]
 
 [ext_resource type="Script" uid="uid://dry1n6m67ku3q" path="res://addons/agent/ui/setting/setting.gd" id="1_c2l6f"]
 [ext_resource type="PackedScene" uid="uid://c2ei06dd8phsw" path="res://addons/agent/ui/setting/setting_item_bool.tscn" id="1_ca3bj"]
 [ext_resource type="PackedScene" uid="uid://jbwyo7x0ce47" path="res://addons/agent/ui/setting/setting_item_option.tscn" id="4_83qt4"]
+[ext_resource type="PackedScene" uid="uid://wicqyhlygh1v" path="res://addons/agent/ui/models/supplier_option_window.tscn" id="4_k4cyc"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_83qt4"]
 font_size = 20
@@ -89,8 +90,14 @@ label_settings = SubResource("LabelSettings_83qt4")
 [node name="ModelSetting" type="VBoxContainer" parent="SettingPanel/SettingItemsContainer"]
 layout_mode = 2
 
+[node name="SupplierOptionButton" type="Button" parent="SettingPanel/SettingItemsContainer/ModelSetting"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "供应商管理"
+
 [node name="SupplierList" type="VBoxContainer" parent="SettingPanel/SettingItemsContainer/ModelSetting"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 
 [node name="AddSupplierButton" type="Button" parent="SettingPanel/SettingItemsContainer/ModelSetting/SupplierList"]
@@ -121,5 +128,8 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_83qt4")
 text = "添加角色"
+
+[node name="SupplierOptionWindow" parent="." instance=ExtResource("4_k4cyc")]
+visible = false
 
 [editable path="SettingPanel/SettingItemsContainer/SendShotCut"]

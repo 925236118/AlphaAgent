@@ -439,7 +439,7 @@ func _on_user_input_gui_input(event: InputEvent) -> void:
 				return
 			elif send_shortcut == AlphaAgentPlugin.SendShotcut.Enter:
 				on_click_send_message()
-						
+
 			elif send_shortcut == AlphaAgentPlugin.SendShotcut.CtrlEnter:
 				user_input.insert_text_at_caret("\n")
 

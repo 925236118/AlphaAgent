@@ -1,5 +1,6 @@
-[gd_scene load_steps=14 format=3 uid="uid://cktcl3yjma34l"]
+[gd_scene load_steps=13 format=3 uid="uid://cktcl3yjma34l"]
 
+[ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_3c5pc"]
 [ext_resource type="Script" uid="uid://7x5ejtpqe0r4" path="res://addons/agent/ui/models/supplier_item.gd" id="1_cxw2j"]
 [ext_resource type="Texture2D" uid="uid://btnh1plrm3etf" path="res://addons/agent/icons/newicon/Icon_arrowdown.svg" id="1_vka0h"]
 [ext_resource type="Texture2D" uid="uid://yhceflqqddt3" path="res://addons/agent/icons/newicon/Icon_more.svg" id="2_vka0h"]
@@ -51,19 +52,6 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_omc8c"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vka0h"]
-content_margin_left = 8.0
-content_margin_top = 2.0
-content_margin_right = 8.0
-content_margin_bottom = 2.0
-bg_color = Color(0.14901961, 0.45882353, 0.8509804, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_d56vv"]
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cxw2j"]
 content_margin_left = 8.0
 content_margin_top = 2.0
@@ -81,21 +69,29 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [node name="SupplierItem" type="PanelContainer"]
-anchors_preset = 10
+custom_minimum_size = Vector2(0, 100)
+anchors_preset = 15
 anchor_right = 1.0
-offset_bottom = 115.0
+anchor_bottom = 1.0
 grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+theme = ExtResource("1_3c5pc")
 theme_override_styles/panel = SubResource("StyleBoxFlat_omc8c")
 script = ExtResource("1_cxw2j")
 
-[node name="SupplierShow" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SupplierShow" type="VBoxContainer" parent="VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="SupplierShow"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/SupplierShow"]
 layout_mode = 2
 
-[node name="ExpendModelButton" type="TextureButton" parent="SupplierShow/HBoxContainer"]
+[node name="ExpendModelButton" type="TextureButton" parent="VBoxContainer/SupplierShow/HBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
@@ -104,19 +100,20 @@ toggle_mode = true
 texture_normal = ExtResource("1_vka0h")
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="SupplierShow/HBoxContainer"]
+[node name="Label" type="Label" parent="VBoxContainer/SupplierShow/HBoxContainer"]
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_3c5pc")
 text = "供应商"
 
-[node name="SupplierTitle" type="Label" parent="SupplierShow/HBoxContainer"]
+[node name="SupplierTitle" type="Label" parent="VBoxContainer/SupplierShow/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "未命名供应商"
 
-[node name="MoreActionButton" type="MenuButton" parent="SupplierShow/HBoxContainer"]
+[node name="MoreActionButton" type="MenuButton" parent="VBoxContainer/SupplierShow/HBoxContainer"]
 unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 mouse_default_cursor_shape = 2
@@ -129,26 +126,36 @@ popup/item_1/text = "删除"
 popup/item_1/icon = ExtResource("4_cxw2j")
 popup/item_1/id = 1
 
-[node name="SettingModelList" type="VBoxContainer" parent="SupplierShow"]
+[node name="CheckModelButton" type="Button" parent="VBoxContainer/SupplierShow/HBoxContainer"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+text = "检测"
 
-[node name="SupplierEdit" type="VBoxContainer" parent="."]
+[node name="RemoveSupplierButton" type="Button" parent="VBoxContainer/SupplierShow/HBoxContainer"]
 unique_name_in_owner = true
-visible = false
+layout_mode = 2
+theme_type_variation = &"DangerButton"
+text = "删除"
+
+[node name="HSeparator2" type="HSeparator" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="SupplierEdit"]
+[node name="SupplierEdit" type="VBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 
-[node name="Label" type="Label" parent="SupplierEdit/HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/SupplierEdit"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/SupplierEdit/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "编辑供应商"
 
-[node name="EditModelButton" type="Button" parent="SupplierEdit/HBoxContainer"]
+[node name="EditModelButton" type="Button" parent="VBoxContainer/SupplierEdit/HBoxContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_d56vv")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_d56vv")
@@ -157,8 +164,9 @@ theme_override_styles/disabled = SubResource("StyleBoxFlat_d56vv")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_cxw2j")
 text = "编辑模型"
 
-[node name="CancelSaveButton" type="Button" parent="SupplierEdit/HBoxContainer"]
+[node name="CancelSaveButton" type="Button" parent="VBoxContainer/SupplierEdit/HBoxContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_d56vv")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_d56vv")
@@ -167,31 +175,27 @@ theme_override_styles/disabled = SubResource("StyleBoxFlat_d56vv")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_omc8c")
 text = "取消"
 
-[node name="SaveButton" type="Button" parent="SupplierEdit/HBoxContainer"]
+[node name="SaveButton" type="Button" parent="VBoxContainer/SupplierEdit/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_vka0h")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_vka0h")
-theme_override_styles/hover = SubResource("StyleBoxFlat_vka0h")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_vka0h")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_d56vv")
+theme_type_variation = &"PrimaryButton"
 text = "保存"
 
-[node name="Label4" type="Label" parent="SupplierEdit"]
+[node name="Label4" type="Label" parent="VBoxContainer/SupplierEdit"]
 layout_mode = 2
 text = "供应商名称"
 
-[node name="SupplierName" type="LineEdit" parent="SupplierEdit"]
+[node name="SupplierName" type="LineEdit" parent="VBoxContainer/SupplierEdit"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_cxw2j")
 placeholder_text = "请输入供应商名称"
 
-[node name="Label" type="Label" parent="SupplierEdit"]
+[node name="Label" type="Label" parent="VBoxContainer/SupplierEdit"]
 layout_mode = 2
 text = "选择API类型"
 
-[node name="SupplierAPIType" type="OptionButton" parent="SupplierEdit"]
+[node name="SupplierAPIType" type="OptionButton" parent="VBoxContainer/SupplierEdit"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_cxw2j")
@@ -204,22 +208,51 @@ popup/item_1/id = 1
 popup/item_2/text = "Ollama"
 popup/item_2/id = 2
 
-[node name="Label2" type="Label" parent="SupplierEdit"]
+[node name="Label2" type="Label" parent="VBoxContainer/SupplierEdit"]
 layout_mode = 2
 text = "API 基础 URL"
 
-[node name="SupplierBaseURL" type="LineEdit" parent="SupplierEdit"]
+[node name="SupplierBaseURL" type="LineEdit" parent="VBoxContainer/SupplierEdit"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_cxw2j")
 placeholder_text = "示列: https://api.openai.com/v1"
 
-[node name="Label3" type="Label" parent="SupplierEdit"]
+[node name="Label3" type="Label" parent="VBoxContainer/SupplierEdit"]
 layout_mode = 2
 text = "API Key"
 
-[node name="SupplierSecretKey" type="LineEdit" parent="SupplierEdit"]
+[node name="SupplierSecretKey" type="LineEdit" parent="VBoxContainer/SupplierEdit"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_cxw2j")
 placeholder_text = "请输入Key"
+emoji_menu_enabled = false
+virtual_keyboard_type = 6
+secret = true
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "模型列表"
+
+[node name="AddModelButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "添加模型"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SettingModelList" type="VBoxContainer" parent="VBoxContainer/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3

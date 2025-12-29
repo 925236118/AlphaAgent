@@ -4,13 +4,16 @@ extends PanelContainer
 
 @onready var supplier_show: VBoxContainer = %SupplierShow
 @onready var expend_model_button: TextureButton = %ExpendModelButton
-@onready var more_action_button: MenuButton = %MoreActionButton
+#@onready var more_action_button: MenuButton = %MoreActionButton
 @onready var setting_model_list: VBoxContainer = %SettingModelList
 @onready var supplier_edit: VBoxContainer = %SupplierEdit
-@onready var cancel_save_button: Button = %CancelSaveButton
+#@onready var cancel_save_button: Button = %CancelSaveButton
 @onready var save_button: Button = %SaveButton
 @onready var supplier_title: Label = %SupplierTitle
-@onready var edit_model_button: Button = %EditModelButton
+#@onready var edit_model_button: Button = %EditModelButton
+@onready var add_model_button: Button = %AddModelButton
+@onready var check_model_button: Button = %CheckModelButton
+@onready var remove_supplier_button: Button = %RemoveSupplierButton
 
 # 编辑相关
 @onready var supplier_name: LineEdit = %SupplierName
@@ -23,6 +26,9 @@ const SETTING_MODEL_ITEM = preload("uid://t8tpl55g2wg0")
 var model_manager_window: Window = null
 
 const MODEL_MANAGER = preload("uid://dr7g6mrkb8u3e")
+
+signal save
+signal remove
 
 const ProviderConfig = [
 	{
@@ -50,41 +56,45 @@ var editing: bool = false:
 		editing = val
 		if editing:
 			init_edit_fields()
-		supplier_show.visible = not editing
-		supplier_edit.visible = editing
+		#supplier_show.visible = not editing
+		#supplier_edit.visible = editing
 
 func _ready() -> void:
 	supplier_info = ModelConfig.SupplierInfo.new()
 	editing = false
 	expend_model_button.toggled.connect(on_toggle_expend_model_button)
-	more_action_button.get_popup().id_pressed.connect(on_click_more_button)
-	cancel_save_button.pressed.connect(on_click_cancel_save_button)
+	#more_action_button.get_popup().id_pressed.connect(on_click_more_button)
+	#cancel_save_button.pressed.connect(on_click_cancel_save_button)
 	save_button.pressed.connect(on_click_save_button)
-	edit_model_button.pressed.connect(on_click_edit_model_button)
+	#edit_model_button.pressed.connect(on_click_edit_model_button)
 	supplier_api_type.item_selected.connect(_on_provider_changed)
 	# setting_container.config_model.connect(_on_manage_models_pressed)
+	remove_supplier_button.pressed.connect(_on_remove_supplier)
+	add_model_button.pressed.connect(on_add_model_button_click)
 
 func on_toggle_expend_model_button(toggle_on: bool):
 	expend_model_button.flip_v = toggle_on
 	setting_model_list.visible = toggle_on
 
-func on_click_more_button(id: MoreActionType):
-	match id:
-		MoreActionType.Edit:
-			editing = true
-		MoreActionType.Remove:
-			if AlphaAgentPlugin.global_setting.model_manager.get_supplier_by_id(supplier_info.id) != null:
-				AlphaAgentPlugin.global_setting.model_manager.remove_supplier(supplier_info)
-			queue_free()
+#func on_click_more_button(id: MoreActionType):
+	#match id:
+		#MoreActionType.Edit:
+			#editing = true
+		#MoreActionType.Remove:
+			#if AlphaAgentPlugin.global_setting.model_manager.get_supplier_by_id(supplier_info.id) != null:
+				#AlphaAgentPlugin.global_setting.model_manager.remove_supplier(supplier_info)
+			#queue_free()
 
-func on_click_cancel_save_button():
-	editing = false
+#func on_click_cancel_save_button():
+	#pass
 
-	pass
+func _on_remove_supplier():
+	if AlphaAgentPlugin.global_setting.model_manager.get_supplier_by_id(supplier_info.id) != null:
+		AlphaAgentPlugin.global_setting.model_manager.remove_supplier(supplier_info)
+		remove.emit()
 
 func on_click_save_button():
 	refresh_setting_model_list()
-	editing = false
 	supplier_title.text = supplier_name.text
 	supplier_info.name = supplier_name.text
 	supplier_info.base_url = supplier_base_url.text
@@ -97,21 +107,33 @@ func on_click_save_button():
 		var singleton = AlphaAgentSingleton.get_instance()
 		singleton.models_changed.emit()
 
+		save.emit()
+
 func refresh_setting_model_list():
 	var model_count = setting_model_list.get_child_count()
 	if model_count > 0:
 		for i in range(model_count):
 			setting_model_list.get_child(model_count - 1 - i).queue_free()
-	
+
 	for model in supplier_info.models:
 		var new_model := SETTING_MODEL_ITEM.instantiate() as AgentSettingModelItem
 		setting_model_list.add_child(new_model)
 		new_model.set_setting_model_info(model)
+		new_model.edit.connect(handle_edit_model)
+		new_model.remove.connect(handle_remove_model.bind(new_model))
 
 func set_supplier_info(supplier: ModelConfig.SupplierInfo):
 	supplier_info = supplier
 	supplier_title.text = supplier_info.name
+
 	refresh_setting_model_list()
+	init_edit_fields()
+
+func handle_edit_model(model: ModelConfig.ModelInfo):
+	on_click_edit_model_button(model)
+
+func handle_remove_model(new_model: AgentSettingModelItem):
+	new_model.queue_free()
 
 func init_edit_fields():
 	if supplier_info == null:
@@ -128,19 +150,16 @@ func init_edit_fields():
 
 
 # 打开模型管理窗口
-func on_click_edit_model_button():
-	if model_manager_window and is_instance_valid(model_manager_window):
-		# 确保窗口可见并居中
-		model_manager_window.popup_centered(Vector2i(600, 500))
-		return
-
+func on_click_edit_model_button(model_info: ModelConfig.ModelInfo = null):
 	model_manager_window = MODEL_MANAGER.instantiate()
 	get_tree().root.add_child(model_manager_window)
 	model_manager_window.set_supplier_info(supplier_info)
+	model_manager_window.set_edit_model(model_info)
+
 	# 绑定信号，当修改模型后，触发全局模型变化信号
 	var singleton = AlphaAgentSingleton.get_instance()
 	model_manager_window.models_changed.connect(singleton.models_changed.emit)
-	
+	model_manager_window.create_model.connect(on_create_model)
 	model_manager_window.popup_centered(Vector2i(600, 500))
 	# 当窗口关闭时，销毁
 	model_manager_window.close_requested.connect(func():
@@ -172,3 +191,9 @@ func update_current_model():
 		expend_model_button.button_pressed = true
 	for model_item in setting_model_list.get_children():
 		model_item.update_current_model()
+
+func on_add_model_button_click():
+	on_click_edit_model_button()
+
+func on_create_model():
+	refresh_setting_model_list()

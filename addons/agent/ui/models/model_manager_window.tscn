@@ -1,18 +1,33 @@
-[gd_scene load_steps=3 format=3 uid="uid://dr7g6mrkb8u3e"]
+[gd_scene load_steps=5 format=3 uid="uid://dr7g6mrkb8u3e"]
 
+[ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_a1aws"]
 [ext_resource type="Script" uid="uid://cw7dsan8l0cfv" path="res://addons/agent/ui/models/model_manager_window.gd" id="1_ww8v3"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_overlay"]
 bg_color = Color(0, 0, 0, 0.7)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_35oay"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.92156863, 0.4392157, 0.27058825, 1)
+border_width_top = 3
+border_width_bottom = 3
+border_color = Color(0.8, 0.8, 0.8, 0)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="ModelManagerWindow" type="Window"]
 oversampling_override = 1.0
 title = "管理模型"
 initial_position = 2
 size = Vector2i(600, 500)
+theme = ExtResource("1_a1aws")
 script = ExtResource("1_ww8v3")
 
 [node name="MainContainer" type="MarginContainer" parent="."]
+visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -54,7 +69,6 @@ size_flags_horizontal = 3
 
 [node name="EditPanel" type="Panel" parent="."]
 unique_name_in_owner = true
-visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -148,12 +162,27 @@ layout_mode = 2
 layout_mode = 2
 alignment = 2
 
+[node name="HBoxContainer" type="HBoxContainer" parent="EditPanel/MarginContainer/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RemoveButton" type="Button" parent="EditPanel/MarginContainer/VBoxContainer/ButtonContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_35oay")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_35oay")
+theme_override_styles/hover = SubResource("StyleBoxFlat_35oay")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_35oay")
+text = "删除模型"
+
 [node name="CancelButton" type="Button" parent="EditPanel/MarginContainer/VBoxContainer/ButtonContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_type_variation = &"SecondaryButton"
 text = "取消"
 
 [node name="SaveButton" type="Button" parent="EditPanel/MarginContainer/VBoxContainer/ButtonContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_type_variation = &"PrimaryButton"
 text = "保存"

@@ -1,5 +1,6 @@
-[gd_scene load_steps=23 format=3 uid="uid://dqkrjn0mak6lh"]
+[gd_scene load_steps=20 format=3 uid="uid://dqkrjn0mak6lh"]
 
+[ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_k8r8m"]
 [ext_resource type="Script" uid="uid://c0gayflg4ovas" path="res://addons/agent/ui/chat/input_container.gd" id="1_xi1dg"]
 [ext_resource type="PackedScene" uid="uid://cr0rgr6uojjsh" path="res://addons/agent/ui/customdropdown/custom_dropdown.tscn" id="2_c3kby"]
 
@@ -7,20 +8,6 @@
 bg_color = Color(0.04303915, 0.043039158, 0.043039113, 0.38039216)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1ot7o"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gy7k7"]
-content_margin_left = 8.0
-content_margin_right = 8.0
-bg_color = Color(0.14901961, 0.45882353, 0.8509804, 1)
-border_width_top = 3
-border_width_bottom = 3
-border_color = Color(0.8, 0.8, 0.8, 0)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_c3kby"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5v6i3"]
 
@@ -57,12 +44,6 @@ content_margin_bottom = 6.0
 [sub_resource type="LabelSettings" id="LabelSettings_gy7k7"]
 font_color = Color(0.46666667, 0.46666667, 0.46666667, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_coixe"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_c8smv"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5t7oo"]
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k8r8m"]
 content_margin_left = 10.0
 content_margin_right = 10.0
@@ -87,12 +68,15 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5t7oo"]
+
 [node name="InputContainer" type="MarginContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_k8r8m")
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
@@ -131,11 +115,7 @@ layout_mode = 2
 tooltip_text = "目前没有任何已经启用的模型，
 需要在设置中配置后才能使用"
 mouse_default_cursor_shape = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_gy7k7")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_gy7k7")
-theme_override_styles/hover = SubResource("StyleBoxFlat_gy7k7")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_gy7k7")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_c3kby")
+theme_type_variation = &"PrimaryButton"
 text = "配置模型"
 
 [node name="InputBox" type="VBoxContainer" parent="VBoxContainer"]
@@ -237,10 +217,9 @@ size_flags_horizontal = 8
 size_flags_vertical = 4
 tooltip_text = "清空输入内容"
 mouse_default_cursor_shape = 2
+theme_type_variation = &"FlatButton"
 theme_override_colors/font_color = Color(0.46666667, 0.46666667, 0.46666667, 1)
 theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_coixe")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_c8smv")
 text = "清空"
 flat = true
 
@@ -251,10 +230,8 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 tooltip_text = "发送"
 mouse_default_cursor_shape = 2
+theme_type_variation = &"PrimaryButton"
 theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_gy7k7")
-theme_override_styles/hover = SubResource("StyleBoxFlat_gy7k7")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_5t7oo")
 text = "发送"
 
 [node name="StopButton" type="Button" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]

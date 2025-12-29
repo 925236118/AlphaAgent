@@ -10,6 +10,8 @@ extends ScrollContainer
 @onready var supplier_list: VBoxContainer = %SupplierList
 @onready var role_list: VBoxContainer = %RoleList
 @onready var add_role_button: Button = %AddRoleButton
+@onready var supplier_option_button: Button = %SupplierOptionButton
+@onready var supplier_option_window: Window = $SupplierOptionWindow
 
 const SUPPLIER_ITEM = preload("uid://cktcl3yjma34l")
 const SETTING_ROLE_ITEM = preload("uid://dwlfm5aqjw7f4")
@@ -25,15 +27,18 @@ const EDIT_ROLE_WINDOW = preload("uid://cx0yeuxsc2kui")
 
 signal config_model
 var suppliers: Array[AgentSupplierItem] = []
+
 func _ready() -> void:
 	AlphaAgentPlugin.global_setting.load_global_setting()
 	init_item_values()
+	supplier_option_button.pressed.connect(show_supplier_option_window)
 	init_signals()
 	add_supplier_button.pressed.connect(on_click_add_supplier_button)
 	init_models_supplier()
 	init_roles()
 	visibility_changed.connect(_on_show_setting)
 	add_role_button.pressed.connect(on_click_add_role_button)
+	supplier_option_window.close_requested.connect(supplier_option_window.hide)
 
 func init_item_values():
 	for setting_item in setting_item_nodes:
@@ -54,16 +59,13 @@ func on_click_add_supplier_button():
 	supplier_list.add_child(new_supplier)
 	new_supplier.editing = true
 
-func init_models_supplier():
-	var model_manager = AlphaAgentPlugin.global_setting.model_manager
-	if model_manager == null:
-		return
+func show_supplier_option_window():
+	supplier_option_window.popup_centered()
+	pass
 
-	for supplier in model_manager.suppliers:
-		var new_supplier := SUPPLIER_ITEM.instantiate() as AgentSupplierItem
-		supplier_list.add_child(new_supplier)
-		new_supplier.set_supplier_info(supplier)
-		suppliers.append(new_supplier)
+func init_models_supplier():
+	supplier_option_window.init_models_supplier()
+	pass
 
 func _on_show_setting():
 	if visible:
@@ -77,7 +79,8 @@ func init_roles():
 		return
 
 	for role in role_list.get_children():
-		role.queue_free()
+		if role is AgentSettingRoleItem:
+			role.queue_free()
 
 	for role in role_manager.roles:
 		var new_role := SETTING_ROLE_ITEM.instantiate() as AgentSettingRoleItem

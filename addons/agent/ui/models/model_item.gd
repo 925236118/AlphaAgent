@@ -21,15 +21,15 @@ func _ready() -> void:
 func set_model_info(model: ModelConfig.ModelInfo, is_current: bool = false):
 	model_id = model.id
 	model_name_label.text = model.name
-	
+
 	var info_parts = []
 	info_parts.append(model.model_name)
-	
+
 	if model.supports_thinking:
 		info_parts.append("Reasoning")
 	if model.supports_tools:
 		info_parts.append("Tools")
-	
+
 	model_info_label.text = " | ".join(info_parts)
-	
+
 	current_indicator.visible = is_current

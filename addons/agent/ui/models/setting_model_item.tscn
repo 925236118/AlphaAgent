@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://t8tpl55g2wg0"]
+[gd_scene load_steps=11 format=3 uid="uid://t8tpl55g2wg0"]
 
 [ext_resource type="Script" uid="uid://vgb4qn2q0f7c" path="res://addons/agent/ui/models/setting_model_item.gd" id="1_cxaef"]
 [ext_resource type="Texture2D" uid="uid://c7k1lmqcefawo" path="res://addons/agent/icons/newicon/Icon_done.svg" id="1_ub8p6"]
+[ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_v6vjr"]
 [ext_resource type="Texture2D" uid="uid://b7gbtprb74gr4" path="res://addons/agent/icons/newicon/Icon_switch_on.svg" id="2_3clfn"]
 [ext_resource type="Texture2D" uid="uid://c4c6o1lp046gh" path="res://addons/agent/icons/newicon/Icon_switch_off.svg" id="3_cxaef"]
 
@@ -27,11 +28,25 @@ vertical = true
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3clfn"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cxaef"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.14901961, 0.45882353, 0.8509804, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_v6vjr"]
+
 [node name="SettingModelItem" type="PanelContainer"]
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 72.0
 grow_horizontal = 2
+theme = ExtResource("1_v6vjr")
 script = ExtResource("1_cxaef")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
@@ -93,3 +108,22 @@ mouse_default_cursor_shape = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_3clfn")
 theme_override_icons/checked = ExtResource("2_3clfn")
 theme_override_icons/unchecked = ExtResource("3_cxaef")
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="EditButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_cxaef")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_cxaef")
+theme_override_styles/hover = SubResource("StyleBoxFlat_cxaef")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_cxaef")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_v6vjr")
+text = "编辑"
+
+[node name="RemoveButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DangerButton"
+text = "删除"

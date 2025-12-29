@@ -15,7 +15,7 @@ func _disable_plugin() -> void:
 func _enter_tree() -> void:
 	var main_panel = MAIN_PANEL.instantiate()
 	add_control_to_dock(EditorPlugin.DOCK_SLOT_RIGHT_UL, main_panel)
-	
+
 	# 初始化单例并设置 main_panel
 	var singleton = AlphaAgentSingleton.get_instance()
 	singleton.set_main_panel(main_panel)
@@ -24,11 +24,11 @@ func _enter_tree() -> void:
 func _exit_tree() -> void:
 	var singleton = AlphaAgentSingleton.get_instance()
 	var main_panel = singleton.main_panel
-	
+
 	if main_panel != null:
 		remove_control_from_docks(main_panel)
 		main_panel.queue_free()
-	
+
 	# 清理单例引用
 	singleton.set_main_panel(null)
 	singleton.set_editor_plugin(null)

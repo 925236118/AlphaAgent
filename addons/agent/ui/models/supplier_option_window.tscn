@@ -1,0 +1,65 @@
+[gd_scene load_steps=4 format=3 uid="uid://wicqyhlygh1v"]
+
+[ext_resource type="PackedScene" uid="uid://cktcl3yjma34l" path="res://addons/agent/ui/models/supplier_item.tscn" id="1_p0unf"]
+[ext_resource type="Script" uid="uid://cvhb0yj0f87p3" path="res://addons/agent/ui/models/supplier_option_window.gd" id="1_rk2ti"]
+[ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_uuvr2"]
+
+[node name="SupplierOptionWindow" type="Window"]
+oversampling_override = 1.0
+title = "供应商配置"
+position = Vector2i(0, 24)
+size = Vector2i(800, 800)
+theme = ExtResource("1_uuvr2")
+script = ExtResource("1_rk2ti")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="HSplitContainer" type="HSplitContainer" parent="MarginContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="SupplierList" type="VBoxContainer" parent="MarginContainer/PanelContainer/HSplitContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/PanelContainer/HSplitContainer/SupplierList"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SupplierButtonList" type="VBoxContainer" parent="MarginContainer/PanelContainer/HSplitContainer/SupplierList/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/PanelContainer/HSplitContainer/SupplierList"]
+layout_mode = 2
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/PanelContainer/HSplitContainer/SupplierList"]
+layout_mode = 2
+
+[node name="AddNewSupplierButton" type="Button" parent="MarginContainer/PanelContainer/HSplitContainer/SupplierList/VBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "新增供应商"
+
+[node name="ResetSupplierButton" type="Button" parent="MarginContainer/PanelContainer/HSplitContainer/SupplierList/VBoxContainer2"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"DangerButton"
+text = "重置"
+
+[node name="SupplierItem" parent="MarginContainer/PanelContainer/HSplitContainer" instance=ExtResource("1_p0unf")]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(10, 100)
+layout_mode = 2

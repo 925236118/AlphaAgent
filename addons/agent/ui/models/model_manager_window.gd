@@ -15,58 +15,65 @@ signal models_changed
 @onready var tool_check_box: CheckBox = %ToolCheckBox
 @onready var save_button: Button = %SaveButton
 @onready var cancel_button: Button = %CancelButton
+@onready var remove_button: Button = %RemoveButton
 
 var model_manager: ModelConfig.ModelManager = null
 var editing_model_id: String = ""
 var supplier_info: ModelConfig.SupplierInfo = null
+var model_info: ModelConfig.ModelInfo = null
+
+signal create_model
 
 const MODEL_ITEM = preload("res://addons/agent/ui/models/model_item.tscn")
 
 func _ready() -> void:
 	model_manager = AlphaAgentPlugin.global_setting.model_manager
-	add_model_button.pressed.connect(_on_add_model_pressed)
+	#add_model_button.pressed.connect(_on_add_model_pressed)
 	save_button.pressed.connect(_on_save_pressed)
 	cancel_button.pressed.connect(_on_cancel_pressed)
-	edit_panel.hide()
-	
+	#remove_button.pressed.connect(_on_delete_model)
+	#edit_panel.hide()
 
-func _refresh_model_list():
-	# 清空列表
-	for child in model_list.get_children():
-		child.queue_free()
-	
-	if supplier_info == null:
-		return
-	
-	# 添加所有模型
-	for model in supplier_info.models:
-		var item = MODEL_ITEM.instantiate()
-		model_list.add_child(item)
-		var is_current = supplier_info.id == model_manager.current_supplier_id and \
-			model.id == model_manager.current_model_id
-		item.set_model_info(model, is_current)
-		item.edit_requested.connect(_on_edit_model.bind(model.id))
-		item.delete_requested.connect(_on_delete_model.bind(supplier_info.id, model.id))
 
-func _on_add_model_pressed():
-	editing_model_id = ""
-	_show_edit_panel()
-	_clear_edit_fields()
+#func _refresh_model_list():
+	## 清空列表
+	#for child in model_list.get_children():
+		#child.queue_free()
+#
+	#if supplier_info == null:
+		#return
+#
+	## 添加所有模型
+	#for model in supplier_info.models:
+		#var item = MODEL_ITEM.instantiate()
+		#model_list.add_child(item)
+		#var is_current = supplier_info.id == model_manager.current_supplier_id and \
+			#model.id == model_manager.current_model_id
+		#item.set_model_info(model, is_current)
+		#item.edit_requested.connect(_on_edit_model.bind(model.id))
+		#item.delete_requested.connect(_on_delete_model.bind(supplier_info.id, model.id))
 
-func _on_edit_model(model_id: String):
-	editing_model_id = model_id
-	var model = model_manager.get_model_by_id(model_id)
-	if model:
-		_show_edit_panel(model)
+#func _on_add_model_pressed():
+	#editing_model_id = ""
+	#_show_edit_panel()
+	#_clear_edit_fields()
 
-func _on_delete_model(supplier_id: String, model_id: String):
-	model_manager.remove_model(supplier_id, model_id)
-	_refresh_model_list()
-	models_changed.emit()
+#func _on_edit_model(model_id: String):
+	#editing_model_id = model_id
+	#var model = model_manager.get_model_by_id(model_id)
+	#if model:
+		#_show_edit_panel(model)
+
+#func _on_delete_model():
+	#var supplier_id = supplier_info.id
+	#var model_id = model_info.id
+	#model_manager.remove_model(supplier_id, model_id)
+	##_refresh_model_list()
+	#models_changed.emit()
 
 func _show_edit_panel(model: ModelConfig.ModelInfo = null):
 	edit_panel.show()
-	
+
 	if model:
 		var supplier = model_manager.get_supplier_by_id(model.supplier_id)
 		model_name_edit.text = model.name
@@ -104,23 +111,24 @@ func _clear_edit_fields():
 
 
 func _on_save_pressed():
-	var model_info = ModelConfig.ModelInfo.new()
-	model_info.name = model_name_edit.text
-	model_info.model_name = model_id_edit.text
-	model_info.max_tokens = int(max_tokens_edit.value)
-	model_info.supplier_id = supplier_info.id
+	var temp_model_info = ModelConfig.ModelInfo.new()
+	temp_model_info.name = model_name_edit.text
+	temp_model_info.model_name = model_id_edit.text
+	temp_model_info.max_tokens = int(max_tokens_edit.value)
+	temp_model_info.supplier_id = supplier_info.id
 	# 从复选框读取是否支持 thinking
-	model_info.supports_thinking = thinking_checkbox.button_pressed
-	model_info.supports_tools = tool_check_box.button_pressed
-	
+	temp_model_info.supports_thinking = thinking_checkbox.button_pressed
+	temp_model_info.supports_tools = tool_check_box.button_pressed
+
 	if editing_model_id == "":
 		# 添加新模型
-		model_manager.add_model(supplier_info.id, model_info)
+		model_manager.add_model(supplier_info.id, temp_model_info)
+		create_model.emit()
 	else:
 		# 更新现有模型
-		model_manager.update_model(supplier_info.id, editing_model_id, model_info)
-	
-	_refresh_model_list()
+		model_manager.update_model(supplier_info.id, editing_model_id, temp_model_info)
+
+	#_refresh_model_list()
 	models_changed.emit()
 	_hide_edit_panel()
 
@@ -128,9 +136,16 @@ func _on_cancel_pressed():
 	_hide_edit_panel()
 
 func _hide_edit_panel():
-	edit_panel.hide()
-	editing_model_id = ""
+	#edit_panel.hide()
+	#editing_model_id = ""
+	queue_free()
 
 func set_supplier_info(supplier: ModelConfig.SupplierInfo):
 	supplier_info = supplier
-	_refresh_model_list()
+	#_refresh_model_list()
+
+func set_edit_model(model: ModelConfig.ModelInfo = null):
+	model_info = model
+	editing_model_id = model_info.id if model_info else ''
+	if model_info:
+		_show_edit_panel(model)

@@ -73,7 +73,7 @@ class RoleInfo:
 	var name: String = ""
 	var prompt: String = ""
 	var tools: Array = []
-	
+
 	func _init(p_name: String = "", p_prompt: String = "", p_tools: Array = []):
 		id = _generate_id()
 		name = p_name
@@ -126,23 +126,23 @@ class RoleManager:
 			return
 		current_role_id = json.get("current_role_id", "")
 		roles = json.get("roles", []).map(func(r: Dictionary): return RoleInfo.from_dict(r))
-	
+
 	func add_default_roles():
 		# 使用单例，等待 main_panel 初始化
 		var singleton = AlphaAgentSingleton.get_instance()
-		
+
 		# 等待 main_panel 初始化（在 _enter_tree 中创建）
 		var max_wait_time = 10.0
 		var elapsed_time = 0.0
 		var start_time = Time.get_ticks_msec()
-		
+
 		while singleton.main_panel == null:
 			await AlphaAgentPlugin.wait_for_scene_tree_frame()
 			elapsed_time = (Time.get_ticks_msec() - start_time) / 1000.0
 			if elapsed_time >= max_wait_time:
 				push_error("等待 main_panel 初始化超时")
 				return
-		
+
 		# 等待一帧，确保工具列表已加载
 		await AlphaAgentPlugin.wait_for_scene_tree_frame()
 
@@ -175,7 +175,7 @@ class RoleManager:
 		current_role_id = default_role.id
 
 		save_datas()
-		
+
 
 	func save_datas():
 		var data = {
@@ -202,7 +202,7 @@ class RoleManager:
 	func add_role(role: RoleInfo):
 		roles.append(role)
 		save_datas()
-		
+
 	func remove_role(role: RoleInfo):
 		roles.remove_at(roles.find(role))
 		save_datas()

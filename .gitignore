@@ -3,6 +3,3 @@
 /android/
 .trae/rules
 .vscode/
-
-# Alpha Agent Plugin
-.alpha/

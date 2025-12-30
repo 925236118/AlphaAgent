@@ -8,7 +8,7 @@ extends PanelContainer
 @onready var history_expand_button: Button = %HistoryExpandButton
 
 
-@onready var project_alpha_dir = AlphaAgentPlugin.project_alpha_dir
+@onready var project_alpha_dir = OS.get_user_data_dir() + "/.alpha/"
 @onready var history_file_path = project_alpha_dir + "history.json"
 
 @onready var today_history_container: VBoxContainer = %TodayHistoryContainer

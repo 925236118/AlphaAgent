@@ -162,11 +162,13 @@ unique_name_in_owner = true
 layout_mode = 2
 
 [node name="ToolLabal" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
+visible = false
 layout_mode = 2
 text = "支持工具调用："
 
 [node name="ToolCheckBox" type="CheckBox" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 
 [node name="HSeparator2" type="HSeparator" parent="EditPanel/MarginContainer/VBoxContainer"]

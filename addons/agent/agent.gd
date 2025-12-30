@@ -40,10 +40,10 @@ enum SendShotcut {
 }
 
 class GlobalSetting:
-	var setting_dir = OS.get_user_data_dir() + "/.alpha/"
-	var setting_file: String = setting_dir + "setting.json"
-	var models_file: String = setting_dir + "models.json"
-	var roles_file: String = setting_dir + "roles.json"
+	var setting_dir = ""
+	var setting_file: String = ""
+	var models_file: String = ""
+	var roles_file: String = ""
 
 	var auto_clear: bool = false
 	var auto_expand_think: bool = false
@@ -51,6 +51,16 @@ class GlobalSetting:
 	var send_shortcut: SendShotcut = SendShotcut.None
 	var model_manager: ModelConfig.ModelManager = null
 	var role_manager: AgentRoleConfig.RoleManager = null
+
+	func _init() -> void:
+		if Engine.is_editor_hint():
+			setting_dir = EditorInterface.get_editor_paths().get_config_dir() + "/.alpha/"
+		else:
+			setting_dir = OS.get_config_dir() + ("/godot/.alpha/" if OS.get_name() == "Linux" else "/Godot/.alpha/")
+		setting_file = setting_dir + "setting.json"
+		models_file = setting_dir + "models.json"
+		roles_file = setting_dir + "roles.json"
+
 
 	func load_global_setting():
 

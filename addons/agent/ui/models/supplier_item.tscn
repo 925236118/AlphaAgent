@@ -91,14 +91,16 @@ layout_mode = 2
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/SupplierShow"]
 layout_mode = 2
 
-[node name="ExpendModelButton" type="TextureButton" parent="VBoxContainer/SupplierShow/HBoxContainer"]
+[node name="ExpendSupplierButton" type="TextureButton" parent="VBoxContainer/SupplierShow/HBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 mouse_default_cursor_shape = 2
 toggle_mode = true
+button_pressed = true
 texture_normal = ExtResource("1_vka0h")
 stretch_mode = 5
+flip_v = true
 
 [node name="Label" type="Label" parent="VBoxContainer/SupplierShow/HBoxContainer"]
 layout_mode = 2
@@ -241,6 +243,17 @@ layout_mode = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
+
+[node name="ExpendModelButton" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+toggle_mode = true
+button_pressed = true
+texture_normal = ExtResource("1_vka0h")
+stretch_mode = 5
+flip_v = true
 
 [node name="Label" type="Label" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2

@@ -3,6 +3,7 @@ class_name AgentSupplierItem
 extends PanelContainer
 
 @onready var supplier_show: VBoxContainer = %SupplierShow
+@onready var expend_supplier_button: TextureButton = %ExpendSupplierButton
 @onready var expend_model_button: TextureButton = %ExpendModelButton
 #@onready var more_action_button: MenuButton = %MoreActionButton
 @onready var setting_model_list: VBoxContainer = %SettingModelList
@@ -51,17 +52,10 @@ enum MoreActionType {
 }
 var supplier_info: ModelConfig.SupplierInfo = null
 
-var editing: bool = false:
-	set(val):
-		editing = val
-		if editing:
-			init_edit_fields()
-		#supplier_show.visible = not editing
-		#supplier_edit.visible = editing
 
 func _ready() -> void:
 	supplier_info = ModelConfig.SupplierInfo.new()
-	editing = false
+	expend_supplier_button.toggled.connect(on_toggle_expend_supplier_button)
 	expend_model_button.toggled.connect(on_toggle_expend_model_button)
 	#more_action_button.get_popup().id_pressed.connect(on_click_more_button)
 	#cancel_save_button.pressed.connect(on_click_cancel_save_button)
@@ -72,21 +66,14 @@ func _ready() -> void:
 	remove_supplier_button.pressed.connect(_on_remove_supplier)
 	add_model_button.pressed.connect(on_add_model_button_click)
 
+func on_toggle_expend_supplier_button(toggle_on: bool):
+	expend_supplier_button.flip_v = toggle_on
+	supplier_edit.visible = toggle_on
+
 func on_toggle_expend_model_button(toggle_on: bool):
 	expend_model_button.flip_v = toggle_on
 	setting_model_list.visible = toggle_on
 
-#func on_click_more_button(id: MoreActionType):
-	#match id:
-		#MoreActionType.Edit:
-			#editing = true
-		#MoreActionType.Remove:
-			#if AlphaAgentPlugin.global_setting.model_manager.get_supplier_by_id(supplier_info.id) != null:
-				#AlphaAgentPlugin.global_setting.model_manager.remove_supplier(supplier_info)
-			#queue_free()
-
-#func on_click_cancel_save_button():
-	#pass
 
 func _on_remove_supplier():
 	if AlphaAgentPlugin.global_setting.model_manager.get_supplier_by_id(supplier_info.id) != null:
@@ -167,9 +154,7 @@ func on_click_edit_model_button(model_info: ModelConfig.ModelInfo = null):
 	)
 
 func _on_provider_changed(index: int):
-	# 只在添加新模型时更新 API Base（编辑时不改变）
-	if editing:
-		_update_default_api_base(index)
+	_update_default_api_base(index)
 
 func _update_default_api_base(provider_index: int):
 	match provider_index:

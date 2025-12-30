@@ -2,7 +2,7 @@
 
 [ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_k8r8m"]
 [ext_resource type="Script" uid="uid://c0gayflg4ovas" path="res://addons/agent/ui/chat/input_container.gd" id="1_xi1dg"]
-[ext_resource type="PackedScene" uid="uid://cr0rgr6uojjsh" path="res://addons/agent/ui/customdropdown/custom_dropdown.tscn" id="2_c3kby"]
+[ext_resource type="PackedScene" uid="uid://cr0rgr6uojjsh" path="res://addons/agent/ui/customdropdown/old/custom_dropdown.tscn" id="2_c3kby"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xi1dg"]
 bg_color = Color(0.04303915, 0.043039158, 0.043039113, 0.38039216)

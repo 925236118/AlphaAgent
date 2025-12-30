@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dhlq8bnacbgqt"]
 
-[ext_resource type="PackedScene" uid="uid://cr0rgr6uojjsh" path="res://addons/agent/ui/customdropdown/custom_dropdown.tscn" id="1_hwvuq"]
+[ext_resource type="PackedScene" uid="uid://cr0rgr6uojjsh" path="res://addons/agent/ui/customdropdown/old/custom_dropdown.tscn" id="1_hwvuq"]
 
 [node name="testbutton" type="Node2D"]
 

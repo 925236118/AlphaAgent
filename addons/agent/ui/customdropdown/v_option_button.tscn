@@ -1,0 +1,35 @@
+[gd_scene load_steps=4 format=3 uid="uid://bdx82groqnb4y"]
+
+[ext_resource type="Script" uid="uid://cbeo2gjvvvx0o" path="res://control.gd" id="1_in7xj"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_in7xj"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ajb2l"]
+
+[node name="VOptionButton" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_in7xj")
+text = "hello"
+
+[node name="PopupPanel" type="PopupPanel" parent="."]
+oversampling_override = 1.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_in7xj")
+
+[node name="MenuButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -34.0
+offset_top = -15.5
+offset_right = 34.0
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_ajb2l")
+text = "hello"
+flat = true

@@ -9,7 +9,7 @@ class SupplierInfo:
 	var name: String = ""
 	var base_url: String = ""
 	var api_key: String = ""
-	var provider: String = "deepseek"  # 提供商类型: openai, deepseek, ollama
+	var provider: String = "openai"  # 提供商类型: openai, deepseek, ollama
 	var models: Array = []
 
 	func _init(s_id: String = "", s_name: String = "", s_api_base: String = "",
@@ -219,6 +219,22 @@ class ModelManager:
 		qwen_next_80b_a3b_thinking.active = false
 		qwen_next_80b_a3b_thinking.supplier_id = siliconflow_supplier.id
 		siliconflow_supplier.models.append(qwen_next_80b_a3b_thinking)
+
+		# 添加默认OpenAI供应商
+		var openai_supplier = SupplierInfo.new()
+		openai_supplier.name = "OPEN AI"
+		openai_supplier.base_url = "https://api.openai.com"
+		openai_supplier.api_key = ""
+		openai_supplier.provider = "openai"
+		suppliers.append(openai_supplier)
+
+		# 添加默认硅基流动供应商
+		var ollama_supplier = SupplierInfo.new()
+		ollama_supplier.name = "Ollama"
+		ollama_supplier.base_url = "http://localhost:11434"
+		ollama_supplier.api_key = ""
+		ollama_supplier.provider = "ollama"
+		suppliers.append(ollama_supplier)
 
 		save_datas()
 

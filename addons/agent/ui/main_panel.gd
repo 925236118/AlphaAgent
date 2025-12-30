@@ -201,7 +201,7 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 func send_messages():
 	var use_thinking = input_container.get_use_thinking()
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
-	
+
 	# 使用模型配置的max_tokens 和 thinking
 	if model_manager:
 		var supplier = model_manager.get_current_supplier()
@@ -227,11 +227,11 @@ func send_messages():
 		current_title_chat.api_base = supplier.base_url
 		current_title_chat.model_name = model.model_name
 		current_title_chat.max_tokens = model.max_tokens
-		
+
 	else:
 		printerr("无法获取model_manager，请检查")
 		return
-	
+
 	# 绑定模型事件
 	current_chat_stream.think.connect(on_agent_think)
 	current_chat_stream.message.connect(on_agent_message)
@@ -369,7 +369,7 @@ func clear():
 	var message_count = message_list.get_child_count()
 	for i in message_count:
 		message_list.get_child(message_count - i - 1).queue_free()
-	
+
 	if current_chat_stream:
 		current_chat_stream.queue_free()
 	if current_title_chat:

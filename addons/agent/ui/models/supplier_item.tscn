@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://cktcl3yjma34l"]
+[gd_scene load_steps=14 format=3 uid="uid://cktcl3yjma34l"]
 
 [ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_3c5pc"]
 [ext_resource type="Script" uid="uid://7x5ejtpqe0r4" path="res://addons/agent/ui/models/supplier_item.gd" id="1_cxw2j"]
@@ -68,6 +68,8 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3c5pc"]
+
 [node name="SupplierItem" type="PanelContainer"]
 custom_minimum_size = Vector2(0, 100)
 anchors_preset = 15
@@ -93,6 +95,7 @@ layout_mode = 2
 
 [node name="ExpendSupplierButton" type="TextureButton" parent="VBoxContainer/SupplierShow/HBoxContainer"]
 unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 mouse_default_cursor_shape = 2
@@ -215,6 +218,20 @@ popup/item_1/id = 1
 popup/item_2/text = "Ollama"
 popup/item_2/id = 2
 
+[node name="SupplierAPITypeTips" type="RichTextLabel" parent="VBoxContainer/SupplierEdit"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/default_color = Color(0.63106036, 0.64326394, 0.6615606, 1)
+theme_override_font_sizes/normal_font_size = 12
+theme_override_font_sizes/bold_font_size = 12
+theme_override_styles/normal = SubResource("StyleBoxEmpty_3c5pc")
+bbcode_enabled = true
+text = "[b]说明[/b]：
+open ai类型表示按照open ai公司开发的标准。适用于目前市面上的大部分模型。
+[b]可使用的平台[/b]：DeepSeek、MoonShot、硅基流动等。
+[b]不可以使用的[/b]：Claude AI、Gemini、以及由于GPT4.0以后的版本都重构了结构，所以不支持新版本的GPT。"
+fit_content = true
+
 [node name="Label2" type="Label" parent="VBoxContainer/SupplierEdit"]
 layout_mode = 2
 text = "API 基础 URL"
@@ -223,7 +240,7 @@ text = "API 基础 URL"
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_cxw2j")
-placeholder_text = "示列: https://api.openai.com/v1"
+placeholder_text = "示列: https://api.openai.com"
 
 [node name="Label3" type="Label" parent="VBoxContainer/SupplierEdit"]
 layout_mode = 2
@@ -275,3 +292,6 @@ size_flags_vertical = 3
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="CheckSupplierRequest" type="HTTPRequest" parent="."]
+use_threads = true

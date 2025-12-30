@@ -29,6 +29,7 @@ func init_models_supplier():
 		var button = Button.new()
 		button.text = supplier.name
 		button.set_theme_type_variation(&"SecondaryButton")
+		button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		button.toggle_mode = true
 		button.pressed.connect(on_select_supplier.bind(button))
 		supplier_button_list.add_child(button)
@@ -73,6 +74,7 @@ func on_add_new_supplier_button_pressed():
 	new_supplier.name = "新供应商"
 	var new_button = Button.new()
 	new_button.set_theme_type_variation(&"SecondaryButton")
+	new_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	new_button.text = "新供应商"
 	new_button.toggle_mode = true
 	new_button.pressed.connect(on_select_supplier.bind(new_button))

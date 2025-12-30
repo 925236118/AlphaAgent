@@ -16,60 +16,24 @@ signal models_changed
 @onready var save_button: Button = %SaveButton
 @onready var cancel_button: Button = %CancelButton
 @onready var remove_button: Button = %RemoveButton
+@onready var remote_get_models_button: Button = %RemoteGetModelsButton
+@onready var remote_get_models_request: HTTPRequest = %RemoteGetModelsRequest
+@onready var remote_get_models_popup_menu: PopupMenu = %RemoteGetModelsPopupMenu
 
 var model_manager: ModelConfig.ModelManager = null
 var editing_model_id: String = ""
 var supplier_info: ModelConfig.SupplierInfo = null
 var model_info: ModelConfig.ModelInfo = null
+var remote_model_list: Array[String] = []
 
 signal create_model
 
-#const MODEL_ITEM = preload("res://addons/agent/ui/models/model_item.tscn")
-
 func _ready() -> void:
 	model_manager = AlphaAgentPlugin.global_setting.model_manager
-	#add_model_button.pressed.connect(_on_add_model_pressed)
 	save_button.pressed.connect(_on_save_pressed)
 	cancel_button.pressed.connect(_on_cancel_pressed)
-	#remove_button.pressed.connect(_on_delete_model)
-	#edit_panel.hide()
-
-
-#func _refresh_model_list():
-	## 清空列表
-	#for child in model_list.get_children():
-		#child.queue_free()
-#
-	#if supplier_info == null:
-		#return
-#
-	## 添加所有模型
-	#for model in supplier_info.models:
-		#var item = MODEL_ITEM.instantiate()
-		#model_list.add_child(item)
-		#var is_current = supplier_info.id == model_manager.current_supplier_id and \
-			#model.id == model_manager.current_model_id
-		#item.set_model_info(model, is_current)
-		#item.edit_requested.connect(_on_edit_model.bind(model.id))
-		#item.delete_requested.connect(_on_delete_model.bind(supplier_info.id, model.id))
-
-#func _on_add_model_pressed():
-	#editing_model_id = ""
-	#_show_edit_panel()
-	#_clear_edit_fields()
-
-#func _on_edit_model(model_id: String):
-	#editing_model_id = model_id
-	#var model = model_manager.get_model_by_id(model_id)
-	#if model:
-		#_show_edit_panel(model)
-
-#func _on_delete_model():
-	#var supplier_id = supplier_info.id
-	#var model_id = model_info.id
-	#model_manager.remove_model(supplier_id, model_id)
-	##_refresh_model_list()
-	#models_changed.emit()
+	remote_get_models_button.pressed.connect(on_remote_get_models_button_click)
+	remote_get_models_popup_menu.index_pressed.connect(handle_select_remote_model)
 
 func _show_edit_panel(model: ModelConfig.ModelInfo = null):
 	edit_panel.show()
@@ -88,27 +52,6 @@ func _clear_edit_fields():
 	model_id_edit.text = ""
 	max_tokens_edit.value = 8192
 	thinking_checkbox.button_pressed = false  # OpenAI 默认不支持 thinking
-	# 根据提供商设置默认 API Base
-	# _update_default_api_base(0)
-
-# func _on_provider_changed(index: int):
-# 	# 只在添加新模型时更新 API Base（编辑时不改变）
-# 	if editing_model_id == "":
-# 		_update_default_api_base(index)
-
-# func _update_default_api_base(provider_index: int):
-# 	match provider_index:
-# 		0: # OpenAI
-# 			api_base_edit.text = "https://api.openai.com/v1"
-# 			api_key_edit.placeholder_text = "sk-..."
-# 		1: # DeepSeek
-# 			api_base_edit.text = "https://api.deepseek.com"
-# 			api_key_edit.placeholder_text = "sk-..."
-# 		2: # Ollama
-# 			api_base_edit.text = "http://localhost:11434"
-# 			api_key_edit.text = ""
-# 			api_key_edit.placeholder_text = "Ollama 不需要 API Key"
-
 
 func _on_save_pressed():
 	var temp_model_info = ModelConfig.ModelInfo.new()
@@ -128,7 +71,6 @@ func _on_save_pressed():
 		# 更新现有模型
 		model_manager.update_model(supplier_info.id, editing_model_id, temp_model_info)
 
-	#_refresh_model_list()
 	models_changed.emit()
 	_hide_edit_panel()
 
@@ -136,16 +78,61 @@ func _on_cancel_pressed():
 	_hide_edit_panel()
 
 func _hide_edit_panel():
-	#edit_panel.hide()
-	#editing_model_id = ""
 	queue_free()
 
 func set_supplier_info(supplier: ModelConfig.SupplierInfo):
 	supplier_info = supplier
-	#_refresh_model_list()
 
 func set_edit_model(model: ModelConfig.ModelInfo = null):
 	model_info = model
 	editing_model_id = model_info.id if model_info else ''
 	if model_info:
 		_show_edit_panel(model)
+
+
+func on_remote_get_models_button_click():
+	remote_get_models_button.disabled = true
+
+	remote_get_models_request.request_completed.connect(self._http_request_completed, CONNECT_ONE_SHOT)
+
+	var headers = [
+		"Accept: application/json",
+		"Authorization: Bearer %s" % supplier_info.api_key,
+		"Content-Type: application/json"
+	]
+
+	# 执行一个 GET 请求。以下 URL 会将写入作为 JSON 返回。
+	var error = remote_get_models_request.request(supplier_info.base_url + "/v1/models", headers)
+	if error != OK:
+		alert("验证失败", "在HTTP请求中发生了一个错误。")
+		remote_get_models_button.disabled = false
+
+
+# 当 HTTP 请求完成时调用。
+func _http_request_completed(result, response_code, headers, body):
+	remote_get_models_button.disabled = false
+	var json = JSON.new()
+	json.parse(body.get_string_from_utf8())
+	var response = json.get_data()
+	if response == null:
+		alert("获取失败", "未获得任何模型列表。请检查配置项。")
+	else:
+		remote_get_models_popup_menu.clear()
+		for model in response.data:
+			remote_get_models_popup_menu.add_item(model.id)
+			remote_model_list.push_back(model.id)
+		remote_get_models_popup_menu.position = Vector2i(remote_get_models_button.global_position) + position + Vector2i(0, 40)
+		remote_get_models_popup_menu.show()
+
+func alert(title, text):
+	var dialog = AcceptDialog.new()
+	dialog.close_requested.connect(dialog.queue_free)
+	dialog.confirmed.connect(dialog.queue_free)
+	dialog.title = title
+	dialog.dialog_text = text
+	dialog.transient = true
+	add_child(dialog)
+	dialog.popup_centered()
+
+func handle_select_remote_model(index: int):
+	model_id_edit.text = remote_model_list[index]

@@ -21,7 +21,7 @@ var readonly_tools_list: Array[String] = [
 func test():
 	var tool = AgentModelUtils.ToolCallsInfo.new()
 	tool.function.name = "execute_command"
-	tool.function.arguments = JSON.stringify({"command":"dir", "args": []})
+	tool.function.arguments = JSON.stringify({"command":"timeout", "args": ["/t", "3"]})
 	#var image = load("res://icon.svg")
 	print(await use_tool(tool))
 	#print(ProjectSettings.get_setting("input"))
@@ -1099,19 +1099,22 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 					await get_tree().process_frame
 				
 				get_tree().create_timer(30.0).timeout.connect(func():
+					#print("计时结束")
+					#print(thread)
 					if thread and thread.is_alive():
 						is_timeout = true
 						thread = Thread.new()
 					)
 				while thread.is_alive():
 					# 等待线程结束
-					# print("thread alive")
+					#print("thread alive")
 					await get_tree().process_frame
-
-				if is_timeout:
+				#print(is_timeout)
+				if is_timeout or !thread.is_started():
 					result = {
 							"error": "命令行执行因超时停止"
 						}
+					#thread.free()
 					thread = null
 				else:
 					# 获取结果并释放线程

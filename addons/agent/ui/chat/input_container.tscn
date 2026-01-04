@@ -220,9 +220,5 @@ theme_type_variation = &"DangerButton"
 theme_override_font_sizes/font_size = 14
 text = "停止"
 
-[node name="Control" type="Control" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]
-custom_minimum_size = Vector2(2, 0)
-layout_mode = 2
-
 [connection signal="gui_input" from="VBoxContainer/InputBox/UserInput" to="." method="_on_user_input_gui_input"]
 [connection signal="item_selected" from="VBoxContainer/InputBox/HBoxContainer/HBoxContainer/InputModeSelect" to="." method="_on_input_mode_select_item_selected"]

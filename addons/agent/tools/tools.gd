@@ -307,7 +307,7 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "read_file",
-				"description": "读取文件内容。可以指定读取的开始行号和结束行号，默认是0和-1，表示读取到文件末尾。**限制**：此工具最多会读取500行文件内容。返回内容中包含总行数和开始行号和结束行号。",
+				"description": "读取文件内容。可以指定读取的开始行号和结束行号，默认是1和-1，表示读取到文件末尾。**限制**：此工具最多会读取500行文件内容。返回内容中包含总行数和开始行号和结束行号。",
 				"parameters": {
 					"type": "object",
 					"properties": {
@@ -317,7 +317,7 @@ func get_tools_list() -> Array[Dictionary]:
 						},
 						"start": {
 							"type": "integer",
-							"description": "需要读取的文件的开始行号，默认是0。",
+							"description": "需要读取的文件的开始行号，默认是1。",
 						},
 						"end": {
 							"type": "integer",
@@ -762,14 +762,15 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 				else:
 					var file_lines = file_string.split("\n")
 					var total_lines = file_lines.size()
-					var start_line = max(0, start)
+					var start_line = max(1, start)
 					start_line = min(start_line, total_lines)
 					if end == -1:
 						end = total_lines
 					else:
 						end = min(total_lines, end)
 					end = min(total_lines + 1, end + 1, start_line + 501)
-					var file_content = "\n".join(file_lines.slice(start_line - 1, end))
+					
+					var file_content = "\n".join(file_lines.slice(max(start_line - 1, 0), end))
 					result = {
 						"file_path": path,
 						"file_uid": ResourceUID.path_to_uid(path),

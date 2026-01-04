@@ -1,6 +1,39 @@
-[gd_scene load_steps=2 format=3 uid="uid://b66g7g3ydkkeb"]
+[gd_scene load_steps=5 format=3 uid="uid://b66g7g3ydkkeb"]
 
 [ext_resource type="Script" uid="uid://cm8oxvgviolv5" path="res://addons/agent/ui/memory/memory_container.gd" id="1_81aon"]
+[ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_a001m"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_81aon"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.15686275, 0.15686275, 0.15686275, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.2, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a001m"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.15686275, 0.15686275, 0.15686275, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.2, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="MemoryContainer" type="VBoxContainer"]
 anchors_preset = 15
@@ -8,6 +41,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_a001m")
 script = ExtResource("1_81aon")
 
 [node name="GlobalMemoryContainer" type="VBoxContainer" parent="."]
@@ -27,13 +61,20 @@ text = "全局记忆"
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "添加全局记忆"
+mouse_default_cursor_shape = 2
+theme_type_variation = &"SecondaryButton"
 text = " + "
 
-[node name="ScrollContainer" type="ScrollContainer" parent="GlobalMemoryContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="GlobalMemoryContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_81aon")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="GlobalMemoryContainer/PanelContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="GlobalMemoryItemContainer" type="VBoxContainer" parent="GlobalMemoryContainer/ScrollContainer"]
+[node name="GlobalMemoryItemContainer" type="VBoxContainer" parent="GlobalMemoryContainer/PanelContainer/ScrollContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -55,13 +96,20 @@ text = "项目记忆"
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "添加项目记忆"
+mouse_default_cursor_shape = 2
+theme_type_variation = &"SecondaryButton"
 text = " + "
 
-[node name="ScrollContainer" type="ScrollContainer" parent="ProjectMemoryContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="ProjectMemoryContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_a001m")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="ProjectMemoryContainer/PanelContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ProjectMemoryItemContainer" type="VBoxContainer" parent="ProjectMemoryContainer/ScrollContainer"]
+[node name="ProjectMemoryItemContainer" type="VBoxContainer" parent="ProjectMemoryContainer/PanelContainer/ScrollContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3

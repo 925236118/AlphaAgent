@@ -24,14 +24,17 @@ size_flags_horizontal = 2
 [node name="FinishEditButton" type="Button" parent="."]
 visible = false
 layout_mode = 2
+tooltip_text = "结束编辑"
 text = "完成"
 
 [node name="EditButton" type="Button" parent="."]
 layout_mode = 2
+tooltip_text = "编辑"
 theme_type_variation = &"SecondaryButton"
 text = " 编辑 "
 
 [node name="RemoveButton" type="Button" parent="."]
 layout_mode = 2
+tooltip_text = "删除记忆"
 theme_type_variation = &"SecondaryButton"
 text = " 删除 "

@@ -95,6 +95,7 @@ flip_v = true
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+tooltip_text = "展开/收起"
 mouse_default_cursor_shape = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_dc6at")
 flat = true

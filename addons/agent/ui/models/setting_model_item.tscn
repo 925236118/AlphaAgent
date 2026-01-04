@@ -104,6 +104,7 @@ text = "支持工具"
 [node name="IsActive" type="CheckButton" parent="HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "是否启用。启用后才可以在对话中使用。"
 mouse_default_cursor_shape = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_3clfn")
 theme_override_icons/checked = ExtResource("2_3clfn")
@@ -115,6 +116,7 @@ layout_mode = 2
 [node name="EditButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "编辑模型"
 mouse_default_cursor_shape = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_cxaef")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_cxaef")
@@ -126,6 +128,7 @@ text = "编辑"
 [node name="RemoveButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "删除模型"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"DangerButton"
 text = "删除"

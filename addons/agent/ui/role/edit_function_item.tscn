@@ -74,6 +74,7 @@ text = "工具介绍"
 [node name="FucntionActiveButton" type="Button" parent="."]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "启用/禁用工具"
 mouse_default_cursor_shape = 2
 theme_override_styles/normal = SubResource("StyleBoxEmpty_yvfk6")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_yvfk6")

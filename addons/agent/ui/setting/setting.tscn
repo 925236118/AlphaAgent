@@ -66,6 +66,7 @@ setting_key = "send_shortcut"
 text = "输入框发送快捷键"
 
 [node name="OptionButton" parent="SettingPanel/SettingItemsContainer/SendShotCut" index="1"]
+tooltip_text = "选择发送快捷键"
 selected = 1
 item_count = 3
 popup/item_0/text = "不使用快捷键"
@@ -93,6 +94,7 @@ layout_mode = 2
 [node name="SupplierOptionButton" type="Button" parent="SettingPanel/SettingItemsContainer/ModelSetting"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "供应商管理"
 text = "供应商管理"
 
 [node name="SupplierList" type="VBoxContainer" parent="SettingPanel/SettingItemsContainer/ModelSetting"]
@@ -126,6 +128,7 @@ layout_mode = 2
 [node name="AddRoleButton" type="Button" parent="SettingPanel/SettingItemsContainer/RoleList"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "添加新的角色"
 theme_override_styles/focus = SubResource("StyleBoxEmpty_83qt4")
 text = "添加角色"
 

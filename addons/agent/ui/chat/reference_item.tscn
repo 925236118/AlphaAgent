@@ -47,6 +47,7 @@ custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 4
+tooltip_text = "删除引用"
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.8745098, 0.8745098, 0.8745098, 0)
 theme_override_colors/icon_hover_color = Color(0.87058824, 0.3019608, 0.11372549, 1)

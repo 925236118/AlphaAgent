@@ -26,6 +26,7 @@ text = "全局记忆"
 [node name="AddGlobalMemory" type="Button" parent="GlobalMemoryContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "添加全局记忆"
 text = " + "
 
 [node name="ScrollContainer" type="ScrollContainer" parent="GlobalMemoryContainer"]
@@ -53,6 +54,7 @@ text = "项目记忆"
 [node name="AddProjectMemory" type="Button" parent="ProjectMemoryContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "添加项目记忆"
 text = " + "
 
 [node name="ScrollContainer" type="ScrollContainer" parent="ProjectMemoryContainer"]

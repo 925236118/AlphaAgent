@@ -124,6 +124,7 @@ size_flags_vertical = 4
 [node name="RoleButton" type="OptionButton" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "选择角色"
 theme_override_styles/normal = SubResource("StyleBoxFlat_vh1vc")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_k8r8m")
 
@@ -164,6 +165,7 @@ fit_to_longest_item = false
 [node name="UseThinking" type="CheckButton" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "是否启用思考"
 mouse_default_cursor_shape = 2
 theme_override_font_sizes/font_size = 14
 theme_override_styles/focus = SubResource("StyleBoxEmpty_xi1dg")
@@ -212,7 +214,7 @@ visible = false
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-tooltip_text = "发送"
+tooltip_text = "停止"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"DangerButton"
 theme_override_font_sizes/font_size = 14

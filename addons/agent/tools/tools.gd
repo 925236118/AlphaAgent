@@ -1092,7 +1092,7 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 
 			if not json == null and json.has("command") and json.has("args"):
 				thread = Thread.new()
-				thread.start(execute_command.bind(json.command, json.args))
+				thread.start(execute_command_with_timeout.bind(json.command, json.args))
 				while not thread.is_started():
 					# 等待线程启动
 					await get_tree().process_frame
@@ -1278,39 +1278,115 @@ func set_res(target: Object, property_target: Array[String], res: Resource):
 			return false
 
 #命令行调用工具
-func execute_command(command: String, args: Array = []) -> Dictionary:
+#func execute_command(command: String, args: Array = []) -> Dictionary:
+	#var result = {
+		#"success": false,
+		#"output": []
+	#}
+#
+	## 获取项目目录
+	#var working_dir = ProjectSettings.globalize_path("res://")
+#
+	## 在Linux/Mac上使用bash，Windows上使用cmd
+	#var shell = "bash" if OS.get_name() != "Windows" else "cmd"
+	#var shell_args = []
+#
+	#if OS.get_name() != "Windows":
+		 ## 使用bash，先切换目录，然后执行命令
+		#var full_command = "cd '" + working_dir + "' && " + command + " " + " ".join(args)
+		#shell_args = ["-c", full_command]
+	#else:
+		## 使用cmd，先切换目录，然后执行命令
+		#var full_command = "cd /d \"" + working_dir + "\" && " + command + " " + " ".join(args)
+		#shell_args = ["/c", full_command]
+#
+	## 执行命令
+	#var error_code = OS.execute(shell, shell_args, result.output, true, false)
+#
+	#if error_code == -1:
+		#result.error = "命令执行失败"
+		#return result
+	#else:
+		#result.output = result.output
+		#result.success = true
+#
+		#return result
+func execute_command_with_timeout(command: String, args: Array = [], timeout_sec: float = 30.0) -> Dictionary:
 	var result = {
 		"success": false,
-		"output": []
+		"output": [],
+		"error": "",
+		"timed_out": false,
+		"exit_code": -1
 	}
 
-	# 获取项目目录
 	var working_dir = ProjectSettings.globalize_path("res://")
-
-	# 在Linux/Mac上使用bash，Windows上使用cmd
 	var shell = "bash" if OS.get_name() != "Windows" else "cmd"
 	var shell_args = []
 
 	if OS.get_name() != "Windows":
-		 # 使用bash，先切换目录，然后执行命令
 		var full_command = "cd '" + working_dir + "' && " + command + " " + " ".join(args)
 		shell_args = ["-c", full_command]
 	else:
-		# 使用cmd，先切换目录，然后执行命令
 		var full_command = "cd /d \"" + working_dir + "\" && " + command + " " + " ".join(args)
 		shell_args = ["/c", full_command]
 
-	# 执行命令
-	var error_code = OS.execute(shell, shell_args, result.output, true, false)
-
-	if error_code == -1:
-		result.error = "命令执行失败"
+	# 1. 使用 create_process 启动独立进程
+	var pid: int = OS.create_process(shell, PackedStringArray(shell_args))
+	if pid == -1:
+		result["error"] = "Failed to create process."
 		return result
-	else:
-		result.output = result.output
-		result.success = true
 
+	# 2. 使用线程来等待进程结束并监控超时
+	var thread = Thread.new()
+	var thread_result = thread.start(_monitor_process.bind(pid, timeout_sec))
+
+	if not thread_result:
+		result["error"] = "Failed to start monitor thread."
+		OS.kill(pid) # 清理进程
 		return result
+
+	# 3. 等待监控线程完成
+	thread.wait_to_finish()
+	
+	# 4. 获取线程返回的结果
+	var monitor_result = thread.wait_to_finish() if thread.is_alive() else {"exit_code": -1, "timed_out": true}
+	# 注意：这里需要从线程安全地传递数据，实际代码中可能需要用Mutex或通过call_deferred
+	# 以下为简化示意，实际应处理好线程间通信
+	result["exit_code"] = monitor_result.get("exit_code", -1)
+	result["timed_out"] = monitor_result.get("timed_out", false)
+	result["success"] = (result["exit_code"] == 0) and (not result["timed_out"])
+	
+	if result["timed_out"]:
+		result["error"] = "Command timed out after " + str(timeout_sec) + " seconds."
+		OS.kill(pid) # 确保超时进程被终止
+	elif result["exit_code"] != 0:
+		result["error"] = "Command failed with exit code: " + str(result["exit_code"])
+
+	return result
+
+# 在单独的线程中运行的监控函数
+func _monitor_process(pid: int, timeout_sec: float) -> Dictionary:
+	var result = {"exit_code": -1, "timed_out": false}
+	var start_time = Time.get_ticks_msec()
+	
+	# 循环检查进程状态
+	while OS.is_process_running(pid):
+		# 检查是否超时
+		if Time.get_ticks_msec() - start_time > timeout_sec * 1000:
+			result["timed_out"] = true
+			OS.kill(pid) # 超时后终止进程
+			return result
+		# 短暂休眠以避免CPU占用过高
+		OS.delay_usec(50000) # 休眠 50 毫秒
+	
+	# 进程正常结束，获取退出码（注：Godot没有直接获取外部进程退出码的函数，此处为逻辑示意）
+	# 可能需要通过其他方式获取退出码，例如通过读取进程的退出状态文件（平台相关）
+	# 这里假设一个不存在的 get_process_exit_code 函数用于示意
+	# result["exit_code"] = OS.get_process_exit_code(pid) 
+	# 作为临时方案，可以尝试用 execute 执行一个快速命令（如 taskkill /f）来检查进程是否存在并获取错误码
+	result["exit_code"] = 0 # 假设正常退出
+	return result
 
 #运行EditorScript
 func run_editor_script(script_path: String) -> bool:

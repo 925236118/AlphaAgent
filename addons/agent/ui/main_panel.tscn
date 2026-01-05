@@ -358,6 +358,16 @@ text = "@moshanzhu"
 underline = 1
 uri = "https://www.moshangzhu.com.cn/"
 
+[node name="LinkButton4" type="LinkButton" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/BottomMarginContainer/HBoxContainer"]
+self_modulate = Color(0.23921569, 0.43137255, 0.67058825, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+tooltip_text = "打开Alpha爱赞助页面"
+text = "爱赞助链接"
+underline = 1
+uri = "https://azz.ee/godotalphaagent"
+
 [node name="Label2" type="Label" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/BottomMarginContainer/HBoxContainer"]
 self_modulate = Color(0.46666667, 0.46666667, 0.46666667, 1)
 layout_mode = 2

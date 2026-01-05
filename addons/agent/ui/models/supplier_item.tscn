@@ -134,6 +134,7 @@ popup/item_1/id = 1
 [node name="CheckModelButton" type="Button" parent="VBoxContainer/SupplierShow/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "检测供应商是否可用"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"SecondaryButton"
 text = "检测"
@@ -141,6 +142,7 @@ text = "检测"
 [node name="RemoveSupplierButton" type="Button" parent="VBoxContainer/SupplierShow/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "删除供应商"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"DangerButton"
 text = "删除"
@@ -187,6 +189,7 @@ text = "取消"
 [node name="SaveButton" type="Button" parent="VBoxContainer/SupplierEdit/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "保存供应商"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"PrimaryButton"
 text = "保存"
@@ -208,6 +211,7 @@ text = "选择API类型"
 [node name="SupplierAPIType" type="OptionButton" parent="VBoxContainer/SupplierEdit"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "支持的API类型。"
 theme_override_styles/normal = SubResource("StyleBoxFlat_cxw2j")
 selected = 0
 item_count = 3
@@ -265,6 +269,7 @@ layout_mode = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
+tooltip_text = "展开/收起模型列表"
 mouse_default_cursor_shape = 2
 toggle_mode = true
 button_pressed = true
@@ -280,6 +285,7 @@ text = "模型列表"
 [node name="AddModelButton" type="Button" parent="VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "添加模型"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"PrimaryButton"
 text = "添加模型"

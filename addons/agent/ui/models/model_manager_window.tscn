@@ -53,6 +53,7 @@ text = "已配置的模型"
 [node name="AddModelButton" type="Button" parent="MainContainer/VBoxContainer/TopBar"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "添加模型"
 text = "添加模型"
 
 [node name="HSeparator" type="HSeparator" parent="MainContainer/VBoxContainer"]
@@ -134,6 +135,7 @@ placeholder_text = "例如: gpt-4, deepseek-chat"
 [node name="RemoteGetModelsButton" type="Button" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "远程获取所有可用的模型，时间可能较久"
 theme_type_variation = &"SecondaryButton"
 text = "远程获取"
 
@@ -160,6 +162,7 @@ text = "支持 Thinking："
 [node name="ThinkingCheckBox" type="CheckBox" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "支持思考"
 
 [node name="ToolLabal" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
 visible = false
@@ -184,7 +187,9 @@ size_flags_horizontal = 3
 
 [node name="RemoveButton" type="Button" parent="EditPanel/MarginContainer/VBoxContainer/ButtonContainer/HBoxContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
+tooltip_text = "删除模型"
 mouse_default_cursor_shape = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_35oay")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_35oay")
@@ -195,6 +200,7 @@ text = "删除模型"
 [node name="CancelButton" type="Button" parent="EditPanel/MarginContainer/VBoxContainer/ButtonContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "取消编辑"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"SecondaryButton"
 text = "取消"
@@ -202,6 +208,7 @@ text = "取消"
 [node name="SaveButton" type="Button" parent="EditPanel/MarginContainer/VBoxContainer/ButtonContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "保存编辑"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"PrimaryButton"
 text = "保存"

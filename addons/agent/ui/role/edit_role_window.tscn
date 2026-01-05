@@ -73,17 +73,20 @@ alignment = 2
 [node name="CancelButton" type="Button" parent="Control/MarginContainer/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "取消"
 theme_type_variation = &"SecondaryButton"
 text = "取消"
 
 [node name="CreateButton" type="Button" parent="Control/MarginContainer/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "创建角色"
 theme_type_variation = &"PrimaryButton"
 text = "确认创建"
 
 [node name="UpdateButton" type="Button" parent="Control/MarginContainer/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "确认编辑角色"
 theme_type_variation = &"PrimaryButton"
 text = "确认编辑"

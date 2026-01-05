@@ -10,7 +10,7 @@ All notable changes to this project will be documented in this file.
   - 在发送键为 Enter 时，按 Ctrl+Enter 应换行。
   - 优化各类按钮样式。
 - **模型管理**:
-  - 添加供应商配置功能，可调用各种 OpenAI 风格的供应商和 Ollama。
+  - 添加供应商配置功能，可调用各种 OpenAI 风格的供应商和 Ollama。([#1](https://github.com/925236118/AlphaAgent/pull/1))
   - 添加多个默认供应商及其模型，优化供应商管理功能。
   - 添加模型管理界面，添加检测供应商是否可用功能。
   - 添加点击获取模型列表功能。
@@ -44,7 +44,7 @@ All notable changes to this project will be documented in this file.
 - 修复下拉框遮挡输入的问题。
 - 修复模型管理中显示的支持标签错误问题。
 - 删除项目中存在的安全密钥。
-
+- 修复所有的按钮的Tooltip文案([#2](https://github.com/925236118/AlphaAgent/issues/2))
 ### 🔧 Improvements (优化改进)
 - 移除历史记录文件并调整设置路径初始化逻辑。
 - 插件启动单例模式完善。

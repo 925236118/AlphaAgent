@@ -255,7 +255,6 @@ func send_messages():
 			# 没有角色时，默认使用所有工具
 			current_chat_stream.tools = tools.get_tools_list()
 
-
 	current_random_message_id = generate_random_string(16)
 	current_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
 	# 始终根据用户选择的 use_thinking 来设置 show_think
@@ -264,7 +263,8 @@ func send_messages():
 	current_message_item.show_think = use_thinking
 	message_list.add_child(current_message_item)
 	current_chat_stream.post_message(messages)
-	message_container.scroll_vertical = 100000
+	await get_tree().process_frame
+	scroll_message_container_to_bottom()
 
 func on_agent_think(think: String):
 	# 检查模型是否支持 thinking
@@ -277,19 +277,19 @@ func on_agent_think(think: String):
 		if model_supports_thinking:
 			current_think += think
 			current_message_item.update_think_content(current_think)
-			message_container.scroll_vertical = 100000
+			scroll_message_container_to_bottom()
 
 		current_message_item.message_id = current_random_message_id
 
 func on_agent_message(msg: String):
 	current_message += msg
 	current_message_item.update_message_content(current_message)
-	message_container.scroll_vertical = 100000
+	scroll_message_container_to_bottom()
 	current_message_item.message_id = current_random_message_id
 
 func on_response_use_tool():
 	current_message_item.response_use_tool()
-	message_container.scroll_vertical = 100000
+	scroll_message_container_to_bottom()
 	current_message_item.message_id = current_random_message_id
 
 func on_use_tool(tool_calls: Array):
@@ -329,7 +329,7 @@ func on_use_tool(tool_calls: Array):
 
 	current_chat_stream.post_message(messages)
 
-	message_container.scroll_vertical = 100000
+	scroll_message_container_to_bottom()
 
 	current_history_item.title = current_title
 
@@ -348,10 +348,15 @@ func on_generate_error(error_info: Dictionary):
 func on_click_new_chat_button():
 	if current_chat_stream != null and current_chat_stream.generatting:
 		current_chat_stream.close()
+
+	if current_title_chat:
+		current_title_chat.queue_free()
+
 	clear()
 	input_container.disable = false
 	show_container(chat_container)
 	plan_list.update_list([])
+	
 
 func clear():
 	welcome_message.show()
@@ -390,15 +395,13 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 		})
 		current_message_item.update_finished_message("Success")
 		await get_tree().process_frame
-		message_container.scroll_vertical = 100000
+		scroll_message_container_to_bottom()
 		current_message_item.resend.connect(on_resend_user_message.bind(current_message_item), CONNECT_ONE_SHOT)
 		current_message_item.copy.connect(on_copy_output_message.bind(current_message_item))
 
 		reset_message_info()
 		if current_chat_stream:
 			current_chat_stream.queue_free()
-		if current_title_chat:
-			current_title_chat.queue_free()
 
 	input_container.set_usage_label(total_tokens, 128)
 	#print(messages)
@@ -438,6 +441,8 @@ func on_title_generate_finish(message: String, _think_msg: String):
 	if current_history_item:
 		current_history_item.title = current_title
 	history_and_title.update_history(current_id, current_history_item)
+	
+	current_title_chat.queue_free()
 
 # 生成随机字符串函数
 func generate_random_string(length: int) -> String:
@@ -486,17 +491,10 @@ func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
 				for tool_call in message.tool_calls:
 					# 根据当前 chat_stream 类型创建对应的 ToolCallsInfo
 					var tool_call_info
-					if current_chat_stream is OpenAIChatStream:
-						tool_call_info = AgentModelUtils.ToolCallsInfo.new()
-						tool_call_info.function = AgentModelUtils.ToolCallsInfoFunc.new()
-					elif current_chat_stream is OllamaChatStream:
-						tool_call_info = AgentModelUtils.ToolCallsInfo.new()
-						tool_call_info.function = AgentModelUtils.ToolCallsInfoFunc.new()
-					else:
-						continue
-
+					tool_call_info = AgentModelUtils.ToolCallsInfo.new()
 					tool_call_info.id = tool_call.get("id")
 					tool_call_info.type = tool_call.get("type")
+					tool_call_info.function = AgentModelUtils.ToolCallsInfoFunc.new()
 					tool_call_info.function.arguments = tool_call.get("function").get("arguments")
 					tool_call_info.function.name = tool_call.get("function").get("name")
 					tool_call_array.push_back(tool_call_info)
@@ -560,10 +558,11 @@ func on_stop_chat():
 	current_chat_stream.close()
 	input_container.disable = false
 	input_container.switch_button_to("Send")
-	current_message_item.update_finished_message("Stop")
-	current_message_item.resend.connect(on_resend_user_message.bind(current_message_item), CONNECT_ONE_SHOT)
-	current_message_item.copy.connect(on_copy_output_message.bind(current_message_item))
-	message_container.scroll_vertical = 100000
+	if current_message_item:
+		current_message_item.update_finished_message("Stop")
+		current_message_item.resend.connect(on_resend_user_message.bind(current_message_item), CONNECT_ONE_SHOT)
+		current_message_item.copy.connect(on_copy_output_message.bind(current_message_item))
+	scroll_message_container_to_bottom()
 	reset_message_info()
 
 func on_update_plan_list(plan_array: Array[AlphaAgentSingleton.PlanItem]):
@@ -612,3 +611,7 @@ func on_copy_output_message(message_item_node: AgentChatMessageItem):
 			print("复制成功")
 
 	DisplayServer.clipboard_set("\n".join(assistant_result))
+
+func scroll_message_container_to_bottom():
+	message_container.get_v_scroll_bar().set_as_ratio(1.0)
+	

@@ -22,11 +22,15 @@ func test():
 	var tool = AgentModelUtils.ToolCallsInfo.new()
 	tool.function.name = "add_node_to_scene"
 	tool.function.arguments = JSON.stringify({"builtin_node_name":"", "packed_scene_path":"res://test/NewNode.tscn", "target_scene_path":"res://test/test.tscn", "parent_node_name":"."})
+
 	#var image = load("res://icon.svg")
 	print(await use_tool(tool))
 	#print(ProjectSettings.get_setting("input"))
 	#var process_id = OS.create_instance(["--headless", "--script", "res://game.gd"])
+	
 	pass
+
+
 
 # 获取工具名称列表
 func get_function_name_list():
@@ -80,6 +84,11 @@ func get_function_name_list():
 			"readonly": false,
 			"group": "文件操作",
 			"description": "全量替换写入文件内容。"
+		},
+		"create_script": {
+			"readonly": false,
+			"group": "文件操作",
+			"description": "通过继承创建脚本文件。"
 		},
 		"add_script_to_scene": {
 			"readonly": false,
@@ -371,6 +380,29 @@ func get_tools_list() -> Array[Dictionary]:
 						}
 					},
 					"required": ["path", "content"]
+				}
+			}
+		},
+		# create_script
+		{
+			"type": "function",
+			"function": {
+				"name": "create_script",
+				"description": "通过继承创建脚本文件。需提供继承的对象类型与所需创建的脚本目录及名称",
+				"parameters": {
+					#需要的参数 inherits: String, path: String,
+					"type": "object",
+					"properties": {
+						"inherits": {
+							"type": "string",
+							"description": "继承的对象类型，必须是Godot的原声对象类型 或 以res://开头的绝对路径。",
+						},
+						"path": {
+							"type": "string",
+							"description": "所需创建的脚本目录。必须是以res://开头并附带脚本名称的绝对路径。"
+						}
+					},
+					"required": ["inherits", "path"]
 				}
 			}
 		},
@@ -983,6 +1015,25 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 					result = {
 						"open_error": error_string(FileAccess.get_open_error())
 					}
+		
+		"create_script":
+			var json = JSON.parse_string(tool_call.function.arguments)
+			if not json == null and json.has("inherits") and json.has("path"):
+				var inherits: String = json.inherits
+				var path: String = json.path
+				var create_result: bool = await create_script(inherits, path)
+				if create_result:
+					result = {
+						"file_path": path,
+						"file_uid": ResourceUID.path_to_uid(path),
+						"file_content": FileAccess.get_file_as_string(path),
+						"open_error": error_string(FileAccess.get_open_error())
+					}
+				else:
+					result = {
+						"error": "提供的\"inherits\"不存在或是提供的\"path\"已存在脚本文件"
+					}
+		
 		"get_image_info":
 			var json = JSON.parse_string(tool_call.function.arguments)
 			if not json == null and json.has("image_path"):
@@ -1259,6 +1310,22 @@ func write_file(path: String, content: String) -> bool:
 		return true
 	else:
 		return false
+
+#通过ScriptCreateDialog创建脚本文件
+func create_script(inherits: String, path: String) -> bool:
+	if ResourceLoader.exists(path):
+		return false
+	
+	if ClassDB.class_exists(inherits) or ((inherits.begins_with("res://") and inherits.ends_with(".gd")) and ResourceLoader.exists(inherits)):
+		var dialog = ScriptCreateDialog.new()
+		dialog.config(inherits, path)
+		EditorInterface.get_base_control().add_child(dialog)
+		dialog.popup_centered()
+		await get_tree().process_frame
+		dialog.get_ok_button().pressed.emit()
+		return true
+	
+	return false
 
 #设置某个场景中的某个节点的某个属性为某个值
 func update_scene_node_property(scene_path: String, node_path: String, property_name: String, property_value: String) -> bool:

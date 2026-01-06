@@ -8,10 +8,11 @@ extends VBoxContainer
 @onready var add_global_memory: Button = %AddGlobalMemory
 @onready var add_project_memory: Button = %AddProjectMemory
 
-var memory_dir = OS.get_user_data_dir() + "/.alpha/"
-var memory_file: String = memory_dir + "memory.json"
+var memory_dir = AlphaAgentPlugin.global_setting.setting_dir
+@onready var memory_file: String = memory_dir + "memory.{version}.json".format({"version": CONFIG.alpha_version})
 
 const MEMORY_ITEM = preload("uid://cr2sav6by4tal")
+const CONFIG = preload("uid://b4bcww0bmnxt0")
 
 func _ready() -> void:
 	load_from_project()

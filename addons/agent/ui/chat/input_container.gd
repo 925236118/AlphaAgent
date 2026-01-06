@@ -328,7 +328,8 @@ func handle_command(command: String, args: PackedStringArray):
 					init()
 			elif args[0] == "global":
 				if args.size() == 2:
-					var memory_file = OS.get_user_data_dir() + "/.alpha/memory.json"
+					var CONFIG : AgentConfig = load("uid://b4bcww0bmnxt0")
+					var memory_file = AlphaAgentPlugin.global_setting.setting_dir + "memory.{version}.json".format({"version": CONFIG.alpha_version})
 					AlphaAgentPlugin.global_memory.push_back(args[1])
 
 					var file = FileAccess.open(memory_file, FileAccess.WRITE)

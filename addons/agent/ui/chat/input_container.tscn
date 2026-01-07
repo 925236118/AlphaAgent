@@ -156,7 +156,6 @@ layout_mode = 2
 tooltip_text = "选择AI模型"
 mouse_default_cursor_shape = 2
 theme_override_constants/h_separation = 2
-theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBoxFlat_0yucd")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_model_button")
 flat = true
@@ -167,7 +166,6 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "是否启用思考"
 mouse_default_cursor_shape = 2
-theme_override_font_sizes/font_size = 14
 theme_override_styles/focus = SubResource("StyleBoxEmpty_xi1dg")
 button_pressed = true
 text = "思考"
@@ -193,7 +191,6 @@ tooltip_text = "清空输入内容"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"FlatButton"
 theme_override_colors/font_color = Color(0.46666667, 0.46666667, 0.46666667, 1)
-theme_override_font_sizes/font_size = 14
 text = "清空"
 flat = true
 
@@ -205,19 +202,16 @@ size_flags_vertical = 4
 tooltip_text = "发送"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"PrimaryButton"
-theme_override_font_sizes/font_size = 14
 text = "发送"
 
 [node name="StopButton" type="Button" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 tooltip_text = "停止"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"DangerButton"
-theme_override_font_sizes/font_size = 14
 text = "停止"
 
 [connection signal="gui_input" from="VBoxContainer/InputBox/UserInput" to="." method="_on_user_input_gui_input"]

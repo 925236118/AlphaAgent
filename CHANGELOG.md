@@ -16,7 +16,7 @@ All notable changes to this project will be documented in this file.
   - 添加点击获取模型列表功能。
   - 重构调用模型节点为随时创建，减少用户 secret_key 泄露风险。
 - **角色功能**:
-  - 开发角色提示词功能。并添加默认角色
+  - 开发角色提示词功能。添加三个默认角色以及相关提示词和工具配置。
 - **对话功能**:
   - 添加停止和错误展示功能。
   - 添加结束提示，并添加重新发送功能。
@@ -45,12 +45,16 @@ All notable changes to this project will be documented in this file.
 - 修复模型管理中显示的支持标签错误问题。
 - 删除项目中存在的安全密钥。
 - 修复所有的按钮的Tooltip文案([#2](https://github.com/925236118/AlphaAgent/issues/2))
+
 ### 🔧 Improvements (优化改进)
 - 移除历史记录文件并调整设置路径初始化逻辑。
 - 插件启动单例模式完善。
 - 抽象出 AgentModelUtils 类作为所有模型通用工具集。
 - 更新部分工具描述和参数限制。
 - 精简提示词。
+- 修改帮助内容
+- 为全局设置文件添加版本号，防止多版本之间互相影响
+- 添加爱赞助链接
 
 ## [0.2.0] - 2025-12-04
 

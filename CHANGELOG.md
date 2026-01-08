@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.3.0] - 2025-12-30
+## [0.3.0] - 2025-01-09
 
 ### ✨ New Features (新增功能)
 - **UI**:

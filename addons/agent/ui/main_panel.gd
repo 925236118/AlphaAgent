@@ -283,14 +283,16 @@ func on_agent_think(think: String):
 
 func on_agent_message(msg: String):
 	current_message += msg
-	current_message_item.update_message_content(current_message)
-	scroll_message_container_to_bottom()
-	current_message_item.message_id = current_random_message_id
+	if current_message_item:
+		current_message_item.update_message_content(current_message)
+		scroll_message_container_to_bottom()
+		current_message_item.message_id = current_random_message_id
 
 func on_response_use_tool():
-	current_message_item.response_use_tool()
+	if current_message_item:
+		current_message_item.response_use_tool()
+		current_message_item.message_id = current_random_message_id
 	scroll_message_container_to_bottom()
-	current_message_item.message_id = current_random_message_id
 
 func on_use_tool(tool_calls: Array):
 	# 兼容两种ToolCallsInfo类型
@@ -356,7 +358,7 @@ func on_click_new_chat_button():
 	input_container.disable = false
 	show_container(chat_container)
 	plan_list.update_list([])
-	
+
 
 func clear():
 	welcome_message.show()
@@ -441,7 +443,7 @@ func on_title_generate_finish(message: String, _think_msg: String):
 	if current_history_item:
 		current_history_item.title = current_title
 	history_and_title.update_history(current_id, current_history_item)
-	
+
 	current_title_chat.queue_free()
 
 # 生成随机字符串函数
@@ -614,4 +616,3 @@ func on_copy_output_message(message_item_node: AgentChatMessageItem):
 
 func scroll_message_container_to_bottom():
 	message_container.get_v_scroll_bar().set_as_ratio(1.0)
-	

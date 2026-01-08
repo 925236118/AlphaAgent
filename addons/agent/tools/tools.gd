@@ -20,8 +20,13 @@ var readonly_tools_list: Array[String] = [
 
 func test():
 	var tool = AgentModelUtils.ToolCallsInfo.new()
-	tool.function.name = "execute_command"
-	tool.function.arguments = JSON.stringify({"command":"timeout", "args": ["/t", "3"]})
+	tool.function.name = "update_script_file_content"
+	tool.function.arguments = JSON.stringify({
+		"script_path": "res://new_script.gd",
+		"content": "test 11111",
+		"line": 10,
+		"delete_line_count": 1,
+	})
 	#var image = load("res://icon.svg")
 	print(await use_tool(tool))
 	#print(ProjectSettings.get_setting("input"))
@@ -469,7 +474,7 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "update_script_file_content",
-				"description": "直接调用编辑器接口更新脚本文件的内容。根据行号和删除的行数量，在对应位置删除若干行后插入内容。如果不删除，则会在对应行之前添加一行内容。可以使用本工具添加、删除、替换文件中的行内容。文件内容是以\n换行的字符串。**依赖**：需要打开的脚本文件必须存在。",
+				"description": "直接调用编辑器接口更新脚本文件的内容。根据行号和删除的行数量，在对应行删除若干行然后插入内容。如果不删除，则会在对应行**之前**添加内容。可以使用本工具添加、删除、替换文件中的行内容。文件内容是以转义字符回车换行的字符串。**注意**：尽量不要以全文的方式修改，而是指定最小需要修改的行号来修改内容。可以多次调用本工具。**限制**：代码修改后行号会发生变化，必须在调用后使用read_file读取修改结果。**依赖**：需要打开的脚本文件必须存在。",
 				"parameters": {
 					"type": "object",
 					"properties": {
@@ -479,11 +484,11 @@ func get_tools_list() -> Array[Dictionary]:
 						},
 						"content": {
 							"type": "string",
-							"description": "需要写入的文件内容。",
+							"description": "需要写入的文件内容。多行内容应以转义字符回车分割，代码缩进应以转义制表符分割。**示例**：正确内容：\ttest line\n\ttest line 2，错误内容：\\ttest line\\n\\ttest line 2",
 						},
 						"line": {
 							"type": "number",
-							"description": "可以指定行号， 默认是0。",
+							"description": "可以指定行号，从1开始，默认是1。",
 						},
 						"delete_line_count": {
 							"type": "number",
@@ -769,8 +774,8 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 					else:
 						end = min(total_lines, end)
 					end = min(total_lines + 1, end + 1, start_line + 501)
-					
-					var file_content = "\n".join(file_lines.slice(max(start_line - 1, 0), end))
+
+					var file_content = file_lines.slice(max(start_line - 1, 0), end)
 					result = {
 						"file_path": path,
 						"file_uid": ResourceUID.path_to_uid(path),
@@ -1032,8 +1037,8 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 
 			if not json == null and json.has("script_path") and json.has("content") and json.has("line") and json.has("delete_line_count"):
 				var script_path = json.script_path
-				var content = json.content
-				var line = json.line
+				var content := json.content as String
+				var line := json.line as int
 				var delete_line_count = json.delete_line_count
 				var resource: Script = load(script_path)
 
@@ -1042,8 +1047,8 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 
 				var editor: CodeEdit = EditorInterface.get_script_editor().get_current_editor().get_base_editor()
 				for i in delete_line_count:
-					editor.remove_line_at(line)
-				editor.insert_line_at(line, content)
+					editor.remove_line_at(max(line - 1, 0))
+				editor.insert_line_at(max(line - 1, 0), content)
 
 				await get_tree().process_frame
 				var save_input_key := InputEventKey.new()
@@ -1055,8 +1060,8 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 				EditorInterface.get_base_control().get_viewport().push_input(save_input_key)
 
 				result = {
-					"file_content": editor.text,
-					"success": "更新成功"
+					#"file_content": editor.text,
+					"success": "更新成功，使用read_file工具查看结果。"
 				}
 		"update_scene_node_property":
 			var json = JSON.parse_string(tool_call.function.arguments)
@@ -1098,7 +1103,7 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 				while not thread.is_started():
 					# 等待线程启动
 					await get_tree().process_frame
-				
+
 				get_tree().create_timer(30.0).timeout.connect(func():
 					#print("计时结束")
 					#print(thread)

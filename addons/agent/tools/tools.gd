@@ -15,21 +15,19 @@ var readonly_tools_list: Array[String] = [
 	"get_image_info",
 	"get_tileset_info",
 	"read_file",
-	"check_script_error"
+	"check_script_error",
+	"global_search"
 ]
 
 func test():
 	var tool = AgentModelUtils.ToolCallsInfo.new()
-	tool.function.name = "add_node_to_scene"
-	tool.function.arguments = JSON.stringify({"builtin_node_name":"", "packed_scene_path":"res://test/NewNode.tscn", "target_scene_path":"res://test/test.tscn", "parent_node_name":"."})
+	tool.function.name = "global_search"
+	tool.function.arguments = JSON.stringify({"text":"get_tools_list", "path":""})
 
 	#var image = load("res://icon.svg")
 	print(await use_tool(tool))
 	#print(ProjectSettings.get_setting("input"))
 	#var process_id = OS.create_instance(["--headless", "--script", "res://game.gd"])
-	
-	pass
-
 
 
 # 获取工具名称列表
@@ -74,6 +72,11 @@ func get_function_name_list():
 			"readonly": true,
 			"group": "文件操作",
 			"description": "读取文件内容。"
+		},
+		"global_search": {
+			"readonly": true,
+			"group": "全局搜索",
+			"description": "全局搜索脚本文件。"
 		},
 		"create_folder": {
 			"readonly": false,
@@ -339,6 +342,28 @@ func get_tools_list() -> Array[Dictionary]:
 						}
 					},
 					"required": ["path", "start", "end"]
+				}
+			}
+		},
+		# global_search
+		{
+			"type": "function",
+			"function": {
+				"name": "global_search",
+				"description": "全局搜索脚本文件。必须指定需要搜索的内容text，如果希望指定路径搜索则必须指定res://开头的绝对路径，目前默认只能搜索.gd后缀文件。",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"text": {
+							"type": "string",
+							"description": "需要搜索的关键字，不得使用诸如func, return, if 等gds原生关键字，不能为空。",
+						},
+						"path": {
+							"type": "string",
+							"description": "需要查找的文件目录，要么为\"\"，要么必须是以res://开头的绝对路径。",
+						}
+					},
+					"required": []
 				}
 			}
 		},
@@ -847,6 +872,19 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 						"total_lines": total_lines
 					}
 
+		"global_search":
+			var json = JSON.parse_string(tool_call.function.arguments)
+			if not json == null and json.has("text"):
+				var text = json.text
+				var path = json.path
+				var search_results = []
+				search_results = await search_recursive(text, search_results, path)
+				#for search_result in search_results:
+					#print(search_result)
+				result = {
+					"result": search_results
+				}
+
 		"create_folder":
 			var json = JSON.parse_string(tool_call.function.arguments)
 			if not json == null and json.has("path"): # 如果有路径就执行
@@ -1296,6 +1334,37 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 		}
 	return JSON.stringify(result)
 
+
+# 全局搜索（递归）
+func search_recursive(text: String, results: Array, path: String = "res://",  ext: String = ".gd"):
+	var dir = DirAccess.open(path)
+	if not dir: 
+		return []
+	
+	dir.list_dir_begin()
+	var item = dir.get_next()
+	
+	while item != "":
+		var full_path = path.path_join(item)
+		
+		if dir.current_is_dir():
+			if not item.begins_with("."):
+				search_recursive(text, results, full_path, ext)
+		elif item.get_extension() == ext.trim_prefix("."):
+			var file = FileAccess.open(full_path, FileAccess.READ)
+			if file:
+				var line_num = 1
+				while not file.eof_reached():
+					var line_content = file.get_line()
+					if line_content.contains(text):
+						results.append({"path": full_path, "line": line_num, "content": line_content})
+					line_num += 1
+				file.close()
+		
+		item = dir.get_next()
+	return results
+
+
 #写入文件
 func write_file(path: String, content: String) -> bool:
 	DirAccess.make_dir_recursive_absolute(path)
@@ -1315,6 +1384,8 @@ func write_file(path: String, content: String) -> bool:
 func create_script(inherits: String, path: String) -> bool:
 	if ResourceLoader.exists(path):
 		return false
+	
+#	EditorFileDialog
 	
 	if ClassDB.class_exists(inherits) or ((inherits.begins_with("res://") and inherits.ends_with(".gd")) and ResourceLoader.exists(inherits)):
 		var dialog = ScriptCreateDialog.new()

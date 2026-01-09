@@ -30,6 +30,12 @@ func test():
 	#var process_id = OS.create_instance(["--headless", "--script", "res://game.gd"])
 
 
+var special_agent_chars = {
+	"newline": {"origin_char": '{$$ALPHA&AGENT&NEWLINE&CHAR$$}', "replace_char": "\n"},
+	"tab": {"origin_char": '{$$ALPHA&AGENT&TAB&CHAR$$}', "replace_char": "\t"},
+	"quote": {"origin_char": '{$$ALPHA&AGENT&QUOTE&CHAR$$}', "replace_char": "\""},
+}
+
 # 获取工具名称列表
 func get_function_name_list():
 	return {
@@ -561,31 +567,40 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "update_script_file_content",
-				"description": "直接调用编辑器接口更新脚本文件的内容。根据行号和删除的行数量，在对应行删除若干行然后插入内容。如果不删除，则会在对应行**之前**添加内容。可以使用本工具添加、删除、替换文件中的行内容。文件内容是以转义字符回车换行的字符串。**注意**：尽量不要以全文的方式修改，而是指定最小需要修改的行号来修改内容。可以多次调用本工具。**限制**：代码修改后行号会发生变化，必须在调用后使用read_file读取修改结果。**依赖**：需要打开的脚本文件必须存在。",
+				"description": "直接调用编辑器接口更新脚本文件的内容。根据行号和删除的行数量，在对应行删除若干行然后插入内容。如果不删除，则会在对应行**之前**添加内容。**依赖**：使用本工具修改代码后，代码的行号会发生变化，必须使用read_file工具查看执行结果。\n\n**特殊标记系统（ALPHA_AGENT专用）**：\n为避免JSON转义问题，请使用以下特殊标记代替转义字符：\n- 换行符：`{ALPHA_AGENT_NEWLINE_CHAR}`\n- 制表符：`{ALPHA_AGENT_TAB_CHAR}`\n- 双引号：`{ALPHA_AGENT_QUOTE_CHAR}`（仅当需要在字符串字面量中时）\n\n工具会自动将这些标记转换为对应的实际字符。**注意**：这些标记仅在本工具中有效，其他工具不会识别。\n\n**示例**：\n想要插入：`\\tprint(\"hello\")` 后换行，再写 `\\tprint(\"world\")`\n应该写成：`{ALPHA_AGENT_TAB_CHAR}print({ALPHA_AGENT_QUOTE_CHAR}hello{ALPHA_AGENT_QUOTE_CHAR}){ALPHA_AGENT_NEWLINE_CHAR}{ALPHA_AGENT_TAB_CHAR}print({ALPHA_AGENT_QUOTE_CHAR}world{ALPHA_AGENT_QUOTE_CHAR})`".format({
+					"ALPHA_AGENT_NEWLINE_CHAR": special_agent_chars.newline.origin_char,
+					"ALPHA_AGENT_TAB_CHAR": special_agent_chars.tab.origin_char,
+					"ALPHA_AGENT_QUOTE_CHAR": special_agent_chars.quote.origin_char,
+				}),
 				"parameters": {
 					"type": "object",
 					"properties": {
 						"script_path": {
-							"type": "string",
-							"description": "需要打开的资源路径，必须是以res://开头的绝对路径。**依赖**：需要打开的脚本文件必须存在。",
+						"type": "string",
+						"description": "需要打开的资源路径，必须是以res://开头的绝对路径。文件必须存在。"
 						},
 						"content": {
 							"type": "string",
-							"description": "需要写入的文件内容。多行内容应以转义字符回车分割，代码缩进应以转义制表符分割。**示例**：正确内容：\ttest line\n\ttest line 2，错误内容：\\ttest line\\n\\ttest line 2",
+							"description": "需要写入的文件内容。**必须使用ALPHA_AGENT特殊标记**：\n\n**可用标记**：\n1. `{ALPHA_AGENT_NEWLINE_CHAR}` - 表示换行（\\n）\n2. `{ALPHA_AGENT_TAB_CHAR}` - 表示制表符缩进（\\t）\n3. `{ALPHA_AGENT_QUOTE_CHAR}` - 表示双引号（\"）\n\n**重要规则**：\n- 在JSON中直接写入这些标记字符串，不要进行额外转义\n- 例如：直接写 `{ALPHA_AGENT_NEWLINE_CHAR}`，不要写 `\\\\{ALPHA_AGENT_NEWLINE_CHAR\\\\}`\n- 工具收到后会进行替换\n\n**示例代码**：\n1. 单行带缩进：`{ALPHA_AGENT_TAB_CHAR}var x = 0`\n2. 两行带缩进：`{ALPHA_AGENT_TAB_CHAR}var a = 1{ALPHA_AGENT_NEWLINE_CHAR}{ALPHA_AGENT_TAB_CHAR}var b = 2`\n3. 带字符串：`print({ALPHA_AGENT_QUOTE_CHAR}test{ALPHA_AGENT_QUOTE_CHAR})`\n4. 复杂示例（Godot脚本）：\n`{ALPHA_AGENT_TAB_CHAR}func _ready():{ALPHA_AGENT_NEWLINE_CHAR}{ALPHA_AGENT_TAB_CHAR}{ALPHA_AGENT_TAB_CHAR}print({ALPHA_AGENT_QUOTE_CHAR}Hello{ALPHA_AGENT_QUOTE_CHAR})`".format({
+								"ALPHA_AGENT_NEWLINE_CHAR": special_agent_chars.newline.origin_char,
+								"ALPHA_AGENT_TAB_CHAR": special_agent_chars.tab.origin_char,
+								"ALPHA_AGENT_QUOTE_CHAR": special_agent_chars.quote.origin_char,
+							})
 						},
 						"line": {
 							"type": "number",
-							"description": "可以指定行号，从1开始，默认是1。",
+							"description": "行号，从1开始。建议使用整数（如2而不是2.0）。"
 						},
 						"delete_line_count": {
 							"type": "number",
-							"description": "需要删除的行的数量，默认是0，为0表示不删除。",
+							"description": "需要删除的行的数量，为0表示不删除。建议使用整数。"
 						}
 					},
 					"required": ["script_path", "content", "line", "delete_line_count"]
 				}
 			}
 		},
+
 		# update_scene_node_property
 		{
 			"type": "function",
@@ -1053,7 +1068,7 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 					result = {
 						"open_error": error_string(FileAccess.get_open_error())
 					}
-		
+
 		"create_script":
 			var json = JSON.parse_string(tool_call.function.arguments)
 			if not json == null and json.has("inherits") and json.has("path"):
@@ -1071,7 +1086,7 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 					result = {
 						"error": "提供的\"inherits\"不存在或是提供的\"path\"已存在脚本文件"
 					}
-		
+
 		"get_image_info":
 			var json = JSON.parse_string(tool_call.function.arguments)
 			if not json == null and json.has("image_path"):
@@ -1171,6 +1186,10 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 				var line := json.line as int
 				var delete_line_count = json.delete_line_count
 				var resource: Script = load(script_path)
+
+				for key in special_agent_chars.keys():
+					var special_agent_char = special_agent_chars[key]
+					content = content.replace(special_agent_char.origin_char, special_agent_char.replace_char)
 
 				EditorInterface.set_main_screen_editor("Script")
 				EditorInterface.edit_script(resource)
@@ -1338,15 +1357,15 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 # 全局搜索（递归）
 func search_recursive(text: String, results: Array, path: String = "res://",  ext: String = ".gd"):
 	var dir = DirAccess.open(path)
-	if not dir: 
+	if not dir:
 		return []
-	
+
 	dir.list_dir_begin()
 	var item = dir.get_next()
-	
+
 	while item != "":
 		var full_path = path.path_join(item)
-		
+
 		if dir.current_is_dir():
 			if not item.begins_with("."):
 				search_recursive(text, results, full_path, ext)
@@ -1360,7 +1379,7 @@ func search_recursive(text: String, results: Array, path: String = "res://",  ex
 						results.append({"path": full_path, "line": line_num, "content": line_content})
 					line_num += 1
 				file.close()
-		
+
 		item = dir.get_next()
 	return results
 
@@ -1384,9 +1403,9 @@ func write_file(path: String, content: String) -> bool:
 func create_script(inherits: String, path: String) -> bool:
 	if ResourceLoader.exists(path):
 		return false
-	
+
 #	EditorFileDialog
-	
+
 	if ClassDB.class_exists(inherits) or ((inherits.begins_with("res://") and inherits.ends_with(".gd")) and ResourceLoader.exists(inherits)):
 		var dialog = ScriptCreateDialog.new()
 		dialog.config(inherits, path)
@@ -1395,7 +1414,7 @@ func create_script(inherits: String, path: String) -> bool:
 		await get_tree().process_frame
 		dialog.get_ok_button().pressed.emit()
 		return true
-	
+
 	return false
 
 #设置某个场景中的某个节点的某个属性为某个值
@@ -1703,84 +1722,84 @@ func add_node_to_scene(
 	#- 如果都为空，返回错误
 	#- target_scene_path 必须非空
 	#"""
-	
+
 	# 1. 参数验证
 	if builtin_node_name != "" and packed_scene_path != "":
 		push_error("错误：builtin_node_name 和 packed_scene_path 不能同时非空")
 		return false
-	
+
 	if builtin_node_name == "" and packed_scene_path == "":
 		push_error("错误：builtin_node_name 和 packed_scene_path 不能同时为空")
 		return false
-	
+
 	if target_scene_path == "":
 		push_error("错误：target_scene_path 不能为空")
 		return false
-	
+
 	# 2. 打开目标场景
-	
+
 	# 保存当前场景状态（如果有修改）
 	if EditorInterface.get_edited_scene_root():
 		# 检查当前场景是否有未保存的修改
 		var current_scene = EditorInterface.get_edited_scene_root()
 		if current_scene and current_scene.get_scene_file_path() != target_scene_path:
 			print("警告：切换场景前，请确保当前场景已保存")
-	
+
 	# 打开目标场景
 	await EditorInterface.get_base_control().get_tree().process_frame
 	EditorInterface.open_scene_from_path(target_scene_path)
 	# 等待场景加载（可能需要一帧的时间）
 	await EditorInterface.get_base_control().get_tree().process_frame
-	
+
 	# 3. 获取目标场景根节点
 	var target_scene_root = EditorInterface.get_edited_scene_root()
 	if not target_scene_root:
 		push_error("错误：无法获取目标场景根节点")
 		return false
-	
+
 	# 4. 创建新节点
 	var new_node: Node
-	
+
 	if builtin_node_name != "":
 		# 创建内置节点
 		if not ClassDB.class_exists(builtin_node_name):
 			push_error("错误：节点类型不存在: " + builtin_node_name)
 			return false
-		
+
 		new_node = ClassDB.instantiate(builtin_node_name)
 		if not new_node:
 			push_error("错误：无法创建节点: " + builtin_node_name)
 			return false
-		
+
 		# 为内置节点设置默认名称
 		new_node.name = get_unique_node_name(target_scene_root, builtin_node_name, parent_node_name)
 		print("创建内置节点: " + builtin_node_name + " -> " + new_node.name)
-		
+
 	else:
 		# 加载并实例化打包场景
 		if not ResourceLoader.exists(packed_scene_path):
 			push_error("错误：场景文件不存在: " + packed_scene_path)
 			return false
-		
+
 		var packed_scene = load(packed_scene_path)
 		if not packed_scene or not packed_scene is PackedScene:
 			push_error("错误：无法加载场景文件: " + packed_scene_path)
 			return false
-		
+
 		new_node = packed_scene.instantiate()
-		
+
 		# 如果场景节点没有名称，设置一个
 		if new_node.name == "" or new_node.name == "Root":
 			new_node.name = get_unique_node_name(
-				target_scene_root, 
+				target_scene_root,
 				packed_scene_path.get_file().get_basename(),
 				parent_node_name
 			)
 		print("实例化场景: " + packed_scene_path + " -> " + new_node.name)
-	
+
 	# 5. 查找父节点
 	var parent_node: Node = target_scene_root
-	
+
 	if parent_node_name != "":
 		# 尝试获取父节点
 		parent_node = target_scene_root.get_node_or_null(NodePath(parent_node_name))
@@ -1789,19 +1808,19 @@ func add_node_to_scene(
 			new_node.free()
 			return false
 		print("父节点: " + parent_node.name)
-	
+
 	# 6. 添加节点
 	parent_node.add_child(new_node)
 	new_node.owner = target_scene_root
-	
+
 	# 7. 选中新添加的节点
 	var selection = EditorInterface.get_selection()
 	selection.clear()
 	selection.add_node(new_node)
-	
+
 	# 8. 确保场景保存标记
 	mark_scene_as_unsaved(target_scene_root)
-	
+
 	print("成功添加节点到场景: " + target_scene_path)
 	return true
 
@@ -1812,26 +1831,26 @@ func get_unique_node_name(scene_root: Node, base_name: String, parent_path: Stri
 		parent = scene_root.get_node_or_null(NodePath(parent_path))
 		if not parent:
 			parent = scene_root
-	
+
 	var count = 1
 	var name = base_name
-	
+
 	# 检查父节点及其所有子节点
 	while true:
 		var name_exists = false
-		
+
 		# 检查父节点的直接子节点
 		for child in parent.get_children():
 			if child.name == name:
 				name_exists = true
 				break
-		
+
 		if not name_exists:
 			break
-		
+
 		name = base_name + str(count)
 		count += 1
-	
+
 	return name
 
 # 标记场景为未保存状态
@@ -1842,9 +1861,9 @@ func mark_scene_as_unsaved(scene_root: Node):
 		var node = nodes_to_check.pop_front()
 		if node.owner != scene_root and node.name != scene_root.name:
 			node.owner = scene_root
-		
+
 		for child in node.get_children():
 			nodes_to_check.append(child)
-	
+
 	# 刷新文件系统，确保更改被识别
 	EditorInterface.get_resource_filesystem().scan()

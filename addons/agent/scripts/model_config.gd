@@ -220,6 +220,24 @@ class ModelManager:
 		qwen_next_80b_a3b_thinking.supplier_id = siliconflow_supplier.id
 		siliconflow_supplier.models.append(qwen_next_80b_a3b_thinking)
 
+		# 添加默认OpenRouter供应商
+		var openrouter_supplier = SupplierInfo.new()
+		openrouter_supplier.name = "Open Router"
+		openrouter_supplier.base_url = "https://openrouter.ai/api"
+		openrouter_supplier.api_key = ""
+		openrouter_supplier.provider = "openai"
+		suppliers.append(openrouter_supplier)
+
+		var claude_sonnet_4_5 = ModelInfo.new()
+		claude_sonnet_4_5.name = "claude-sonnet-4.5"
+		claude_sonnet_4_5.model_name = "anthropic/claude-sonnet-4.5"
+		claude_sonnet_4_5.supports_thinking = false
+		claude_sonnet_4_5.supports_tools = true
+		claude_sonnet_4_5.max_tokens = 64 * 1024
+		claude_sonnet_4_5.active = false
+		claude_sonnet_4_5.supplier_id = openrouter_supplier.id
+		openrouter_supplier.models.append(claude_sonnet_4_5)
+
 		# 添加默认OpenAI供应商
 		var openai_supplier = SupplierInfo.new()
 		openai_supplier.name = "OPEN AI"

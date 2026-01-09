@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=25 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_i5act"]
@@ -51,11 +51,6 @@ corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
-
-[sub_resource type="LabelSettings" id="LabelSettings_6rfr6"]
-line_spacing = 6.0
-font_size = 18
-font_color = Color(0.7666196, 0.76661956, 0.76661956, 0.5254902)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5v6i3"]
 bg_color = Color(0.14406255, 0.14406255, 0.14406249, 1)
@@ -290,11 +285,9 @@ stretch_mode = 5
 
 [node name="Description" type="Label" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/WelcomeMessage/PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 10
 text = "帮助构建游戏项目
 帮助学习Godot插件
 帮助梳理已有功能"
-label_settings = SubResource("LabelSettings_6rfr6")
 horizontal_alignment = 1
 
 [node name="MessageContainer" type="ScrollContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer"]
@@ -357,6 +350,16 @@ tooltip_text = "打开作者页面"
 text = "@moshanzhu"
 underline = 1
 uri = "https://www.moshangzhu.com.cn/"
+
+[node name="LinkButton4" type="LinkButton" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/BottomMarginContainer/HBoxContainer"]
+self_modulate = Color(0.23921569, 0.43137255, 0.67058825, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+tooltip_text = "打开Alpha爱赞助页面"
+text = "爱赞助链接"
+underline = 1
+uri = "https://azz.ee/godotalphaagent"
 
 [node name="Label2" type="Label" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/BottomMarginContainer/HBoxContainer"]
 self_modulate = Color(0.46666667, 0.46666667, 0.46666667, 1)

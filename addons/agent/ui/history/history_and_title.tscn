@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://dob5hdboaqcnu"]
+[gd_scene load_steps=12 format=3 uid="uid://dob5hdboaqcnu"]
 
 [ext_resource type="Texture2D" uid="uid://btnh1plrm3etf" path="res://addons/agent/icons/newicon/Icon_arrowdown.svg" id="1_0u44n"]
 [ext_resource type="Script" uid="uid://0iv7f02886de" path="res://addons/agent/ui/history/history_and_title.gd" id="1_a7crv"]
@@ -9,8 +9,6 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
-
-[sub_resource type="LabelSettings" id="LabelSettings_5v6i3"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a7crv"]
 bg_color = Color(0.15686275, 0.15686275, 0.15686275, 1)
@@ -111,7 +109,6 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "新对话"
-label_settings = SubResource("LabelSettings_5v6i3")
 clip_text = true
 text_overrun_behavior = 3
 
@@ -221,7 +218,23 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_i5act")
 flat = true
 expand_icon = true
 
-[connection signal="mouse_entered" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/TodayHistoryContainer/HistoryMessageItem" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/TodayHistoryContainer/HistoryMessageItem" method="_on_mouse_entered"]
-[connection signal="mouse_exited" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/TodayHistoryContainer/HistoryMessageItem" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/TodayHistoryContainer/HistoryMessageItem" method="_on_mouse_exited"]
-[connection signal="mouse_entered" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/TodayHistoryContainer/@PanelContainer@31432" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/TodayHistoryContainer/@PanelContainer@31432" method="_on_mouse_entered"]
-[connection signal="mouse_exited" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/TodayHistoryContainer/@PanelContainer@31432" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/TodayHistoryContainer/@PanelContainer@31432" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/HistoryMessageItem" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/HistoryMessageItem" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/HistoryMessageItem" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/HistoryMessageItem" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21290" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21290" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21290" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21290" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21291" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21291" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21291" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21291" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21292" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21292" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21292" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21292" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21293" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21293" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21293" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21293" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21294" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21294" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21294" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/YestodayHistoryContainer/@PanelContainer@21294" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/HistoryMessageItem" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/HistoryMessageItem" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/HistoryMessageItem" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/HistoryMessageItem" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/@PanelContainer@21295" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/@PanelContainer@21295" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/@PanelContainer@21295" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/@PanelContainer@21295" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/@PanelContainer@21296" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/@PanelContainer@21296" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/@PanelContainer@21296" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/@PanelContainer@21296" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/@PanelContainer@21297" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/@PanelContainer@21297" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/@PanelContainer@21297" to="HistoryList/Panel/MarginContainer/ScrollContainer/VBoxContainer/ToweekHistoryContainer/@PanelContainer@21297" method="_on_mouse_exited"]

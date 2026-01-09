@@ -5,6 +5,7 @@ extends EditorPlugin
 const project_alpha_dir: String = "res://.alpha/"
 
 const MAIN_PANEL = preload("uid://baqbjml8ahgng")
+const CONFIG = preload("uid://b4bcww0bmnxt0")
 
 func _enable_plugin() -> void:
 	pass
@@ -57,9 +58,9 @@ class GlobalSetting:
 			setting_dir = EditorInterface.get_editor_paths().get_config_dir() + "/.alpha/"
 		else:
 			setting_dir = OS.get_config_dir() + ("/godot/.alpha/" if OS.get_name() == "Linux" else "/Godot/.alpha/")
-		setting_file = setting_dir + "setting.json"
-		models_file = setting_dir + "models.json"
-		roles_file = setting_dir + "roles.json"
+		setting_file = setting_dir + "setting.{version}.json".format({"version": CONFIG.alpha_version})
+		models_file = setting_dir + "models.{version}.json".format({"version": CONFIG.alpha_version})
+		roles_file = setting_dir + "roles.{version}.json".format({"version": CONFIG.alpha_version})
 
 
 	func load_global_setting():
@@ -97,7 +98,7 @@ class GlobalSetting:
 		file.store_string(JSON.stringify(dict))
 		file.close()
 
-static  var global_setting := GlobalSetting.new()
+static var global_setting := GlobalSetting.new()
 
 static var project_memory: Array[String] = []
 static var global_memory: Array[String] = []

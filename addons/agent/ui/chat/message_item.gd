@@ -59,10 +59,10 @@ func _ready() -> void:
 	re_send_button.pressed.connect(resend.emit)
 	copy_button.pressed.connect(copy.emit)
 
-	if AlphaAgentPlugin.global_setting.auto_expand_think:
-		expand_button.button_pressed = true
-		set_expand_icon_flip(true)
-		think_content.visible = true
+	var auto_expand_think = AlphaAgentPlugin.global_setting.auto_expand_think
+	expand_button.button_pressed = auto_expand_think
+	set_expand_icon_flip(auto_expand_think)
+	think_content.visible = auto_expand_think
 
 func _process(delta: float) -> void:
 	if thinking:

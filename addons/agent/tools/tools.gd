@@ -2,8 +2,6 @@
 class_name AgentTools
 extends Node
 
-@export_tool_button("测试") var test_action = test
-
 var thread: Thread = null
 
 # 只读工具列表
@@ -18,17 +16,6 @@ var readonly_tools_list: Array[String] = [
 	"check_script_error",
 	"global_search"
 ]
-
-func test():
-	var tool = AgentModelUtils.ToolCallsInfo.new()
-	tool.function.name = "global_search"
-	tool.function.arguments = JSON.stringify({"text":"get_tools_list", "path":""})
-
-	#var image = load("res://icon.svg")
-	print(await use_tool(tool))
-	#print(ProjectSettings.get_setting("input"))
-	#var process_id = OS.create_instance(["--headless", "--script", "res://game.gd"])
-
 
 var special_agent_chars = {
 	"newline": {"origin_char": '{$$ALPHA&AGENT&NEWLINE&CHAR$$}', "replace_char": "\n"},
@@ -369,7 +356,7 @@ func get_tools_list() -> Array[Dictionary]:
 							"description": "需要查找的文件目录，要么为\"\"，要么必须是以res://开头的绝对路径。",
 						}
 					},
-					"required": []
+					"required": ["text"]
 				}
 			}
 		},
@@ -891,7 +878,7 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 			var json = JSON.parse_string(tool_call.function.arguments)
 			if not json == null and json.has("text"):
 				var text = json.text
-				var path = json.path
+				var path = json.get("path", "res://")
 				var search_results = []
 				search_results = await search_recursive(text, search_results, path)
 				#for search_result in search_results:

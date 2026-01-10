@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://c15oykpyjj7vd"]
+
+[ext_resource type="Script" uid="uid://bfmj71l4urlcg" path="res://addons/agent/tools/tools_test.gd" id="1_eee58"]
+[ext_resource type="PackedScene" uid="uid://cq2jo5hlpns6j" path="res://addons/agent/tools/tools.tscn" id="2_rab50"]
+
+[node name="ToolsTest" type="Node"]
+script = ExtResource("1_eee58")
+
+[node name="Tools" parent="." instance=ExtResource("2_rab50")]

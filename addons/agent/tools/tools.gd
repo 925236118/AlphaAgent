@@ -23,6 +23,9 @@ var special_agent_chars = {
 	"quote": {"origin_char": '{$$ALPHA&AGENT&QUOTE&CHAR$$}', "replace_char": "\""},
 }
 
+const IGNORE_DIRS: Array[String] = [".alpha", ".godot", "*.uid", "addons", "*.import"]
+
+
 # 获取工具名称列表
 func get_function_name_list():
 	return {
@@ -1342,33 +1345,80 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 
 
 # 全局搜索（递归）
-func search_recursive(text: String, results: Array, path: String = "res://",  ext: String = ".gd"):
+func search_recursive(text: String, results: Array, path: String = "res://", 
+extensions: Array[String] = [".gd", ".md", ".gdshader"]):
+	
 	var dir = DirAccess.open(path)
 	if not dir:
 		return []
-
+	
 	dir.list_dir_begin()
 	var item = dir.get_next()
-
+	
 	while item != "":
 		var full_path = path.path_join(item)
-
+		
 		if dir.current_is_dir():
-			if not item.begins_with("."):
-				search_recursive(text, results, full_path, ext)
-		elif item.get_extension() == ext.trim_prefix("."):
-			var file = FileAccess.open(full_path, FileAccess.READ)
-			if file:
-				var line_num = 1
-				while not file.eof_reached():
-					var line_content = file.get_line()
-					if line_content.contains(text):
-						results.append({"path": full_path, "line": line_num, "content": line_content})
-					line_num += 1
-				file.close()
-
+			var should_ignore = false
+			for ignore_pattern in IGNORE_DIRS:
+				if item.match(ignore_pattern):
+					should_ignore = true
+					break
+			
+			if not item.begins_with(".") and not should_ignore:
+				search_recursive(text, results, full_path, extensions)
+		
+		else:
+			# 检查文件扩展名是否在允许的列表中
+			var file_ext = "." + item.get_extension()
+			if extensions.has(file_ext):
+				var file = FileAccess.open(full_path, FileAccess.READ)
+				if file:
+					var line_num = 1
+					while not file.eof_reached():
+						var line_content = file.get_line()
+						if line_content.contains(text):
+							results.append({
+								"path": full_path, 
+								"line": line_num, 
+								"content": line_content
+							})
+						line_num += 1
+					file.close()
+		
 		item = dir.get_next()
+	
+	dir.list_dir_end()
 	return results
+
+# 全局搜索（递归）
+#func search_recursive(text: String, results: Array, path: String = "res://",  ext: String = ".gd"):
+	#var dir = DirAccess.open(path)
+	#if not dir:
+		#return []
+	#
+	#dir.list_dir_begin()
+	#var item = dir.get_next()
+	#
+	#while item != "":
+		#var full_path = path.path_join(item)
+		#
+		#if dir.current_is_dir():
+			#if not item.begins_with("."):
+				#search_recursive(text, results, full_path, ext)
+		#elif item.get_extension() == ext.trim_prefix("."):
+			#var file = FileAccess.open(full_path, FileAccess.READ)
+			#if file:
+				#var line_num = 1
+				#while not file.eof_reached():
+					#var line_content = file.get_line()
+					#if line_content.contains(text):
+						#results.append({"path": full_path, "line": line_num, "content": line_content})
+					#line_num += 1
+				#file.close()
+		#
+		#item = dir.get_next()
+	#return results
 
 
 #写入文件

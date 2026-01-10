@@ -1391,36 +1391,6 @@ extensions: Array[String] = [".gd", ".md", ".gdshader"]):
 	dir.list_dir_end()
 	return results
 
-# 全局搜索（递归）
-#func search_recursive(text: String, results: Array, path: String = "res://",  ext: String = ".gd"):
-	#var dir = DirAccess.open(path)
-	#if not dir:
-		#return []
-	#
-	#dir.list_dir_begin()
-	#var item = dir.get_next()
-	#
-	#while item != "":
-		#var full_path = path.path_join(item)
-		#
-		#if dir.current_is_dir():
-			#if not item.begins_with("."):
-				#search_recursive(text, results, full_path, ext)
-		#elif item.get_extension() == ext.trim_prefix("."):
-			#var file = FileAccess.open(full_path, FileAccess.READ)
-			#if file:
-				#var line_num = 1
-				#while not file.eof_reached():
-					#var line_content = file.get_line()
-					#if line_content.contains(text):
-						#results.append({"path": full_path, "line": line_num, "content": line_content})
-					#line_num += 1
-				#file.close()
-		#
-		#item = dir.get_next()
-	#return results
-
-
 #写入文件
 func write_file(path: String, content: String) -> bool:
 	DirAccess.make_dir_recursive_absolute(path)

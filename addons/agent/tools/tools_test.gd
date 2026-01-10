@@ -56,7 +56,7 @@ extends Node
 @export_tool_button("测试 global_search") var read_test_global_search_action = func():
 	var tool = AgentModelUtils.ToolCallsInfo.new()
 	tool.function.name = "global_search"
-	tool.function.arguments = JSON.stringify({"text": "重构整个Agent的各个组件和功能页面的样式"}) # 填写测试参数
+	tool.function.arguments = JSON.stringify({"text": "vertex"}) # 填写测试参数
 	print(await tools.use_tool(tool))
 
 @export_tool_button("测试 check_script_error") var read_test_check_script_error_action = func():

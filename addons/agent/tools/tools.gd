@@ -2,8 +2,6 @@
 class_name AgentTools
 extends Node
 
-@export_tool_button("测试") var test_action = test
-
 var thread: Thread = null
 
 # 只读工具列表
@@ -15,23 +13,18 @@ var readonly_tools_list: Array[String] = [
 	"get_image_info",
 	"get_tileset_info",
 	"read_file",
-	"check_script_error"
+	"check_script_error",
+	"global_search"
 ]
 
-func test():
-	var tool = AgentModelUtils.ToolCallsInfo.new()
-	tool.function.name = "update_script_file_content"
-	tool.function.arguments = JSON.stringify({
-		"script_path": "res://new_script.gd",
-		"content": "test 11111",
-		"line": 10,
-		"delete_line_count": 1,
-	})
-	#var image = load("res://icon.svg")
-	print(await use_tool(tool))
-	#print(ProjectSettings.get_setting("input"))
-	#var process_id = OS.create_instance(["--headless", "--script", "res://game.gd"])
-	pass
+var special_agent_chars = {
+	"newline": {"origin_char": '{$$ALPHA&AGENT&NEWLINE&CHAR$$}', "replace_char": "\n"},
+	"tab": {"origin_char": '{$$ALPHA&AGENT&TAB&CHAR$$}', "replace_char": "\t"},
+	"quote": {"origin_char": '{$$ALPHA&AGENT&QUOTE&CHAR$$}', "replace_char": "\""},
+}
+
+const IGNORE_DIRS: Array[String] = [".alpha", ".godot", "*.uid", "addons", "*.import"]
+
 
 # 获取工具名称列表
 func get_function_name_list():
@@ -76,6 +69,11 @@ func get_function_name_list():
 			"group": "文件操作",
 			"description": "读取文件内容。"
 		},
+		"global_search": {
+			"readonly": true,
+			"group": "全局搜索",
+			"description": "全局搜索脚本文件。"
+		},
 		"create_folder": {
 			"readonly": false,
 			"group": "文件操作",
@@ -86,6 +84,11 @@ func get_function_name_list():
 			"group": "文件操作",
 			"description": "全量替换写入文件内容。"
 		},
+		"create_script": {
+			"readonly": false,
+			"group": "文件操作",
+			"description": "通过继承创建脚本文件。"
+		},
 		"add_script_to_scene": {
 			"readonly": false,
 			"group": "场景操作",
@@ -95,6 +98,11 @@ func get_function_name_list():
 			"readonly": false,
 			"group": "场景操作",
 			"description": "将节点上的脚本分离。"
+		},
+		"add_node_to_scene": {
+			"readonly": false,
+			"group": "场景操作",
+			"description": "添加节点到场景中。"
 		},
 		"check_script_error": {
 			"readonly": true,
@@ -333,6 +341,28 @@ func get_tools_list() -> Array[Dictionary]:
 				}
 			}
 		},
+		# global_search
+		{
+			"type": "function",
+			"function": {
+				"name": "global_search",
+				"description": "全局搜索脚本文件。必须指定需要搜索的内容text，如果希望指定路径搜索则必须指定res://开头的绝对路径，目前默认只能搜索.gd后缀文件。",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"text": {
+							"type": "string",
+							"description": "需要搜索的关键字，不得使用诸如func, return, if 等gds原生关键字，不能为空。",
+						},
+						"path": {
+							"type": "string",
+							"description": "需要查找的文件目录，要么为\"\"，要么必须是以res://开头的绝对路径。",
+						}
+					},
+					"required": ["text"]
+				}
+			}
+		},
 		# create_folder
 		{
 			"type": "function",
@@ -371,6 +401,29 @@ func get_tools_list() -> Array[Dictionary]:
 						}
 					},
 					"required": ["path", "content"]
+				}
+			}
+		},
+		# create_script
+		{
+			"type": "function",
+			"function": {
+				"name": "create_script",
+				"description": "通过继承创建脚本文件。需提供继承的对象类型与所需创建的脚本目录及名称",
+				"parameters": {
+					#需要的参数 inherits: String, path: String,
+					"type": "object",
+					"properties": {
+						"inherits": {
+							"type": "string",
+							"description": "继承的对象类型，必须是Godot的原声对象类型 或 以res://开头的绝对路径。",
+						},
+						"path": {
+							"type": "string",
+							"description": "所需创建的脚本目录。必须是以res://开头并附带脚本名称的绝对路径。"
+						}
+					},
+					"required": ["inherits", "path"]
 				}
 			}
 		},
@@ -413,6 +466,36 @@ func get_tools_list() -> Array[Dictionary]:
 						},
 					},
 					"required": ["scene_path"]
+				}
+			}
+		},
+		# add_node_to_scene
+		{
+			"type": "function",
+			"function": {
+				"name": "add_node_to_scene",
+				"description": "为指定场景添加节点，支持内置节点和用户自定义节点。如果需要向场景添加节点应该优先考虑本工具。",
+				"parameters": {
+					"type": "object",
+					"properties": {
+						"builtin_node_name": {
+							"type": "string",
+							"description": "如果添加的节点是Godot内置节点，本参数传入节点类名，否则为空字符串。",
+						},
+						"packed_scene_path": {
+							"type": "string",
+							"description": "如果添加的节点是用户自定义节点，本参数传入该节点在项目文件里的路径（必须是以res://开头），否则为空字符串。",
+						},
+						"target_scene_path": {
+							"type": "string",
+							"description": "被添加的场景在项目文件里的路径，必须是以res://开头。",
+						},
+						"parent_node_name": {
+							"type": "string",
+							"description": "被挂载的父节点在场景中的路径，从场景的根节点开始，用“/”分隔。",
+						},
+					},
+					"required": ["builtin_node_name", "packed_scene_path", "target_scene_path", "parent_node_name"]
 				}
 			}
 		},
@@ -474,31 +557,40 @@ func get_tools_list() -> Array[Dictionary]:
 			"type": "function",
 			"function": {
 				"name": "update_script_file_content",
-				"description": "直接调用编辑器接口更新脚本文件的内容。根据行号和删除的行数量，在对应行删除若干行然后插入内容。如果不删除，则会在对应行**之前**添加内容。可以使用本工具添加、删除、替换文件中的行内容。文件内容是以转义字符回车换行的字符串。**注意**：尽量不要以全文的方式修改，而是指定最小需要修改的行号来修改内容。可以多次调用本工具。**限制**：代码修改后行号会发生变化，必须在调用后使用read_file读取修改结果。**依赖**：需要打开的脚本文件必须存在。",
+				"description": "直接调用编辑器接口更新脚本文件的内容。根据行号和删除的行数量，在对应行删除若干行然后插入内容。如果不删除，则会在对应行**之前**添加内容。**依赖**：使用本工具修改代码后，代码的行号会发生变化，必须使用read_file工具查看执行结果。\n\n**特殊标记系统（ALPHA_AGENT专用）**：\n为避免JSON转义问题，请使用以下特殊标记代替转义字符：\n- 换行符：`{ALPHA_AGENT_NEWLINE_CHAR}`\n- 制表符：`{ALPHA_AGENT_TAB_CHAR}`\n- 双引号：`{ALPHA_AGENT_QUOTE_CHAR}`（仅当需要在字符串字面量中时）\n\n工具会自动将这些标记转换为对应的实际字符。**注意**：这些标记仅在本工具中有效，其他工具不会识别。\n\n**示例**：\n想要插入：`\\tprint(\"hello\")` 后换行，再写 `\\tprint(\"world\")`\n应该写成：`{ALPHA_AGENT_TAB_CHAR}print({ALPHA_AGENT_QUOTE_CHAR}hello{ALPHA_AGENT_QUOTE_CHAR}){ALPHA_AGENT_NEWLINE_CHAR}{ALPHA_AGENT_TAB_CHAR}print({ALPHA_AGENT_QUOTE_CHAR}world{ALPHA_AGENT_QUOTE_CHAR})`".format({
+					"ALPHA_AGENT_NEWLINE_CHAR": special_agent_chars.newline.origin_char,
+					"ALPHA_AGENT_TAB_CHAR": special_agent_chars.tab.origin_char,
+					"ALPHA_AGENT_QUOTE_CHAR": special_agent_chars.quote.origin_char,
+				}),
 				"parameters": {
 					"type": "object",
 					"properties": {
 						"script_path": {
-							"type": "string",
-							"description": "需要打开的资源路径，必须是以res://开头的绝对路径。**依赖**：需要打开的脚本文件必须存在。",
+						"type": "string",
+						"description": "需要打开的资源路径，必须是以res://开头的绝对路径。文件必须存在。"
 						},
 						"content": {
 							"type": "string",
-							"description": "需要写入的文件内容。多行内容应以转义字符回车分割，代码缩进应以转义制表符分割。**示例**：正确内容：\ttest line\n\ttest line 2，错误内容：\\ttest line\\n\\ttest line 2",
+							"description": "需要写入的文件内容。**必须使用ALPHA_AGENT特殊标记**：\n\n**可用标记**：\n1. `{ALPHA_AGENT_NEWLINE_CHAR}` - 表示换行（\\n）\n2. `{ALPHA_AGENT_TAB_CHAR}` - 表示制表符缩进（\\t）\n3. `{ALPHA_AGENT_QUOTE_CHAR}` - 表示双引号（\"）\n\n**重要规则**：\n- 在JSON中直接写入这些标记字符串，不要进行额外转义\n- 例如：直接写 `{ALPHA_AGENT_NEWLINE_CHAR}`，不要写 `\\\\{ALPHA_AGENT_NEWLINE_CHAR\\\\}`\n- 工具收到后会进行替换\n\n**示例代码**：\n1. 单行带缩进：`{ALPHA_AGENT_TAB_CHAR}var x = 0`\n2. 两行带缩进：`{ALPHA_AGENT_TAB_CHAR}var a = 1{ALPHA_AGENT_NEWLINE_CHAR}{ALPHA_AGENT_TAB_CHAR}var b = 2`\n3. 带字符串：`print({ALPHA_AGENT_QUOTE_CHAR}test{ALPHA_AGENT_QUOTE_CHAR})`\n4. 复杂示例（Godot脚本）：\n`{ALPHA_AGENT_TAB_CHAR}func _ready():{ALPHA_AGENT_NEWLINE_CHAR}{ALPHA_AGENT_TAB_CHAR}{ALPHA_AGENT_TAB_CHAR}print({ALPHA_AGENT_QUOTE_CHAR}Hello{ALPHA_AGENT_QUOTE_CHAR})`".format({
+								"ALPHA_AGENT_NEWLINE_CHAR": special_agent_chars.newline.origin_char,
+								"ALPHA_AGENT_TAB_CHAR": special_agent_chars.tab.origin_char,
+								"ALPHA_AGENT_QUOTE_CHAR": special_agent_chars.quote.origin_char,
+							})
 						},
 						"line": {
 							"type": "number",
-							"description": "可以指定行号，从1开始，默认是1。",
+							"description": "行号，从1开始。建议使用整数（如2而不是2.0）。"
 						},
 						"delete_line_count": {
 							"type": "number",
-							"description": "需要删除的行的数量，默认是0，为0表示不删除。",
+							"description": "需要删除的行的数量，为0表示不删除。建议使用整数。"
 						}
 					},
 					"required": ["script_path", "content", "line", "delete_line_count"]
 				}
 			}
 		},
+
 		# update_scene_node_property
 		{
 			"type": "function",
@@ -785,6 +877,19 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 						"total_lines": total_lines
 					}
 
+		"global_search":
+			var json = JSON.parse_string(tool_call.function.arguments)
+			if not json == null and json.has("text"):
+				var text = json.text
+				var path = json.get("path", "res://")
+				var search_results = []
+				search_results = await search_recursive(text, search_results, path)
+				#for search_result in search_results:
+					#print(search_result)
+				result = {
+					"result": search_results
+				}
+
 		"create_folder":
 			var json = JSON.parse_string(tool_call.function.arguments)
 			if not json == null and json.has("path"): # 如果有路径就执行
@@ -920,6 +1025,17 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 						}
 
 				EditorInterface.get_resource_filesystem().scan()
+		"add_node_to_scene":
+			var json = JSON.parse_string(tool_call.function.arguments)
+			if not json == null and json.has("builtin_node_name") and json.has("packed_scene_path") and json.has("target_scene_path") and json.has("parent_node_name"):
+				if await add_node_to_scene(json.builtin_node_name, json.packed_scene_path, json.target_scene_path, json.parent_node_name):
+					result = {
+						"success":"节点已添加。"
+					}
+				else:
+					result = {
+						"error":"节点添加失败，请检查节点和目标场景。"
+					}
 		"write_file":
 			var json = JSON.parse_string(tool_call.function.arguments)
 			if not json == null and json.has("path") and json.has("content"):
@@ -942,6 +1058,25 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 					result = {
 						"open_error": error_string(FileAccess.get_open_error())
 					}
+
+		"create_script":
+			var json = JSON.parse_string(tool_call.function.arguments)
+			if not json == null and json.has("inherits") and json.has("path"):
+				var inherits: String = json.inherits
+				var path: String = json.path
+				var create_result: bool = await create_script(inherits, path)
+				if create_result:
+					result = {
+						"file_path": path,
+						"file_uid": ResourceUID.path_to_uid(path),
+						"file_content": FileAccess.get_file_as_string(path),
+						"open_error": error_string(FileAccess.get_open_error())
+					}
+				else:
+					result = {
+						"error": "提供的\"inherits\"不存在或是提供的\"path\"已存在脚本文件"
+					}
+
 		"get_image_info":
 			var json = JSON.parse_string(tool_call.function.arguments)
 			if not json == null and json.has("image_path"):
@@ -1041,6 +1176,10 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 				var line := json.line as int
 				var delete_line_count = json.delete_line_count
 				var resource: Script = load(script_path)
+
+				for key in special_agent_chars.keys():
+					var special_agent_char = special_agent_chars[key]
+					content = content.replace(special_agent_char.origin_char, special_agent_char.replace_char)
 
 				EditorInterface.set_main_screen_editor("Script")
 				EditorInterface.edit_script(resource)
@@ -1204,6 +1343,54 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 		}
 	return JSON.stringify(result)
 
+
+# 全局搜索（递归）
+func search_recursive(text: String, results: Array, path: String = "res://", 
+extensions: Array[String] = [".gd", ".md", ".gdshader"]):
+	
+	var dir = DirAccess.open(path)
+	if not dir:
+		return []
+	
+	dir.list_dir_begin()
+	var item = dir.get_next()
+	
+	while item != "":
+		var full_path = path.path_join(item)
+		
+		if dir.current_is_dir():
+			var should_ignore = false
+			for ignore_pattern in IGNORE_DIRS:
+				if item.match(ignore_pattern):
+					should_ignore = true
+					break
+			
+			if not item.begins_with(".") and not should_ignore:
+				search_recursive(text, results, full_path, extensions)
+		
+		else:
+			# 检查文件扩展名是否在允许的列表中
+			var file_ext = "." + item.get_extension()
+			if extensions.has(file_ext):
+				var file = FileAccess.open(full_path, FileAccess.READ)
+				if file:
+					var line_num = 1
+					while not file.eof_reached():
+						var line_content = file.get_line()
+						if line_content.contains(text):
+							results.append({
+								"path": full_path, 
+								"line": line_num, 
+								"content": line_content
+							})
+						line_num += 1
+					file.close()
+		
+		item = dir.get_next()
+	
+	dir.list_dir_end()
+	return results
+
 #写入文件
 func write_file(path: String, content: String) -> bool:
 	DirAccess.make_dir_recursive_absolute(path)
@@ -1218,6 +1405,24 @@ func write_file(path: String, content: String) -> bool:
 		return true
 	else:
 		return false
+
+#通过ScriptCreateDialog创建脚本文件
+func create_script(inherits: String, path: String) -> bool:
+	if ResourceLoader.exists(path):
+		return false
+
+#	EditorFileDialog
+
+	if ClassDB.class_exists(inherits) or ((inherits.begins_with("res://") and inherits.ends_with(".gd")) and ResourceLoader.exists(inherits)):
+		var dialog = ScriptCreateDialog.new()
+		dialog.config(inherits, path)
+		EditorInterface.get_base_control().add_child(dialog)
+		dialog.popup_centered()
+		await get_tree().process_frame
+		dialog.get_ok_button().pressed.emit()
+		return true
+
+	return false
 
 #设置某个场景中的某个节点的某个属性为某个值
 func update_scene_node_property(scene_path: String, node_path: String, property_name: String, property_value: String) -> bool:
@@ -1378,7 +1583,7 @@ func get_tileset_info(tileset: TileSet) -> Dictionary:
 		tileset_data["texture/" + str(tileset.get_source_id(source_index))] = source.texture.resource_path
 	return tileset_data
 
-# 将 TileData 转换为字典的核心函数
+# 将TileData转换为字典的核心函数
 func tile_data_to_dict(tile_data: TileData, tileset: TileSet, source_texture: Texture2D = null) -> Dictionary:
 	var dict := {}
 	var physics_layers_count = tileset.get_physics_layers_count()
@@ -1498,3 +1703,174 @@ func _exit_tree():
 	if thread != null:
 		thread.wait_to_finish()
 		thread = null
+
+# 向场景中添加节点的主函数
+func add_node_to_scene(
+	builtin_node_name: String = "",
+	packed_scene_path: String = "",
+	target_scene_path: String = "",
+	parent_node_name: String = ""
+) -> bool:
+	#"""
+	#向指定场景中添加节点
+	#
+	#参数:
+	#- builtin_node_name: Godot内置节点类型名称（如"Sprite2D"、"Node3D"等），与packed_scene_path互斥
+	#- packed_scene_path: 打包场景的资源路径（如"res://scenes/my_scene.tscn"），与builtin_node_name互斥
+	#- target_scene_path: 目标场景路径（如"res://scenes/main.tscn"）
+	#- parent_node_name: 父节点名称，如果不指定则添加到场景根节点
+	#
+	#返回:
+	#- bool: 操作是否成功
+	#
+	#规则:
+	#- builtin_node_name 和 packed_scene_path 只能有一个非空
+	#- 如果都不为空，返回错误
+	#- 如果都为空，返回错误
+	#- target_scene_path 必须非空
+	#"""
+
+	# 1. 参数验证
+	if builtin_node_name != "" and packed_scene_path != "":
+		push_error("错误：builtin_node_name 和 packed_scene_path 不能同时非空")
+		return false
+
+	if builtin_node_name == "" and packed_scene_path == "":
+		push_error("错误：builtin_node_name 和 packed_scene_path 不能同时为空")
+		return false
+
+	if target_scene_path == "":
+		push_error("错误：target_scene_path 不能为空")
+		return false
+
+	# 2. 打开目标场景
+
+	# 保存当前场景状态（如果有修改）
+	if EditorInterface.get_edited_scene_root():
+		# 检查当前场景是否有未保存的修改
+		var current_scene = EditorInterface.get_edited_scene_root()
+		if current_scene and current_scene.get_scene_file_path() != target_scene_path:
+			print("警告：切换场景前，请确保当前场景已保存")
+
+	# 打开目标场景
+	await EditorInterface.get_base_control().get_tree().process_frame
+	EditorInterface.open_scene_from_path(target_scene_path)
+	# 等待场景加载（可能需要一帧的时间）
+	await EditorInterface.get_base_control().get_tree().process_frame
+
+	# 3. 获取目标场景根节点
+	var target_scene_root = EditorInterface.get_edited_scene_root()
+	if not target_scene_root:
+		push_error("错误：无法获取目标场景根节点")
+		return false
+
+	# 4. 创建新节点
+	var new_node: Node
+
+	if builtin_node_name != "":
+		# 创建内置节点
+		if not ClassDB.class_exists(builtin_node_name):
+			push_error("错误：节点类型不存在: " + builtin_node_name)
+			return false
+
+		new_node = ClassDB.instantiate(builtin_node_name)
+		if not new_node:
+			push_error("错误：无法创建节点: " + builtin_node_name)
+			return false
+
+		# 为内置节点设置默认名称
+		new_node.name = get_unique_node_name(target_scene_root, builtin_node_name, parent_node_name)
+		print("创建内置节点: " + builtin_node_name + " -> " + new_node.name)
+
+	else:
+		# 加载并实例化打包场景
+		if not ResourceLoader.exists(packed_scene_path):
+			push_error("错误：场景文件不存在: " + packed_scene_path)
+			return false
+
+		var packed_scene = load(packed_scene_path)
+		if not packed_scene or not packed_scene is PackedScene:
+			push_error("错误：无法加载场景文件: " + packed_scene_path)
+			return false
+
+		new_node = packed_scene.instantiate()
+
+		# 如果场景节点没有名称，设置一个
+		if new_node.name == "" or new_node.name == "Root":
+			new_node.name = get_unique_node_name(
+				target_scene_root,
+				packed_scene_path.get_file().get_basename(),
+				parent_node_name
+			)
+		print("实例化场景: " + packed_scene_path + " -> " + new_node.name)
+
+	# 5. 查找父节点
+	var parent_node: Node = target_scene_root
+
+	if parent_node_name != "":
+		# 尝试获取父节点
+		parent_node = target_scene_root.get_node_or_null(NodePath(parent_node_name))
+		if not parent_node:
+			push_error("错误：父节点不存在: " + parent_node_name)
+			new_node.free()
+			return false
+		print("父节点: " + parent_node.name)
+
+	# 6. 添加节点
+	parent_node.add_child(new_node)
+	new_node.owner = target_scene_root
+
+	# 7. 选中新添加的节点
+	var selection = EditorInterface.get_selection()
+	selection.clear()
+	selection.add_node(new_node)
+
+	# 8. 确保场景保存标记
+	mark_scene_as_unsaved(target_scene_root)
+
+	print("成功添加节点到场景: " + target_scene_path)
+	return true
+
+# 辅助函数：获取唯一的节点名称
+func get_unique_node_name(scene_root: Node, base_name: String, parent_path: String = "") -> String:
+	var parent: Node = scene_root
+	if parent_path != "":
+		parent = scene_root.get_node_or_null(NodePath(parent_path))
+		if not parent:
+			parent = scene_root
+
+	var count = 1
+	var name = base_name
+
+	# 检查父节点及其所有子节点
+	while true:
+		var name_exists = false
+
+		# 检查父节点的直接子节点
+		for child in parent.get_children():
+			if child.name == name:
+				name_exists = true
+				break
+
+		if not name_exists:
+			break
+
+		name = base_name + str(count)
+		count += 1
+
+	return name
+
+# 标记场景为未保存状态
+func mark_scene_as_unsaved(scene_root: Node):
+	# 遍历新节点及其所有子节点，确保它们都有正确的owner
+	var nodes_to_check = [scene_root]
+	while nodes_to_check.size() > 0:
+		var node = nodes_to_check.pop_front()
+		if node.owner != scene_root and node.name != scene_root.name:
+			node.owner = scene_root
+
+		for child in node.get_children():
+			nodes_to_check.append(child)
+
+	# 刷新文件系统，确保更改被识别
+	EditorInterface.get_resource_filesystem().scan()

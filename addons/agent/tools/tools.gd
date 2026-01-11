@@ -853,8 +853,7 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 						"file_content": "",
 						"start": 1,
 						"end": 1,
-						"total_lines": 1,
-						"open_error": error_string(FileAccess.get_open_error())
+						"total_lines": 1
 					}
 				else:
 					var file_lines = file_string.split("\n")
@@ -1043,7 +1042,8 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 				var content = json.content
 				# var is_new_file = not FileAccess.file_exists(path)
 				#var file = FileAccess.open(path, FileAccess.WRITE)
-				if write_file(path, content):
+				var write_file_err = write_file(path, content)
+				if write_file_err == OK:
 
 					if path.get_file().get_extension() == "tscn":
 						EditorInterface.reload_scene_from_path(path)
@@ -1052,11 +1052,11 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 						"file_path": path,
 						"file_uid": ResourceUID.path_to_uid(path),
 						"file_content": FileAccess.get_file_as_string(path),
-						"open_error": error_string(FileAccess.get_open_error())
 					}
 				else:
 					result = {
-						"open_error": error_string(FileAccess.get_open_error())
+						"open_error": error_string(FileAccess.get_open_error()),
+						"error_msg": error_string(write_file_err)
 					}
 
 		"create_script":
@@ -1069,8 +1069,7 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 					result = {
 						"file_path": path,
 						"file_uid": ResourceUID.path_to_uid(path),
-						"file_content": FileAccess.get_file_as_string(path),
-						"open_error": error_string(FileAccess.get_open_error())
+						"file_content": FileAccess.get_file_as_string(path)
 					}
 				else:
 					result = {
@@ -1218,18 +1217,20 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 			var json = JSON.parse_string(tool_call.function.arguments)
 
 			if not json == null and json.has("scene_path") and json.has("node_path") and json.has("property_path") and json.has("resource_path") and json.has("content"):
-				if write_file(json.resource_path, json.content):
+				var write_file_err = write_file(json.resource_path, json.content)
+				if write_file_err == OK:
 					if set_resource_property(json.resource_path, json.scene_path, json.node_path, json.property_path):
 						result = {
-						"success": "更新成功"
+							"success": "更新成功"
 						}
 					else:
 						result = {
-						"error": "资源挂载失败"
+							"error": "资源挂载失败"
 						}
 				else:
 					result = {
-					"error": "资源写入失败"
+						"error": "资源写入失败",
+						"error_msg": error_string(write_file_err)
 					}
 
 		"execute_command":
@@ -1275,7 +1276,8 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 			var json = JSON.parse_string(tool_call.function.arguments)
 
 			if not json == null and json.has("path") and json.has("content"):
-				if write_file(json.path, json.content):
+				var write_file_err = write_file(json.path, json.content)
+				if write_file_err == OK:
 					if run_editor_script(json.path):
 						result = {
 							"success": "已运行EditorScript:" + json.path
@@ -1286,7 +1288,8 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 						}
 				else:
 					result = {
-							"error": "创建脚本失败:" + json.path
+							"error": "创建脚本失败:" + json.path,
+							"error_msg": error_string(write_file_err)
 						}
 
 		"update_plan_list":
@@ -1392,8 +1395,10 @@ extensions: Array[String] = [".gd", ".md", ".gdshader"]):
 	return results
 
 #写入文件
-func write_file(path: String, content: String) -> bool:
-	DirAccess.make_dir_recursive_absolute(path)
+func write_file(path: String, content: String) -> Error:
+	var ensure_dir_error = DirAccess.make_dir_recursive_absolute(path.get_base_dir())
+	if ensure_dir_error != OK:
+		return ensure_dir_error
 	var file = FileAccess.open(path, FileAccess.WRITE)
 	if not file == null:
 		file.store_string(content)
@@ -1402,9 +1407,9 @@ func write_file(path: String, content: String) -> bool:
 		EditorInterface.get_resource_filesystem().update_file(path)
 
 		EditorInterface.get_script_editor().notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
-		return true
+		return OK
 	else:
-		return false
+		return file.get_open_error()
 
 #通过ScriptCreateDialog创建脚本文件
 func create_script(inherits: String, path: String) -> bool:

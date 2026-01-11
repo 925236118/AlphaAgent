@@ -81,7 +81,10 @@ extends Node
 @export_tool_button("测试 write_file") var write_test_write_file_action = func():
 	var tool = AgentModelUtils.ToolCallsInfo.new()
 	tool.function.name = "write_file"
-	tool.function.arguments = JSON.stringify({}) # 填写测试参数
+	tool.function.arguments = JSON.stringify({
+	"content": "extends CharacterBody2D\n\n# 玩家控制参数\n@export var move_speed: float = 300.0  # 移动速度（像素/秒）\n@export var jump_velocity: float = -400.0  # 跳跃速度（向上为负）\n@export var gravity: float = 980.0  # 重力（像素/秒²）\n\nfunc _physics_process(delta: float) -> void:\n\t# 应用重力（如果没有在地面上）\n\tif not is_on_floor():\n\t\tvelocity.y += gravity * delta\n\t\n\t# 处理水平移动输入\n\tvar horizontal_input: float = Input.get_axis(\"ui_left\", \"ui_right\")\n\tvelocity.x = horizontal_input * move_speed\n\t\n\t# 处理跳跃输入（只有在地面上才能跳跃）\n\tif Input.is_action_just_pressed(\"ui_select\") and is_on_floor():\n\t\tvelocity.y = jump_velocity\n\t\n\t# 应用移动\n\tmove_and_slide()",
+	"path": "res://scripts/player.gd"
+}) # 填写测试参数
 	print(await tools.use_tool(tool))
 
 @export_tool_button("测试 create_script") var write_test_create_script_action = func():

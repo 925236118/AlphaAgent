@@ -25,6 +25,9 @@ var special_agent_chars = {
 
 const IGNORE_DIRS: Array[String] = [".alpha", ".godot", "*.uid", "addons", "*.import"]
 
+var temp_file_array: Array[Dictionary] = []
+
+@onready var project_alpha_dir = OS.get_user_data_dir() + "/.alpha/"
 
 # 获取工具名称列表
 func get_function_name_list():
@@ -1170,11 +1173,14 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 			var json = JSON.parse_string(tool_call.function.arguments)
 
 			if not json == null and json.has("script_path") and json.has("content") and json.has("line") and json.has("delete_line_count"):
+
 				var script_path = json.script_path
 				var content := json.content as String
 				var line := json.line as int
 				var delete_line_count = json.delete_line_count
 				var resource: Script = load(script_path)
+
+				create_temp_file(script_path)
 
 				for key in special_agent_chars.keys():
 					var special_agent_char = special_agent_chars[key]
@@ -1396,6 +1402,9 @@ extensions: Array[String] = [".gd", ".md", ".gdshader"]):
 
 #写入文件
 func write_file(path: String, content: String) -> Error:
+	# 保存临时文件
+	create_temp_file(path)
+
 	var ensure_dir_error = DirAccess.make_dir_recursive_absolute(path.get_base_dir())
 	if ensure_dir_error != OK:
 		return ensure_dir_error
@@ -1842,6 +1851,7 @@ func get_unique_node_name(scene_root: Node, base_name: String, parent_path: Stri
 	if parent_path != "":
 		parent = scene_root.get_node_or_null(NodePath(parent_path))
 		if not parent:
+
 			parent = scene_root
 
 	var count = 1
@@ -1879,3 +1889,37 @@ func mark_scene_as_unsaved(scene_root: Node):
 
 	# 刷新文件系统，确保更改被识别
 	EditorInterface.get_resource_filesystem().scan()
+
+
+
+# 临时文件相关内容
+# 创建临时文件用于保存源文件内容
+func create_temp_file(origin_path: String) -> void:
+	var result = {
+		"origin_path": origin_path,
+		"origin_exist": false,
+		"temp_file_path": ""
+	}
+	DirAccess.make_dir_recursive_absolute(OS.get_user_data_dir() + "/.alpha/" + "temp/")
+
+	var temp_file_path = OS.get_user_data_dir() + "/.alpha/" + "temp/" + origin_path.get_file().get_basename() + '.' + AlphaUtils.generate_random_string(16) + ".temp"
+
+	result["temp_file_path"] = temp_file_path
+	# 如果文件存在，则复制文件并保存
+	if FileAccess.file_exists(origin_path):
+		var origin_file = FileAccess.open(origin_path, FileAccess.READ)
+		var origin_content = origin_file.get_buffer(origin_file.get_length())
+		var temp_file = FileAccess.open(temp_file_path, FileAccess.WRITE)
+		temp_file.store_buffer(origin_content)
+		temp_file.close()
+		origin_file.close()
+		result["origin_exist"] = true
+
+	temp_file_array.append(result)
+
+# 删除临时文件
+func delete_temp_file(index) -> void:
+	var temp_file = temp_file_array[index]
+	var temp_file_path = temp_file["temp_file_path"]
+	DirAccess.remove_absolute(temp_file_path)
+	temp_file_array.remove_at(index)

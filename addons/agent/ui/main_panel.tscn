@@ -296,10 +296,19 @@ visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="MessageList" type="VBoxContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/MessageContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/MessageContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MessageList" type="VBoxContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/MessageContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="EditedFilesContainer" type="VBoxContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/MessageContainer/VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
 
 [node name="PlanList" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer" instance=ExtResource("8_1ot7o")]
 unique_name_in_owner = true

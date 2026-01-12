@@ -8,7 +8,7 @@ extends Node
 @export_tool_button("测试 update_plan_list") var read_test_update_plan_list_action = func():
 	var tool = AgentModelUtils.ToolCallsInfo.new()
 	tool.function.name = "update_plan_list"
-	tool.function.arguments = JSON.stringify({}) # 填写测试参数
+	tool.function.arguments = JSON.stringify({"tasks": [{"name": "测试任务1", "state": "finished"}, {"name": "测试任务2", "state": "finished"}, {"name": "测试任务3", "state": "finished"}, {"name": "测试任务4", "state": "finished"}]}) # 填写测试参数
 	print(await tools.use_tool(tool))
 
 @export_tool_button("测试 get_project_info") var read_test_get_project_info_action = func():

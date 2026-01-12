@@ -42,8 +42,11 @@ enum SendShotcut {
 
 class GlobalSetting:
 	var setting_dir = ""
-	
+
 	var setting_file: String = ""
+
+	var project_alpha_dir = ""
+
 	var models_file: String = ""
 	var roles_file: String = ""
 	var memory_file: String = ""
@@ -60,11 +63,13 @@ class GlobalSetting:
 			setting_dir = EditorInterface.get_editor_paths().get_config_dir() + "/.alpha/"
 		else:
 			setting_dir = OS.get_config_dir() + ("/godot/.alpha/" if OS.get_name() == "Linux" else "/Godot/.alpha/")
-		
+
 		setting_file = setting_dir + "setting.{version}.json".format({"version": CONFIG.alpha_version})
 		models_file = setting_dir + "models.{version}.json".format({"version": CONFIG.alpha_version})
 		roles_file = setting_dir + "roles.{version}.json".format({"version": CONFIG.alpha_version})
 		memory_file = setting_dir + "memory.{version}.json".format({"version": CONFIG.alpha_version})
+
+		project_alpha_dir = OS.get_user_data_dir() + "/.alpha/"
 
 	func load_global_setting():
 

@@ -11,6 +11,7 @@ extends Control
 @onready var history_button: Button = %HistoryButton
 @onready var back_chat_button: Button = %BackChatButton
 @onready var top_bar_buttons: HBoxContainer = %TopBarButtons
+@onready var edited_files_container: VBoxContainer = %EditedFilesContainer
 
 @onready var setting_tabs: HBoxContainer = %SettingTabs
 @onready var setting_tab_memory: Button = %SettingTabMemory
@@ -171,7 +172,7 @@ func init_message_list():
 				"global_memory": ''.join(AlphaAgentPlugin.global_memory.map(func(m): return "-" + m + "\n")),
 				"role_prompt": current_role.prompt if current_role else "无"
 			}),
-			"id": generate_random_string(16)
+			"id": AlphaUtils.generate_random_string(16)
 		}
 	]
 
@@ -185,7 +186,7 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 
 	reset_message_info()
 
-	var random_id = generate_random_string(16)
+	var random_id = AlphaUtils.generate_random_string(16)
 	user_message.id = random_id
 
 	messages.push_back(user_message)
@@ -255,7 +256,7 @@ func send_messages():
 			# 没有角色时，默认使用所有工具
 			current_chat_stream.tools = tools.get_tools_list()
 
-	current_random_message_id = generate_random_string(16)
+	current_random_message_id = AlphaUtils.generate_random_string(16)
 	current_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
 	# 始终根据用户选择的 use_thinking 来设置 show_think
 	# 如果模型不支持 thinking，后续会在 on_agent_think 中跳过更新
@@ -387,6 +388,7 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 	#print("total_tokens ", total_tokens)
 
 	if finish_reason != "tool_calls":
+		# 彻底结束，否则可能是调用工具
 		input_container.disable = false
 		input_container.switch_button_to("Send")
 		messages.push_back({
@@ -405,13 +407,22 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 		if current_chat_stream:
 			current_chat_stream.queue_free()
 
+		print("修改过的文件列表：", tools.temp_file_array)
+		for child in edited_files_container.get_children():
+			child.queue_free()
+		for temp_file in tools.temp_file_array:
+			var button = Button.new()
+			button.text = temp_file.get("origin_path", "")
+			edited_files_container.add_child(button)
+			edited_files_container.show()
+
 	input_container.set_usage_label(total_tokens, 128)
 	#print(messages)
 
 	if first_chat:
 		#print(JSON.stringify(messages))
 		current_history_item = AgentHistoryAndTitle.HistoryItem.new()
-		current_id = generate_random_string(16)
+		current_id = AlphaUtils.generate_random_string(16)
 		current_time = Time.get_datetime_string_from_system()
 		var title_messages: Array[Dictionary] = [
 			{
@@ -445,17 +456,6 @@ func on_title_generate_finish(message: String, _think_msg: String):
 	history_and_title.update_history(current_id, current_history_item)
 
 	current_title_chat.queue_free()
-
-# 生成随机字符串函数
-func generate_random_string(length: int) -> String:
-	var characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	var result = ""
-
-	for i in range(length):
-		var random_index = randi() % characters.length()
-		result += characters[random_index]
-
-	return result
 
 func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
 	show_container(chat_container)

@@ -7,7 +7,6 @@ extends PanelContainer
 @onready var history_list_window: Window = $HistoryList
 @onready var history_expand_button: Button = %HistoryExpandButton
 
-
 @onready var project_alpha_dir = OS.get_user_data_dir() + "/.alpha/"
 @onready var history_file_path = project_alpha_dir + "history.json"
 
@@ -70,14 +69,14 @@ func on_click_history_expand_button():
 	var window_pos = get_tree().root.position
 	var window_width = 296
 	var window_height = min(162 + history_list.size() * 32 + 16, 500)
-	
+
 	var popup_pos = Vector2i(global_position) + popup_offset + window_pos
 	# 判断是否在编辑器环境中
 	var singleton = AlphaAgentSingleton.get_instance()
 	# 如果是编辑器运行，限制位置在窗体大小内
 	if singleton.editor_plugin == null:
 		popup_pos = Vector2i(global_position) + popup_offset
-	
+
 	history_list_window.popup(Rect2i(popup_pos, Vector2i(window_width, window_height)))
 	# 在编辑器模式下，需要手动设置窗口可获取焦点
 	if singleton.editor_plugin == null:

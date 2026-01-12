@@ -22,6 +22,7 @@ func _ready() -> void:
 
 func on_visibility_changed():
 	if visible:
+		clear_memory_nodes()
 		add_memory_nodes()
 	else:
 		clear_memory_nodes()
@@ -55,7 +56,7 @@ func add_memory_nodes():
 		item.set_text(global_memory)
 		item.remove.connect(on_remove_global_memory.bind(item))
 		item.save.connect(on_save_global_memory.bind(item))
-		
+
 	for i in AlphaAgentPlugin.project_memory.size():
 		var project_memory = AlphaAgentPlugin.project_memory[i]
 		var item = MEMORY_ITEM.instantiate()

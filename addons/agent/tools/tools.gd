@@ -1348,29 +1348,29 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 
 
 # 全局搜索（递归）
-func search_recursive(text: String, results: Array, path: String = "res://", 
+func search_recursive(text: String, results: Array, path: String = "res://",
 extensions: Array[String] = [".gd", ".md", ".gdshader"]):
-	
+
 	var dir = DirAccess.open(path)
 	if not dir:
 		return []
-	
+
 	dir.list_dir_begin()
 	var item = dir.get_next()
-	
+
 	while item != "":
 		var full_path = path.path_join(item)
-		
+
 		if dir.current_is_dir():
 			var should_ignore = false
 			for ignore_pattern in IGNORE_DIRS:
 				if item.match(ignore_pattern):
 					should_ignore = true
 					break
-			
+
 			if not item.begins_with(".") and not should_ignore:
 				search_recursive(text, results, full_path, extensions)
-		
+
 		else:
 			# 检查文件扩展名是否在允许的列表中
 			var file_ext = "." + item.get_extension()
@@ -1382,15 +1382,15 @@ extensions: Array[String] = [".gd", ".md", ".gdshader"]):
 						var line_content = file.get_line()
 						if line_content.contains(text):
 							results.append({
-								"path": full_path, 
-								"line": line_num, 
+								"path": full_path,
+								"line": line_num,
 								"content": line_content
 							})
 						line_num += 1
 					file.close()
-		
+
 		item = dir.get_next()
-	
+
 	dir.list_dir_end()
 	return results
 

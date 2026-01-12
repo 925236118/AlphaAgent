@@ -8,8 +8,7 @@ extends VBoxContainer
 @onready var add_global_memory: Button = %AddGlobalMemory
 @onready var add_project_memory: Button = %AddProjectMemory
 
-var memory_dir = AlphaAgentPlugin.global_setting.setting_dir
-@onready var memory_file: String = memory_dir + "memory.{version}.json".format({"version": CONFIG.alpha_version})
+@onready var global_memory_file: String = AlphaAgentPlugin.global_setting.memory_file
 
 const MEMORY_ITEM = preload("uid://cr2sav6by4tal")
 const CONFIG = preload("uid://b4bcww0bmnxt0")
@@ -34,10 +33,7 @@ func load_from_project():
 	AlphaAgentPlugin.project_memory = memory
 
 func load_from_global():
-	if not DirAccess.dir_exists_absolute(memory_dir):
-		DirAccess.make_dir_absolute(memory_dir)
-
-	var memory_string = FileAccess.get_file_as_string(memory_file)
+	var memory_string = FileAccess.get_file_as_string(global_memory_file)
 	if FileAccess.get_open_error() != OK:
 		memory_string = ""
 
@@ -72,7 +68,7 @@ func on_remove_global_memory(node: Control):
 	save_global_memory_file()
 
 func save_global_memory_file():
-	var file = FileAccess.open(memory_file, FileAccess.WRITE)
+	var file = FileAccess.open(global_memory_file, FileAccess.WRITE)
 	file.store_string(JSON.stringify(AlphaAgentPlugin.global_memory))
 	file.close()
 

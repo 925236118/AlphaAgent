@@ -11,7 +11,7 @@ extends Control
 @onready var history_button: Button = %HistoryButton
 @onready var back_chat_button: Button = %BackChatButton
 @onready var top_bar_buttons: HBoxContainer = %TopBarButtons
-@onready var edited_files_container: VBoxContainer = %EditedFilesContainer
+@onready var edited_files_container: AgentEditedFilesContainer = %EditedFilesContainer
 
 @onready var setting_tabs: HBoxContainer = %SettingTabs
 @onready var setting_tab_memory: Button = %SettingTabMemory
@@ -406,15 +406,7 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 		reset_message_info()
 		if current_chat_stream:
 			current_chat_stream.queue_free()
-
-		print("修改过的文件列表：", tools.temp_file_array)
-		for child in edited_files_container.get_children():
-			child.queue_free()
-		for temp_file in tools.temp_file_array:
-			var button = Button.new()
-			button.text = temp_file.get("origin_path", "")
-			edited_files_container.add_child(button)
-			edited_files_container.show()
+		show_edited_file_container()
 
 	input_container.set_usage_label(total_tokens, 128)
 	#print(messages)
@@ -456,6 +448,9 @@ func on_title_generate_finish(message: String, _think_msg: String):
 	history_and_title.update_history(current_id, current_history_item)
 
 	current_title_chat.queue_free()
+
+func show_edited_file_container():
+	edited_files_container.generate_edited_file_list(tools.temp_file_array)
 
 func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
 	show_container(chat_container)

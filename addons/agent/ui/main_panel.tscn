@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=26 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_i5act"]
@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://bxe6hto0vk8fu" path="res://addons/agent/ui/setting/setting.tscn" id="8_5t7oo"]
 [ext_resource type="ButtonGroup" uid="uid://4cfowu05scrd" path="res://addons/agent/ui/resource/setting_tab_group.tres" id="8_i5act"]
 [ext_resource type="PackedScene" uid="uid://b66g7g3ydkkeb" path="res://addons/agent/ui/memory/memory_container.tscn" id="10_n876e"]
+[ext_resource type="PackedScene" uid="uid://dy4ccoiv2ppl2" path="res://addons/agent/ui/edit_file/edited_files_container.tscn" id="11_wlmmt"]
 
 [sub_resource type="Theme" id="Theme_aabuu"]
 
@@ -305,9 +306,8 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="EditedFilesContainer" type="VBoxContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/MessageContainer/VBoxContainer"]
+[node name="EditedFilesContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/MessageContainer/VBoxContainer" instance=ExtResource("11_wlmmt")]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 
 [node name="PlanList" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer" instance=ExtResource("8_1ot7o")]

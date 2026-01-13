@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://dy4ccoiv2ppl2"]
+
+[ext_resource type="Script" uid="uid://bjnjgl1bsagd6" path="res://addons/agent/ui/edit_file/edited_files_container.gd" id="1_oih3i"]
+
+[node name="EditedFilesContainer" type="VBoxContainer"]
+visible = false
+script = ExtResource("1_oih3i")

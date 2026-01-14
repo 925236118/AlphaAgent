@@ -7,13 +7,31 @@ extends Window
 
 @onready var sync_scroll: CheckButton = %SyncScroll
 
+@onready var accept_origin_button: Button = %AcceptOriginButton
+@onready var accept_target_button: Button = %AcceptTargetButton
+
+# 保留源文件信号
+signal accept_origin
+# 保留新文件信号
+signal accept_target
+
 var origin_file_path: String = ""
 var target_file_path: String = ""
 
-const DELETE_LINE_COLOR = Color(0.566, 0.0, 0.0, 1.0)
-const ADD_LINE_COLOR = Color(0.187, 0.337, 0.137, 1.0)
+const DELETE_LINE_COLOR = Color(0.325, 0.137, 0.165, 1.0)
+const ADD_LINE_COLOR = Color(0.247, 0.282, 0.231, 1.0)
 
 var diff_res: AgentDiffTool.DiffResult = null
+
+func _ready() -> void:
+	accept_origin_button.pressed.connect(func():
+		accept_origin.emit()
+		close_requested.emit()
+	)
+	accept_target_button.pressed.connect(func():
+		accept_target.emit()
+		close_requested.emit()
+	)
 
 func _process(delta: float) -> void:
 	if sync_scroll.button_pressed:

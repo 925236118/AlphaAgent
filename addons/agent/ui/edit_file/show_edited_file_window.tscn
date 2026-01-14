@@ -38,7 +38,8 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="BackButton" type="Button" parent="Control/PanelContainer/VBoxContainer/HBoxContainer/Control"]
+[node name="AcceptOriginButton" type="Button" parent="Control/PanelContainer/VBoxContainer/HBoxContainer/Control"]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 4.0
 offset_right = 108.0
@@ -57,7 +58,8 @@ offset_bottom = 24.0
 button_pressed = true
 text = "同步滚动"
 
-[node name="SubmitButton" type="Button" parent="Control/PanelContainer/VBoxContainer/HBoxContainer"]
+[node name="AcceptTargetButton" type="Button" parent="Control/PanelContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "保留新的"
 
@@ -70,7 +72,9 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "当前文件没有代码"
+editable = false
 scroll_past_end_of_file = true
+caret_multiple = false
 syntax_highlighter = SubResource("GDScriptSyntaxHighlighter_1e3q2")
 gutters_draw_line_numbers = true
 
@@ -79,6 +83,8 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "当前文件没有代码"
+editable = false
 scroll_past_end_of_file = true
+caret_multiple = false
 syntax_highlighter = SubResource("GDScriptSyntaxHighlighter_ye4xr")
 gutters_draw_line_numbers = true

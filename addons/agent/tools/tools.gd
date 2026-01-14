@@ -27,9 +27,9 @@ const IGNORE_DIRS: Array[String] = [".alpha", ".godot", "*.uid", "addons", "*.im
 
 # 编辑过的文件类
 class EditedFile:
-	var origin_path = ""
+	var target_path = ""
 	var origin_exist = false
-	var temp_file_path = ""
+	var origin_path = ""
 
 var temp_file_array: Array[EditedFile] = []
 
@@ -1898,24 +1898,24 @@ func mark_scene_as_unsaved(scene_root: Node):
 
 # 临时文件相关内容
 # 创建临时文件用于保存源文件内容
-func create_temp_file(origin_path: String) -> void:
-	if temp_file_array.any(func (item): return item.origin_path == origin_path):
+func create_temp_file(target_path: String) -> void:
+	if temp_file_array.any(func (item): return item.target_path == target_path):
 		return
 
 	var result = EditedFile.new()
-	result.origin_path = origin_path
+	result.target_path = target_path
 	result.origin_exist = false
 
 	DirAccess.make_dir_recursive_absolute(OS.get_user_data_dir() + "/.alpha/" + "temp/")
 
-	var temp_file_path = OS.get_user_data_dir() + "/.alpha/" + "temp/" + origin_path.get_file().get_basename() + '.' + AlphaUtils.generate_random_string(16) + ".temp"
+	var origin_path = OS.get_user_data_dir() + "/.alpha/" + "temp/" + target_path.get_file().get_basename() + '.' + AlphaUtils.generate_random_string(16) + ".temp"
 
-	result.temp_file_path = temp_file_path
+	result.origin_path = origin_path
 	# 如果文件存在，则复制文件并保存
-	if FileAccess.file_exists(origin_path):
-		var origin_file = FileAccess.open(origin_path, FileAccess.READ)
+	if FileAccess.file_exists(target_path):
+		var origin_file = FileAccess.open(target_path, FileAccess.READ)
 		var origin_content = origin_file.get_buffer(origin_file.get_length())
-		var temp_file = FileAccess.open(temp_file_path, FileAccess.WRITE)
+		var temp_file = FileAccess.open(origin_path, FileAccess.WRITE)
 		temp_file.store_buffer(origin_content)
 		temp_file.close()
 		origin_file.close()
@@ -1926,6 +1926,6 @@ func create_temp_file(origin_path: String) -> void:
 # 删除临时文件
 func delete_temp_file(index: int) -> void:
 	var temp_file = temp_file_array[index]
-	var temp_file_path = temp_file.temp_file_path
-	DirAccess.remove_absolute(temp_file_path)
+	var origin_path = temp_file.origin_path
+	DirAccess.remove_absolute(origin_path)
 	temp_file_array.remove_at(index)

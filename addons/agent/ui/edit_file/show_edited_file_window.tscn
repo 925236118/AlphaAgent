@@ -1,0 +1,84 @@
+[gd_scene load_steps=4 format=3 uid="uid://cga6fwmm6ifke"]
+
+[ext_resource type="Script" uid="uid://hq5a4puo2oqi" path="res://addons/agent/ui/edit_file/show_edited_file_window.gd" id="1_4nnou"]
+
+[sub_resource type="GDScriptSyntaxHighlighter" id="GDScriptSyntaxHighlighter_1e3q2"]
+
+[sub_resource type="GDScriptSyntaxHighlighter" id="GDScriptSyntaxHighlighter_ye4xr"]
+
+[node name="ShowEditedFileWindow" type="Window"]
+oversampling_override = 1.0
+position = Vector2i(0, 36)
+size = Vector2i(800, 600)
+script = ExtResource("1_4nnou")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Control" type="Control" parent="Control/PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BackButton" type="Button" parent="Control/PanelContainer/VBoxContainer/HBoxContainer/Control"]
+layout_mode = 0
+offset_left = 4.0
+offset_right = 108.0
+offset_bottom = 31.0
+text = "回退到旧版本"
+
+[node name="Control2" type="Control" parent="Control/PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SyncScroll" type="CheckButton" parent="Control/PanelContainer/VBoxContainer/HBoxContainer/Control2"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 44.0
+offset_bottom = 24.0
+button_pressed = true
+text = "同步滚动"
+
+[node name="SubmitButton" type="Button" parent="Control/PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "保留新的"
+
+[node name="HSplitContainer" type="HSplitContainer" parent="Control/PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="OriginCodeEdit" type="CodeEdit" parent="Control/PanelContainer/VBoxContainer/HSplitContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "当前文件没有代码"
+scroll_past_end_of_file = true
+syntax_highlighter = SubResource("GDScriptSyntaxHighlighter_1e3q2")
+gutters_draw_line_numbers = true
+
+[node name="TargetCodeEdit" type="CodeEdit" parent="Control/PanelContainer/VBoxContainer/HSplitContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "当前文件没有代码"
+scroll_past_end_of_file = true
+syntax_highlighter = SubResource("GDScriptSyntaxHighlighter_ye4xr")
+gutters_draw_line_numbers = true

@@ -40,27 +40,27 @@ static func get_instance() -> AlphaAgentSingleton:
 		instance = AlphaAgentSingleton.new()
 		# 如果场景树中已存在 main_panel，自动添加引用（只尝试一次）
 		instance._try_find_main_panel_in_scene_tree()
-		
+
 	return instance
 
 # 尝试在场景树中查找 main_panel（用于编辑器测试环境）
 func _try_find_main_panel_in_scene_tree() -> void:
 	if main_panel != null:
 		return  # 已经设置了，不需要查找
-	
+
 	if _has_tried_find_main_panel:
 		return  # 已经尝试过查找，避免重复查找
-	
+
 	_has_tried_find_main_panel = true
-	
+
 	var scene_tree = get_scene_tree()
 	if scene_tree == null:
 		return
-	
+
 	var root = scene_tree.root
 	if root == null:
 		return
-	
+
 	# 递归查找 AgentMainPanel 节点
 	var found_panel = _find_main_panel_recursive(root)
 	if found_panel != null:
@@ -70,12 +70,12 @@ func _try_find_main_panel_in_scene_tree() -> void:
 func _find_main_panel_recursive(node: Node) -> AgentMainPanel:
 	if node is AgentMainPanel:
 		return node as AgentMainPanel
-	
+
 	for child in node.get_children():
 		var result = _find_main_panel_recursive(child)
 		if result != null:
 			return result
-	
+
 	return null
 
 # 设置主面板
@@ -108,13 +108,13 @@ func get_scene_tree() -> SceneTree:
 		var tree = main_panel.get_tree()
 		if tree != null:
 			return tree
-	
+
 	var main_loop = Engine.get_main_loop()
 	if main_loop != null:
 		var scene_tree = main_loop as SceneTree
 		if scene_tree != null:
 			return scene_tree
-	
+
 	return null
 
 # 等待场景树可用并等待一帧（统一处理，兼容插件和编辑器环境）
@@ -125,18 +125,18 @@ func wait_for_scene_tree_frame() -> void:
 		if tree != null:
 			await tree.process_frame
 			return
-	
+
 	# 如果 main_panel 的场景树不可用，使用主循环的场景树
 	var main_loop = Engine.get_main_loop()
 	if main_loop == null:
 		push_warning("无法获取主循环，跳过等待帧")
 		return
-	
+
 	var scene_tree = main_loop as SceneTree
 	if scene_tree != null:
 		await scene_tree.process_frame
 		return
-	
+
 	# 如果主循环不是 SceneTree（在编辑器脚本中可能出现），使用定时器等待
 	# 这种情况很少见，但为了兼容性保留
 	var timer = main_loop.create_timer(0.016)  # 约一帧的时间（60fps）

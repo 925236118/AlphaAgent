@@ -40,7 +40,7 @@ func get_function_name_list():
 	return {
 		"update_plan_list": {
 			"readonly": false,
-			"group": "Agent",
+			"group": "编辑器操作",
 			"description": "用于管理Agent的计划列表"
 		},
 		"get_project_info": {
@@ -80,7 +80,7 @@ func get_function_name_list():
 		},
 		"global_search": {
 			"readonly": true,
-			"group": "全局搜索",
+			"group": "查询操作",
 			"description": "全局搜索脚本文件。"
 		},
 		"create_folder": {

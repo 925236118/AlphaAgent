@@ -301,4 +301,3 @@ static func execute_command(command: String, args: Array = []) -> Dictionary:
 	result.output = result.output
 	result.success = true
 	return result
-

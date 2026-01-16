@@ -5,6 +5,14 @@ extends Node
 
 var tool_name: String = "":
 	get: return _get_tool_name()
+var tool_description: String = "":
+	get: return _get_tool_description()
+var tool_readonly: bool = false:
+	get: return _get_tool_readonly()
+var tool_group: ToolGroup = ToolGroup.QUERY:
+	get: return _get_tool_group()
+var tool_short_description: String = "":
+	get: return _get_tool_short_description()
 
 enum ToolGroup {
 	QUERY, # 查询操作

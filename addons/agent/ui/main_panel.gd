@@ -450,7 +450,7 @@ func on_title_generate_finish(message: String, _think_msg: String):
 	current_title_chat.queue_free()
 
 func show_edited_file_container():
-	edited_files_container.generate_edited_file_list(tools.temp_file_array)
+	edited_files_container.generate_edited_file_list(AgentTempFileManager.get_instance().temp_file_array)
 
 func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
 	show_container(chat_container)

@@ -12,7 +12,7 @@ const SHOW_EDITED_FILE_WINDOW = preload("uid://cga6fwmm6ifke")
  	#file.origin_path = "res://scripts/player1.gd"
  	#generate_edited_file_list([file])
 
-func generate_edited_file_list(temp_file_array: Array[AgentTools.EditedFile]):
+func generate_edited_file_list(temp_file_array: Array[AgentTempFileManager.EditedFile]):
 	#print("修改过的文件列表：", temp_file_array)
 	for child in get_children():
 		child.queue_free()
@@ -23,7 +23,7 @@ func generate_edited_file_list(temp_file_array: Array[AgentTools.EditedFile]):
 		edit_file_item.show_edit_file.connect(on_show_edit_file.bind(temp_file, edit_file_item))
 		show()
 
-func on_show_edit_file(temp_file: AgentTools.EditedFile, edit_file_node: AgentEditedFileItem):
+func on_show_edit_file(temp_file: AgentTempFileManager.EditedFile, edit_file_node: AgentEditedFileItem):
 	#print("显示编辑过的文件：", temp_file.target_path)
 	#print("编辑过的文件临时文件路径：", temp_file.origin_path)
 	#print("编辑过的文件是否存在：", temp_file.origin_exist)
@@ -40,7 +40,7 @@ func on_show_edit_file(temp_file: AgentTools.EditedFile, edit_file_node: AgentEd
 	show_window.popup_centered()
 
 # 保留源文件则需要将源文件内容复制后更新到新文件中
-func on_accept_origin(temp_file: AgentTools.EditedFile, edit_file_node: AgentEditedFileItem):
+func on_accept_origin(temp_file: AgentTempFileManager.EditedFile, edit_file_node: AgentEditedFileItem):
 	if temp_file.origin_exist:
 		var origin_file = FileAccess.open(temp_file.origin_path, FileAccess.READ)
 		var target_file = FileAccess.open(temp_file.target_path, FileAccess.WRITE)
@@ -59,7 +59,7 @@ func on_accept_origin(temp_file: AgentTools.EditedFile, edit_file_node: AgentEdi
 	edit_file_node.queue_free()
 
 # 保留目标文件则需要将源文件删除
-func on_accept_target(temp_file: AgentTools.EditedFile, edit_file_node: AgentEditedFileItem):
+func on_accept_target(temp_file: AgentTempFileManager.EditedFile, edit_file_node: AgentEditedFileItem):
 	if temp_file.origin_exist:
 		DirAccess.remove_absolute(temp_file.origin_path)
 

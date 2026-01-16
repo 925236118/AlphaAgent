@@ -1,11 +1,116 @@
-[gd_scene load_steps=3 format=3 uid="uid://cq2jo5hlpns6j"]
+[gd_scene load_steps=24 format=3 uid="uid://cq2jo5hlpns6j"]
 
 [ext_resource type="Script" uid="uid://brrn1lmlftop0" path="res://addons/agent/tools/tools.gd" id="1_rxf3o"]
 [ext_resource type="Script" uid="uid://bw4aphbgnkejd" path="res://addons/agent/tools/tools_nodes/update_plan_list.gd" id="2_dfgn2"]
+[ext_resource type="Script" uid="uid://cvghebict0c6q" path="res://addons/agent/tools/tools_nodes/add_node_to_scene_tool.gd" id="3_53y2v"]
+[ext_resource type="Script" uid="uid://n5tqpwn782ri" path="res://addons/agent/tools/tools_nodes/add_script_to_scene_tool.gd" id="4_obe2q"]
+[ext_resource type="Script" uid="uid://d2aajafai4jtu" path="res://addons/agent/tools/tools_nodes/check_script_error_tool.gd" id="5_jbvan"]
+[ext_resource type="Script" uid="uid://b3nxx4ehs1npw" path="res://addons/agent/tools/tools_nodes/create_folder_tool.gd" id="6_3gvlj"]
+[ext_resource type="Script" uid="uid://dgq46pwd02i5j" path="res://addons/agent/tools/tools_nodes/create_script_tool.gd" id="7_bmqa0"]
+[ext_resource type="Script" uid="uid://8li4ofyoruj7" path="res://addons/agent/tools/tools_nodes/execute_command_tool.gd" id="8_hx6na"]
+[ext_resource type="Script" uid="uid://mnblwomtq7pq" path="res://addons/agent/tools/tools_nodes/get_class_doc_tool.gd" id="9_d4p25"]
+[ext_resource type="Script" uid="uid://b1o5rj2m2ad50" path="res://addons/agent/tools/tools_nodes/get_editor_info_tool.gd" id="10_icabv"]
+[ext_resource type="Script" uid="uid://cblt20x0p1gbm" path="res://addons/agent/tools/tools_nodes/get_image_info_tool.gd" id="11_g1dts"]
+[ext_resource type="Script" uid="uid://w6od3ri5yutk" path="res://addons/agent/tools/tools_nodes/get_project_file_list_tool.gd" id="12_dqv32"]
+[ext_resource type="Script" uid="uid://cyspwkbr8v6n1" path="res://addons/agent/tools/tools_nodes/get_project_info_tool.gd" id="13_whnwd"]
+[ext_resource type="Script" uid="uid://b5o7ls70ps0sl" path="res://addons/agent/tools/tools_nodes/get_tileset_info_tool.gd" id="14_gfiyh"]
+[ext_resource type="Script" uid="uid://bn7s84xdq2dv4" path="res://addons/agent/tools/tools_nodes/global_search_tool.gd" id="15_dqlvb"]
+[ext_resource type="Script" uid="uid://baxetubbd1hg4" path="res://addons/agent/tools/tools_nodes/open_resource_tool.gd" id="16_0v8fo"]
+[ext_resource type="Script" uid="uid://ddamsje4gsf3w" path="res://addons/agent/tools/tools_nodes/read_file_tool.gd" id="17_uhxmd"]
+[ext_resource type="Script" uid="uid://ccwis3445fpto" path="res://addons/agent/tools/tools_nodes/sep_script_to_scene_tool.gd" id="18_6qtkm"]
+[ext_resource type="Script" uid="uid://cbs0vdtg4whwx" path="res://addons/agent/tools/tools_nodes/set_resource_property_tool.gd" id="19_u0f8y"]
+[ext_resource type="Script" uid="uid://bsnqqy1p5k0p5" path="res://addons/agent/tools/tools_nodes/set_singleton_tool.gd" id="20_5y8ni"]
+[ext_resource type="Script" uid="uid://bnuj6ekokk51q" path="res://addons/agent/tools/tools_nodes/update_scene_node_property_tool.gd" id="21_fvoat"]
+[ext_resource type="Script" uid="uid://cem5r5a37l4y8" path="res://addons/agent/tools/tools_nodes/update_script_file_content_tool.gd" id="22_d4t82"]
+[ext_resource type="Script" uid="uid://dbp0on28785my" path="res://addons/agent/tools/tools_nodes/write_file_tool.gd" id="23_vdjg2"]
 
 [node name="Tools" type="Node"]
 script = ExtResource("1_rxf3o")
 
+[node name="AddNodeToSceneTool" type="Node" parent="."]
+script = ExtResource("3_53y2v")
+metadata/_custom_type_script = "uid://cvghebict0c6q"
+
+[node name="AddScriptToSceneTool" type="Node" parent="."]
+script = ExtResource("4_obe2q")
+metadata/_custom_type_script = "uid://n5tqpwn782ri"
+
+[node name="CheckScriptErrorTool" type="Node" parent="."]
+script = ExtResource("5_jbvan")
+metadata/_custom_type_script = "uid://d2aajafai4jtu"
+
+[node name="CreateFolderTool" type="Node" parent="."]
+script = ExtResource("6_3gvlj")
+metadata/_custom_type_script = "uid://b3nxx4ehs1npw"
+
+[node name="CreateScriptTool" type="Node" parent="."]
+script = ExtResource("7_bmqa0")
+metadata/_custom_type_script = "uid://dgq46pwd02i5j"
+
+[node name="ExecuteCommandTool" type="Node" parent="."]
+script = ExtResource("8_hx6na")
+metadata/_custom_type_script = "uid://8li4ofyoruj7"
+
+[node name="GetClassDocTool" type="Node" parent="."]
+script = ExtResource("9_d4p25")
+metadata/_custom_type_script = "uid://mnblwomtq7pq"
+
+[node name="GetEditorInfoTool" type="Node" parent="."]
+script = ExtResource("10_icabv")
+metadata/_custom_type_script = "uid://b1o5rj2m2ad50"
+
+[node name="GetImageInfoTool" type="Node" parent="."]
+script = ExtResource("11_g1dts")
+metadata/_custom_type_script = "uid://cblt20x0p1gbm"
+
+[node name="GetProjectFileListTool" type="Node" parent="."]
+script = ExtResource("12_dqv32")
+metadata/_custom_type_script = "uid://w6od3ri5yutk"
+
+[node name="GetProjectInfoTool" type="Node" parent="."]
+script = ExtResource("13_whnwd")
+metadata/_custom_type_script = "uid://cyspwkbr8v6n1"
+
+[node name="GetTilesetInfoTool" type="Node" parent="."]
+script = ExtResource("14_gfiyh")
+metadata/_custom_type_script = "uid://b5o7ls70ps0sl"
+
+[node name="GlobalSearchTool" type="Node" parent="."]
+script = ExtResource("15_dqlvb")
+metadata/_custom_type_script = "uid://bn7s84xdq2dv4"
+
+[node name="OpenResourceTool" type="Node" parent="."]
+script = ExtResource("16_0v8fo")
+metadata/_custom_type_script = "uid://baxetubbd1hg4"
+
+[node name="ReadFileTool" type="Node" parent="."]
+script = ExtResource("17_uhxmd")
+metadata/_custom_type_script = "uid://ddamsje4gsf3w"
+
+[node name="SepScriptToSceneTool" type="Node" parent="."]
+script = ExtResource("18_6qtkm")
+metadata/_custom_type_script = "uid://ccwis3445fpto"
+
+[node name="SetResourcePropertyTool" type="Node" parent="."]
+script = ExtResource("19_u0f8y")
+metadata/_custom_type_script = "uid://cbs0vdtg4whwx"
+
+[node name="SetSingletonTool" type="Node" parent="."]
+script = ExtResource("20_5y8ni")
+metadata/_custom_type_script = "uid://bsnqqy1p5k0p5"
+
 [node name="UpdatePlanListTool" type="Node" parent="."]
 script = ExtResource("2_dfgn2")
 metadata/_custom_type_script = "uid://bw4aphbgnkejd"
+
+[node name="UpdateSceneNodePropertyTool" type="Node" parent="."]
+script = ExtResource("21_fvoat")
+metadata/_custom_type_script = "uid://bnuj6ekokk51q"
+
+[node name="UpdateScriptFileContentTool" type="Node" parent="."]
+script = ExtResource("22_d4t82")
+metadata/_custom_type_script = "uid://cem5r5a37l4y8"
+
+[node name="WriteFileTool" type="Node" parent="."]
+script = ExtResource("23_vdjg2")
+metadata/_custom_type_script = "uid://dbp0on28785my"

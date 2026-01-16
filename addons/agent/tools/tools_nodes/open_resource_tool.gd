@@ -33,7 +33,7 @@ func _get_tool_parameters() -> Dictionary:
 				"description": "如果打开的是脚本，可以指定列号，默认是0",
 			},
 		},
-		"required": ["name", "type"]
+		"required": ["path", "type"]
 	}
 
 func _get_tool_readonly() -> bool:

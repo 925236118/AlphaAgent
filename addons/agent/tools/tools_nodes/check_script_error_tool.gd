@@ -20,7 +20,7 @@ func _get_tool_parameters() -> Dictionary:
 				"description": "需要检查的脚本路径，必须是以res://开头的绝对路径。",
 			},
 		},
-		"required": ["name"]
+		"required": ["path"]
 	}
 
 func _get_tool_readonly() -> bool:
@@ -44,10 +44,9 @@ func do_action(tool_call: AgentModelUtils.ToolCallsInfo) -> Dictionary:
 
 		var script_check_result = FileAccess.get_file_as_string(log_file_path)
 		DirAccess.remove_absolute(log_file_path)
-
 		return {
 			"script_path": path,
-			"script_check_result": script_check_result
+			"script_check_result": "代码没有语法错误" if script_check_result == "" else script_check_result
 		}
 
 	return { "error": "调用失败。请检查参数是否正确。" }

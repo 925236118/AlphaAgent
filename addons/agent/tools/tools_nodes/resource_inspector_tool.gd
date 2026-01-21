@@ -20,7 +20,7 @@ func _get_tool_parameters() -> Dictionary:
 				"description": "需要资源文件路径，必须是以res://开头的绝对路径。",
 			},
 			"include_meta": {
-				"type": "string",
+				"type": "boolean",
 				"description": "是否需要meta数据，默认为false",
 			}
 		},

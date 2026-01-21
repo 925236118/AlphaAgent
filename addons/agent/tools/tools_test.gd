@@ -71,6 +71,12 @@ extends Node
 	tool.function.arguments = JSON.stringify({}) # 填写测试参数
 	print(await tools.use_tool(tool))
 
+@export_tool_button("测试 resource_inspector") var resource_inspector_action = func():
+	var tool = AgentModelUtils.ToolCallsInfo.new()
+	tool.function.name = "resource_inspector"
+	tool.function.arguments = JSON.stringify({"resource_path": "res://test/color_change.gdshader"}) # 填写测试参数
+	print(await tools.use_tool(tool))
+
 @export_group("写工具", "write_")
 @export_tool_button("测试 create_folder") var write_test_create_folder_action = func():
 	var tool = AgentModelUtils.ToolCallsInfo.new()

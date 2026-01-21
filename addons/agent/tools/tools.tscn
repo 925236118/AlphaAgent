@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://cq2jo5hlpns6j"]
+[gd_scene load_steps=25 format=3 uid="uid://cq2jo5hlpns6j"]
 
 [ext_resource type="Script" uid="uid://brrn1lmlftop0" path="res://addons/agent/tools/tools.gd" id="1_rxf3o"]
 [ext_resource type="Script" uid="uid://bw4aphbgnkejd" path="res://addons/agent/tools/tools_nodes/update_plan_list.gd" id="2_dfgn2"]
@@ -23,6 +23,7 @@
 [ext_resource type="Script" uid="uid://bnuj6ekokk51q" path="res://addons/agent/tools/tools_nodes/update_scene_node_property_tool.gd" id="21_fvoat"]
 [ext_resource type="Script" uid="uid://cem5r5a37l4y8" path="res://addons/agent/tools/tools_nodes/update_script_file_content_tool.gd" id="22_d4t82"]
 [ext_resource type="Script" uid="uid://dbp0on28785my" path="res://addons/agent/tools/tools_nodes/write_file_tool.gd" id="23_vdjg2"]
+[ext_resource type="Script" uid="uid://bo7wlnxhg6myh" path="res://addons/agent/tools/tools_nodes/resource_inspector_tool.gd" id="24_obe2q"]
 
 [node name="Tools" type="Node"]
 script = ExtResource("1_rxf3o")
@@ -114,3 +115,7 @@ metadata/_custom_type_script = "uid://cem5r5a37l4y8"
 [node name="WriteFileTool" type="Node" parent="."]
 script = ExtResource("23_vdjg2")
 metadata/_custom_type_script = "uid://dbp0on28785my"
+
+[node name="ResourceInspectorTool" type="Node" parent="."]
+script = ExtResource("24_obe2q")
+metadata/_custom_type_script = "uid://bo7wlnxhg6myh"

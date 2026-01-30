@@ -224,8 +224,8 @@ static func _read_file_lines(file_path: String) -> Array:
 
 	var file = FileAccess.open(file_path, FileAccess.READ)
 
-	var content = file.get_as_text()
-	file.close()
+	var content = file.get_as_text() if file else ""
+	if file: file.close()
 
 	# 分割行并移除空行（可选）
 	var lines = content.split("\n")

@@ -22,6 +22,9 @@ func _enter_tree() -> void:
 	singleton.set_main_panel(main_panel)
 	singleton.set_editor_plugin(self)
 
+	# 初始化临时文件管理器
+	AgentTempFileManager.get_instance().init()
+
 func _exit_tree() -> void:
 	var singleton = AlphaAgentSingleton.get_instance()
 	var main_panel = singleton.main_panel

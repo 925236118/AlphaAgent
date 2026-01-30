@@ -8,9 +8,13 @@ extends PanelContainer
 @onready var cancel_button: Button = %CancelButton
 
 signal show_edit_file
+signal accept
+signal undo
 
 func _ready() -> void:
 	show_edit_file_button.pressed.connect(show_edit_file.emit)
+	confirm_button.pressed.connect(accept.emit)
+	cancel_button.pressed.connect(undo.emit)
 
-func set_name(file_name):
+func set_file_name(file_name):
 	file_name_label.text = file_name

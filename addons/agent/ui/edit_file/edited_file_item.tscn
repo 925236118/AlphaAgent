@@ -1,13 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://c7acg0onq62p8"]
+[gd_scene load_steps=3 format=3 uid="uid://c7acg0onq62p8"]
 
+[ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_2qcx0"]
 [ext_resource type="Script" uid="uid://kdbbw6fcydny" path="res://addons/agent/ui/edit_file/edited_file_item.gd" id="1_48ytp"]
-[ext_resource type="Texture2D" uid="uid://ba73pa4qitcps" path="res://addons/agent/icons/newicon/Icon_checkmark.svg" id="1_hbej1"]
-[ext_resource type="Texture2D" uid="uid://60p5i4otthyn" path="res://addons/agent/icons/newicon/Icon_close.svg" id="2_2qcx0"]
 
 [node name="EditedFileItem" type="PanelContainer"]
 anchors_preset = 10
 anchor_right = 1.0
 grow_horizontal = 2
+theme = ExtResource("1_2qcx0")
 script = ExtResource("1_48ytp")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
@@ -25,7 +25,6 @@ offset_top = 4.0
 offset_right = 576.0
 offset_bottom = 27.0
 size_flags_horizontal = 3
-text = "res://player.gd"
 
 [node name="ShowEditFileButton" type="Button" parent="HBoxContainer/Container"]
 unique_name_in_owner = true
@@ -35,16 +34,21 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_default_cursor_shape = 2
 flat = true
 
 [node name="ConfirmButton" type="Button" parent="HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-icon = ExtResource("1_hbej1")
+theme_type_variation = &"SecondaryButton"
+text = "保留"
 flat = true
+expand_icon = true
 
 [node name="CancelButton" type="Button" parent="HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-icon = ExtResource("2_2qcx0")
+theme_type_variation = &"SecondaryButton"
+text = "回退"
 flat = true
+expand_icon = true

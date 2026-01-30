@@ -17,10 +17,15 @@ func generate_edited_file_list(temp_file_array: Array[AgentTempFileManager.Edite
 	for child in get_children():
 		child.queue_free()
 	for temp_file in temp_file_array:
-		var edit_file_item := EDITED_FILE_ITEM.instantiate()
-		edit_file_item.set_name(temp_file.origin_path)
+		var edit_file_item : AgentEditedFileItem = EDITED_FILE_ITEM.instantiate()
 		add_child(edit_file_item)
+		print("22", temp_file.target_path)
+		edit_file_item.set_file_name(temp_file.target_path)
 		edit_file_item.show_edit_file.connect(on_show_edit_file.bind(temp_file, edit_file_item))
+		edit_file_item.accept.connect(on_accept_target.bind(temp_file, edit_file_item))
+		edit_file_item.undo.connect(on_accept_origin.bind(temp_file, edit_file_item))
+
+	if temp_file_array.size() > 0:
 		show()
 
 func on_show_edit_file(temp_file: AgentTempFileManager.EditedFile, edit_file_node: AgentEditedFileItem):
@@ -55,7 +60,7 @@ func on_accept_origin(temp_file: AgentTempFileManager.EditedFile, edit_file_node
 	EditorInterface.get_script_editor().notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
 
 	var index = edit_file_node.get_index()
-	AlphaAgentSingleton.instance.main_panel.tools.delete_temp_file(index)
+	AgentTempFileManager.get_instance().delete_temp_file(index)
 	edit_file_node.queue_free()
 
 # 保留目标文件则需要将源文件删除
@@ -64,5 +69,5 @@ func on_accept_target(temp_file: AgentTempFileManager.EditedFile, edit_file_node
 		DirAccess.remove_absolute(temp_file.origin_path)
 
 	var index = edit_file_node.get_index()
-	AlphaAgentSingleton.instance.main_panel.tools.delete_temp_file(index)
+	AgentTempFileManager.get_instance().delete_temp_file(index)
 	edit_file_node.queue_free()

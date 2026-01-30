@@ -8,8 +8,11 @@ extends RefCounted
 static var _instance: AgentTempFileManager = null
 
 class EditedFile:
+	# 有变化的文件目录
 	var target_path := ""
+	# 是否有源文件，如果为false，则是新创建的文件
 	var origin_exist := false
+	# 临时文件目录
 	var origin_path := ""
 
 var temp_file_array: Array[EditedFile] = []
@@ -18,6 +21,9 @@ static func get_instance() -> AgentTempFileManager:
 	if _instance == null:
 		_instance = AgentTempFileManager.new()
 	return _instance
+
+func init() -> void:
+	temp_file_array.clear()
 
 func create_temp_file(target_path: String) -> void:
 	if temp_file_array.any(func(item): return item.target_path == target_path):

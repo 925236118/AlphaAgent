@@ -126,6 +126,7 @@ class RoleManager:
 			return
 		current_role_id = json.get("current_role_id", "")
 		roles = json.get("roles", []).map(func(r: Dictionary): return RoleInfo.from_dict(r))
+		AlphaAgentPlugin.print_alpha_message("{0}个角色加载完成".format([roles.size()]))
 
 	func add_default_roles():
 		# 使用单例，等待 main_panel 初始化

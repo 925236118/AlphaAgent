@@ -273,6 +273,9 @@ class ModelManager:
 		suppliers.clear()
 		for supplier_data in suppliers_data:
 			suppliers.append(SupplierInfo.from_dict(supplier_data))
+		var model_size = suppliers.reduce(func(sum, supplier): return supplier.models.size() + sum, 0)
+
+		AlphaAgentPlugin.print_alpha_message("{0}个供应商及{1}个模型加载完成".format([suppliers.size(), model_size]))
 
 	func save_datas():
 		var data = {

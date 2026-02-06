@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://cq2jo5hlpns6j"]
+[gd_scene load_steps=27 format=3 uid="uid://cq2jo5hlpns6j"]
 
 [ext_resource type="Script" uid="uid://brrn1lmlftop0" path="res://addons/agent/tools/tools.gd" id="1_rxf3o"]
 [ext_resource type="Script" uid="uid://bw4aphbgnkejd" path="res://addons/agent/tools/tools_nodes/update_plan_list.gd" id="2_dfgn2"]
@@ -17,6 +17,7 @@
 [ext_resource type="Script" uid="uid://bn7s84xdq2dv4" path="res://addons/agent/tools/tools_nodes/global_search_tool.gd" id="15_dqlvb"]
 [ext_resource type="Script" uid="uid://bq50f4xl8kxrs" path="res://addons/agent/tools/tools_nodes/list_scene_nodes.gd" id="15_jbvan"]
 [ext_resource type="Script" uid="uid://baxetubbd1hg4" path="res://addons/agent/tools/tools_nodes/open_resource_tool.gd" id="16_0v8fo"]
+[ext_resource type="Script" uid="uid://dyg77edsqckb" path="res://addons/agent/tools/tools_nodes/load_skill.gd" id="16_3gvlj"]
 [ext_resource type="Script" uid="uid://ddamsje4gsf3w" path="res://addons/agent/tools/tools_nodes/read_file_tool.gd" id="17_uhxmd"]
 [ext_resource type="Script" uid="uid://ccwis3445fpto" path="res://addons/agent/tools/tools_nodes/sep_script_to_scene_tool.gd" id="18_6qtkm"]
 [ext_resource type="Script" uid="uid://cbs0vdtg4whwx" path="res://addons/agent/tools/tools_nodes/set_resource_property_tool.gd" id="19_u0f8y"]
@@ -84,6 +85,10 @@ metadata/_custom_type_script = "uid://bn7s84xdq2dv4"
 [node name="ListSceneNodesTool" type="Node" parent="."]
 script = ExtResource("15_jbvan")
 metadata/_custom_type_script = "uid://bq50f4xl8kxrs"
+
+[node name="LoadSkillTool" type="Node" parent="."]
+script = ExtResource("16_3gvlj")
+metadata/_custom_type_script = "uid://dyg77edsqckb"
 
 [node name="OpenResourceTool" type="Node" parent="."]
 script = ExtResource("16_0v8fo")

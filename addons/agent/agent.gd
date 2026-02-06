@@ -14,6 +14,8 @@ func _disable_plugin() -> void:
 	pass
 
 func _enter_tree() -> void:
+	print_greetings()
+
 	var main_panel = MAIN_PANEL.instantiate()
 	add_control_to_dock(EditorPlugin.DOCK_SLOT_RIGHT_UL, main_panel)
 
@@ -37,6 +39,25 @@ func _exit_tree() -> void:
 	singleton.set_main_panel(null)
 	singleton.set_editor_plugin(null)
 
+func _ready() -> void:
+	print_alpha_message("==$==*----*===*----*===*----*==$==")
+	print_alpha_message("初始化结束，欢迎使用 [b]Alpha[/b]")
+	print_alpha_message("更多详细信息请查看：[url href='https://godotvillage.github.io/alpha/']Alpha 官方网站[/url]")
+
+func print_greetings():
+	print_alpha_message("==$==*----*===*----*===*----*==$==")
+	print_alpha_message("""    ___     __        __
+   /   |   / /____   / /_   ____ _
+  / /| |  / // __ \\ / __ \\ / __ `/
+ / ___ | / // /_/ // / / // /_/ /
+/_/  |_|/_// .___//_/ /_/ \\__,_/
+		  /_/""")
+	print_alpha_message("==$==*----*===*----*===*----*==$==")
+	print_alpha_message("初始化插件中...")
+
+static func print_alpha_message(str):
+	print_rich("[color='#478cbf']{0}[/color]".format([str]))
+
 enum SendShotcut {
 	None,
 	Enter,
@@ -53,6 +74,7 @@ class GlobalSetting:
 	var models_file: String = ""
 	var roles_file: String = ""
 	var memory_file: String = ""
+	var skill_directory: String = ""
 
 	var auto_clear: bool = false
 	var auto_expand_think: bool = false
@@ -60,6 +82,7 @@ class GlobalSetting:
 	var send_shortcut: SendShotcut = SendShotcut.None
 	var model_manager: ModelConfig.ModelManager = null
 	var role_manager: AgentRoleConfig.RoleManager = null
+	var skill_manager: AgentSkillConfig.SkillManager = null
 
 	func _init() -> void:
 		if Engine.is_editor_hint():
@@ -71,11 +94,13 @@ class GlobalSetting:
 		models_file = setting_dir + "models.{version}.json".format({"version": CONFIG.alpha_version})
 		roles_file = setting_dir + "roles.{version}.json".format({"version": CONFIG.alpha_version})
 		memory_file = setting_dir + "memory.{version}.json".format({"version": CONFIG.alpha_version})
+		skill_directory = setting_dir + "skills_{version}/".format({"version": CONFIG.alpha_version})
 
 		project_alpha_dir = OS.get_user_data_dir() + "/.alpha/"
 
 	func load_global_setting():
 
+		AlphaAgentPlugin.print_alpha_message("加载全局设置...")
 		if not DirAccess.dir_exists_absolute(setting_dir):
 			DirAccess.make_dir_absolute(setting_dir)
 
@@ -97,6 +122,9 @@ class GlobalSetting:
 
 		# 初始化角色管理器
 		role_manager = AgentRoleConfig.RoleManager.new(roles_file)
+
+		# 初始化技能管理器
+		skill_manager = AgentSkillConfig.SkillManager.new(skill_directory)
 
 	func save_global_setting():
 		var dict = {

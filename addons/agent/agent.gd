@@ -41,7 +41,7 @@ func _exit_tree() -> void:
 
 func _ready() -> void:
 	print_alpha_message("==$==*----*===*----*===*----*==$==")
-	print_alpha_message("初始化结束，欢迎使用 [b]Alpha[/b]")
+	print_alpha_message("初始化结束，欢迎使用 [b]Alpha[/b]，始于初心，无限可能。")
 	print_alpha_message("更多详细信息请查看：[url href='https://godotvillage.github.io/alpha/']Alpha 官方网站[/url]")
 
 func print_greetings():

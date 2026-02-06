@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3 uid="uid://dkic1ui7mmhyy"]
+
+[ext_resource type="Script" uid="uid://dqul45c41fe3l" path="res://addons/agent/ui/skill/skill_item.gd" id="1_tptle"]
+
+[node name="SkillItem" type="HBoxContainer"]
+script = ExtResource("1_tptle")
+
+[node name="SkillName" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "godot-gdscript-patterns"
+
+[node name="EditButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+text = "编辑"
+
+[node name="DeleteButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+text = "删除"

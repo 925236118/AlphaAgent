@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://baqbjml8ahgng"]
+[gd_scene load_steps=27 format=3 uid="uid://baqbjml8ahgng"]
 
 [ext_resource type="Script" uid="uid://cfmtk5lhwecto" path="res://addons/agent/ui/main_panel.gd" id="1_c4fjy"]
 [ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_i5act"]
@@ -16,6 +16,7 @@
 [ext_resource type="ButtonGroup" uid="uid://4cfowu05scrd" path="res://addons/agent/ui/resource/setting_tab_group.tres" id="8_i5act"]
 [ext_resource type="PackedScene" uid="uid://b66g7g3ydkkeb" path="res://addons/agent/ui/memory/memory_container.tscn" id="10_n876e"]
 [ext_resource type="PackedScene" uid="uid://dy4ccoiv2ppl2" path="res://addons/agent/ui/edit_file/edited_files_container.tscn" id="11_wlmmt"]
+[ext_resource type="PackedScene" uid="uid://dmukluveklpjy" path="res://addons/agent/ui/skill/skill_container.tscn" id="16_q7ex6"]
 
 [sub_resource type="Theme" id="Theme_aabuu"]
 
@@ -202,6 +203,26 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 
+[node name="SettingTabSkill" type="Button" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar/Control2/SettingTabs"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "切换到记忆设置"
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxEmpty_cd0et")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_i5act")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_cd0et")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_i5act")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_pcyt6")
+toggle_mode = true
+button_pressed = true
+button_group = ExtResource("8_i5act")
+text = " 技能 "
+
 [node name="SettingTabMemory" type="Button" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/TopBarConrainer/TopBar/Control2/SettingTabs"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -334,6 +355,11 @@ visible = false
 layout_mode = 1
 
 [node name="MemoryContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers" instance=ExtResource("10_n876e")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+
+[node name="SkillContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers" instance=ExtResource("16_q7ex6")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1

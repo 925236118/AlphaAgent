@@ -1,0 +1,93 @@
+[gd_scene load_steps=2 format=3 uid="uid://dmukluveklpjy"]
+
+[ext_resource type="Script" uid="uid://b6oofx42giaym" path="res://addons/agent/ui/skill/skill_container.gd" id="1_30m6u"]
+
+[node name="SkillContainer" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_30m6u")
+
+[node name="SkillListContainer" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="SkillListContainer"]
+layout_mode = 2
+
+[node name="ListTitle" type="Label" parent="SkillListContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "技能列表"
+
+[node name="AddSkillButton" type="Button" parent="SkillListContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "新增"
+
+[node name="SkillList" type="VBoxContainer" parent="SkillListContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SkillEditContainer" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="SmartRecognitionLabel" type="Label" parent="SkillEditContainer"]
+layout_mode = 2
+text = "智能识别"
+
+[node name="SmartRecognitionInput" type="TextEdit" parent="SkillEditContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+placeholder_text = "填写内容，自动识别出标题、简介、内容。"
+
+[node name="SkillNameLabel" type="Label" parent="SkillEditContainer"]
+layout_mode = 2
+text = "技能名称"
+
+[node name="SkillNameInput" type="LineEdit" parent="SkillEditContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "填写技能名称"
+
+[node name="SkillDescriptionLabel" type="Label" parent="SkillEditContainer"]
+layout_mode = 2
+text = "技能简介"
+
+[node name="SkillDescriptionInput" type="TextEdit" parent="SkillEditContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+placeholder_text = "填写技能简介"
+wrap_mode = 1
+
+[node name="SkillContentLabel" type="Label" parent="SkillEditContainer"]
+layout_mode = 2
+text = "技能内容"
+
+[node name="SkillContentInput" type="TextEdit" parent="SkillEditContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+placeholder_text = "填写技能内容"
+wrap_mode = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SkillEditContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="ConfirmButton" type="Button" parent="SkillEditContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "确认"
+
+[node name="CancelButton" type="Button" parent="SkillEditContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "返回列表"

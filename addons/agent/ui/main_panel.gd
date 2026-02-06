@@ -16,6 +16,8 @@ extends Control
 @onready var setting_tabs: HBoxContainer = %SettingTabs
 @onready var setting_tab_memory: Button = %SettingTabMemory
 @onready var setting_tab_setting: Button = %SettingTabSetting
+@onready var setting_tab_skill: Button = %SettingTabSkill
+
 @onready var history_and_title: PanelContainer = %HistoryAndTitle
 
 @onready var tools: AgentTools = $Tools
@@ -27,12 +29,15 @@ extends Control
 
 @onready var setting_container: ScrollContainer = %SettingContainer
 @onready var memory_container: VBoxContainer = %MemoryContainer
+@onready var skill_container: VBoxContainer = %SkillContainer
+
 @onready var plan_list: AgentPlanList = %PlanList
 
 @onready var container_list = [
 	chat_container,
 	setting_container,
-	memory_container
+	memory_container,
+	skill_container
 ]
 
 enum MoreButtonIds {
@@ -99,6 +104,7 @@ func _ready() -> void:
 
 	setting_tab_memory.pressed.connect(func(): show_container(memory_container))
 	setting_tab_setting.pressed.connect(func(): show_container(setting_container))
+	setting_tab_skill.pressed.connect(func(): show_container(skill_container))
 
 # 连接插件信号（使用单例，始终可用）
 func _connect_plugin_signals():
@@ -533,14 +539,17 @@ func _exit_tree() -> void:
 func show_container(container: Control):
 	back_chat_button.visible = container != chat_container
 	history_and_title.visible = container == chat_container
-
-	if container == memory_container or container == setting_container:
+	
+	if [memory_container, setting_container, skill_container].has(container):
 		setting_tabs.show()
 		top_bar_buttons.hide()
-		if container == memory_container:
-			setting_tab_memory.button_pressed = true
-		if container == setting_container:
-			setting_tab_setting.button_pressed = true
+		match container:
+			memory_container:
+				setting_tab_memory.button_pressed = true
+			setting_container:
+				setting_tab_setting.button_pressed = true
+			skill_container:
+				setting_tab_skill.button_pressed = true
 	else:
 		setting_tabs.hide()
 		top_bar_buttons.show()

@@ -18,9 +18,14 @@ func _get_tool_parameters() -> Dictionary:
 			"scene_path": {
 				"type": "string",
 				"description": "需要列出节点的场景路径，必须是以res://开头的路径。",
+			},
+			"print_edited_properties": {
+				"type": "boolean",
+				"description": "是否打印编辑过的属性，默认是false。如果为true，则会在返回结果中包含编辑过的属性。返回内容较多，非必要情况不应开启。",
+				"default": false
 			}
 		},
-		"required": ["scene_path"]
+		"required": ["scene_path", "print_edited_properties"]
 	}
 
 func _get_tool_readonly() -> bool:
@@ -31,8 +36,9 @@ func _get_tool_group() -> AgentToolBase.ToolGroup:
 
 func do_action(tool_call: AgentModelUtils.ToolCallsInfo) -> Dictionary:
 	var json = JSON.parse_string(tool_call.function.arguments)
-	if not json == null and json.has("scene_path"):
+	if not json == null and json.has("scene_path") and json.has("print_edited_properties"):
 		var scene_path = json.scene_path
+		var print_edited_properties = json.print_edited_properties
 
 		if not scene_path.ends_with(".tscn"):
 			return {
@@ -50,15 +56,19 @@ func do_action(tool_call: AgentModelUtils.ToolCallsInfo) -> Dictionary:
 			var script_path = ""
 			if script:
 				script_path = script.resource_path
-
-			node_info.append({
+			var current_node_info = {
 				"unique_node_path": root_node.get_path_to(current_node, true),
 				"node_path": root_node.get_path_to(current_node, false),
 				"node_name": current_node.get_name(),
 				"node_base_type": current_node.get_class(),
 				"script": script_path,
 				"parent": root_node.get_path_to(current_node.get_parent(), false)
-			})
+			}
+
+			if print_edited_properties:
+				current_node_info["edited_properties"] = list_edited_properties(current_node)
+
+			node_info.append(current_node_info)
 			var nodes = current_node.get_children()
 			for node in nodes:
 				queue.push_back(node)
@@ -70,3 +80,36 @@ func do_action(tool_call: AgentModelUtils.ToolCallsInfo) -> Dictionary:
 	return {
 		"error": "调用失败。请检查参数是否正确。"
 	}
+
+func list_edited_properties(node: Node) -> Array[Dictionary]:
+	var properties: Array[Dictionary] = []
+	var base_class = node.get_class()
+	var class_property_list = ClassDB.class_get_property_list(base_class)
+	var script: Script = node.get_script()
+	var script_property_list = []
+	if script:
+		script_property_list = script.get_script_property_list()
+
+	for property in node.get_property_list():
+		var value = node.get(property.name)
+		if class_property_list.has(property):
+			var default_value = ClassDB.class_get_property_default_value(base_class, property.name)
+			if value != default_value:
+				properties.append({
+					"name": property.name,
+					"value": str(value),
+					"default_value": str(default_value),
+					"property_type": property.class_name if not property.class_name == "" else type_string(property.type),
+					"from": "class"
+				})
+		elif script_property_list.has(property):
+			var default_value = script.get_property_default_value(property.name)
+			if value != default_value:
+				properties.append({
+					"name": property.name,
+					"value": str(value),
+					"default_value": str(default_value),
+					"property_type": property.class_name if not property.class_name == "" else type_string(property.type),
+					"from": "script"
+				})
+	return properties

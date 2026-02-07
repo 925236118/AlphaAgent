@@ -14,13 +14,17 @@ func _get_tool_description() -> String:
 
 func _get_tool_parameters() -> Dictionary:
 	var skill_names = AlphaAgentPlugin.global_setting.skill_manager.get_skill_names()
+	var skill_descriptions = []
+	for skill: AgentSkillResource in AlphaAgentPlugin.global_setting.skill_manager.skills:
+		skill_descriptions.push_back("- **{skill_name}**: {skill_description}".format(skill))
+
 	return {
 		"type": "object",
 		"properties": {
 			"skill_name": {
 				"type": "string",
 				"enum": skill_names,
-				"description": "需要加载的技能名称，不能为空。",
+				"description": "需要加载的技能名称，不能为空。以下为所有可用的skill列表: \n" + '\n'.join(skill_descriptions),
 			},
 		},
 		"required": ["skill_name"]

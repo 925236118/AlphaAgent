@@ -2,11 +2,9 @@
 
 [ext_resource type="Script" uid="uid://dry1n6m67ku3q" path="res://addons/agent/ui/setting/setting.gd" id="1_c2l6f"]
 [ext_resource type="PackedScene" uid="uid://c2ei06dd8phsw" path="res://addons/agent/ui/setting/setting_item_bool.tscn" id="1_ca3bj"]
+[ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_k4cyc"]
 [ext_resource type="PackedScene" uid="uid://jbwyo7x0ce47" path="res://addons/agent/ui/setting/setting_item_option.tscn" id="4_83qt4"]
 [ext_resource type="PackedScene" uid="uid://wicqyhlygh1v" path="res://addons/agent/ui/models/supplier_option_window.tscn" id="4_k4cyc"]
-
-[sub_resource type="LabelSettings" id="LabelSettings_83qt4"]
-font_size = 20
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_c2l6f"]
 
@@ -19,6 +17,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 3
+theme = ExtResource("1_k4cyc")
 script = ExtResource("1_c2l6f")
 
 [node name="SettingPanel" type="MarginContainer" parent="."]
@@ -39,8 +38,8 @@ theme_override_constants/margin_bottom = 12
 
 [node name="Label" type="Label" parent="SettingPanel/SettingItemsContainer/MarginContainer"]
 layout_mode = 2
+theme_type_variation = &"TitleLabel"
 text = "对话设置"
-label_settings = SubResource("LabelSettings_83qt4")
 
 [node name="AutoClearSetting" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("1_ca3bj")]
 layout_mode = 2
@@ -85,8 +84,8 @@ theme_override_constants/margin_bottom = 12
 
 [node name="Label" type="Label" parent="SettingPanel/SettingItemsContainer/MarginContainer2"]
 layout_mode = 2
+theme_type_variation = &"TitleLabel"
 text = "模型设置"
-label_settings = SubResource("LabelSettings_83qt4")
 
 [node name="ModelSetting" type="VBoxContainer" parent="SettingPanel/SettingItemsContainer"]
 layout_mode = 2
@@ -118,8 +117,8 @@ theme_override_constants/margin_bottom = 12
 
 [node name="Label" type="Label" parent="SettingPanel/SettingItemsContainer/MarginContainer3"]
 layout_mode = 2
+theme_type_variation = &"TitleLabel"
 text = "角色管理"
-label_settings = SubResource("LabelSettings_83qt4")
 
 [node name="RoleList" type="VBoxContainer" parent="SettingPanel/SettingItemsContainer"]
 unique_name_in_owner = true

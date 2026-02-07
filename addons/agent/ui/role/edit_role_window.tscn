@@ -5,6 +5,7 @@
 
 [node name="EditRoleWindow" type="Window"]
 oversampling_override = 1.0
+position = Vector2i(0, 24)
 size = Vector2i(600, 600)
 theme = ExtResource("1_ga12p")
 script = ExtResource("1_yvfk6")

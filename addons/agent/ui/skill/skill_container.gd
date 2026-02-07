@@ -19,6 +19,7 @@ const SKILL_ITEM = preload("uid://dkic1ui7mmhyy")
 var edited_skill = null
 
 func _ready() -> void:
+	await get_tree().process_frame
 	visibility_changed.connect(on_visibility_changed)
 	add_skill_button.pressed.connect(on_add_skill_button_pressed)
 	confirm_button.pressed.connect(on_confirm_button_pressed)

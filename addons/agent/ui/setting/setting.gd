@@ -29,7 +29,6 @@ signal config_model
 var suppliers: Array[AgentSupplierItem] = []
 
 func _ready() -> void:
-	AlphaAgentPlugin.global_setting.load_global_setting()
 	init_item_values()
 	supplier_option_button.pressed.connect(show_supplier_option_window)
 	init_signals()

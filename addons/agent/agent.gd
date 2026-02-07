@@ -26,6 +26,8 @@ func _enter_tree() -> void:
 
 	# 初始化临时文件管理器
 	AgentTempFileManager.get_instance().init()
+	# 初始化全局设置
+	global_setting.load_global_setting()
 
 func _exit_tree() -> void:
 	var singleton = AlphaAgentSingleton.get_instance()

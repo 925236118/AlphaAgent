@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0-bugfix-20260208] - 2026-02-08
+### 🐛 Bug Fixes (问题修复)
+- 删除新手村相关内容
+
 ## [0.3.0] - 2025-01-09
 
 ### ✨ New Features (新增功能)

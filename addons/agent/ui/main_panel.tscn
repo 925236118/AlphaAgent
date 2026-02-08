@@ -372,9 +372,9 @@ self_modulate = Color(0.23921569, 0.43137255, 0.67058825, 1)
 layout_mode = 2
 size_flags_vertical = 4
 tooltip_text = "打开Godot新手村页面"
-text = "Godot新手村"
+text = "Alpha官网"
 underline = 1
-uri = "https://godotvillage.github.io/"
+uri = "https://godotvillage.github.io/alpha/"
 
 [node name="Tools" parent="." instance=ExtResource("3_2usmi")]
 

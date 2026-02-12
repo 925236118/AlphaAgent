@@ -539,7 +539,7 @@ func _exit_tree() -> void:
 func show_container(container: Control):
 	back_chat_button.visible = container != chat_container
 	history_and_title.visible = container == chat_container
-	
+
 	if [memory_container, setting_container, skill_container].has(container):
 		setting_tabs.show()
 		top_bar_buttons.hide()

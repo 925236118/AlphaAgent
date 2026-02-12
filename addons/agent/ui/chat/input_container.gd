@@ -163,9 +163,28 @@ func user_input_can_drop (at_position: Vector2, data: Variant):
 	var allow_types = ['files', "files_and_dirs", 'nodes', 'script_list_element', 'shader_list_element']
 	return allow_types.find(data.type) != -1
 
+func _insert_text_at_current_caret(insert_text: String) -> bool:
+	if insert_text.is_empty():
+		return false
+
+	var start_line := user_input.get_caret_line()
+	var start_column := user_input.get_caret_column()
+	user_input.insert_text_at_caret(insert_text)
+
+	# 拖拽流程中显式设置光标，确保始终落在新增文本末尾
+	var lines := insert_text.split("\n", true)
+	if lines.size() == 1:
+		user_input.set_caret_line(start_line)
+		user_input.set_caret_column(start_column + lines[0].length())
+	else:
+		user_input.set_caret_line(start_line + lines.size() - 1)
+		user_input.set_caret_column(lines[-1].length())
+	return true
+
 ## 将数据拖放到输入框后处理数据
 func user_input_drop_data(at_position: Vector2, data: Variant):
 	var info_list = reference_list.get_children().map(func(node): return node.info)
+	var has_inserted_text := false
 	match data.type:
 		"files":
 			var file_info_list = info_list.filter(func(info): return info.type == "file")
@@ -181,7 +200,7 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 				reference_item.set_label(file.get_file())
 				reference_item.set_tooltip(file)
 				if AlphaAgentPlugin.global_setting.auto_add_file_ref:
-					user_input.insert_text_at_caret(file.get_file() + " ")
+					has_inserted_text = _insert_text_at_current_caret(file.get_file() + " ") or has_inserted_text
 		"files_and_dirs":
 			var file_info_list = info_list.filter(func(info): return info.type == "file")
 			for file: String in data.files:
@@ -196,7 +215,7 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 				reference_item.set_label(file if file.ends_with("/") else file.get_file())
 				reference_item.set_tooltip(file)
 				if AlphaAgentPlugin.global_setting.auto_add_file_ref:
-					user_input.insert_text_at_caret(file if file.ends_with("/") else file.get_file() + " ")
+					has_inserted_text = _insert_text_at_current_caret(file if file.ends_with("/") else file.get_file() + " ") or has_inserted_text
 		"nodes":
 			var node_info_list = info_list.filter(func(info): return info.type == "node")
 			var root_node = EditorInterface.get_edited_scene_root()
@@ -209,6 +228,7 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 				var path = splite_array[-1]
 
 				if node_info_list.find_custom(func(info): return info.path == path and info.scene == current_scene) != -1:
+					user_input.grab_focus()
 					return
 				var reference_item = REFERENCE_ITEM.instantiate()
 				reference_item.info = {
@@ -221,7 +241,7 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 
 				reference_item.set_tooltip(current_scene + "/" + path)
 				if AlphaAgentPlugin.global_setting.auto_add_file_ref:
-					user_input.insert_text_at_caret(current_scene.get_file() + "/" + path.split('/')[-1] + " ")
+					has_inserted_text = _insert_text_at_current_caret(current_scene.get_file() + "/" + path.split('/')[-1] + " ") or has_inserted_text
 			pass
 		"script_list_element":
 			var script = EditorInterface.get_script_editor().get_current_script()
@@ -233,12 +253,14 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 				var editor_file_list: ItemList = script_editor.get_child(0).get_child(1).get_child(0).get_child(0).get_child(1)
 				var selected := editor_file_list.get_selected_items()
 				if not selected:
+					user_input.grab_focus()
 					return
 				var index := selected[0]
 				file = editor_file_list.get_item_tooltip(index)
 			var file_info_list = info_list.filter(func(info): return info.type == "file")
 
 			if file_info_list.find_custom(func(info): return info.path == file) != -1:
+				user_input.grab_focus()
 				return
 			var reference_item = REFERENCE_ITEM.instantiate()
 			reference_item.info = {
@@ -250,10 +272,12 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 			reference_item.set_tooltip(file)
 
 			if AlphaAgentPlugin.global_setting.auto_add_file_ref:
-				user_input.insert_text_at_caret(file.get_file() + " ")
+				has_inserted_text = _insert_text_at_current_caret(file.get_file() + " ") or has_inserted_text
 		"shader_list_element":
 			print("暂时不支持拖拽shader，请从文件系统中拖入。")
 			pass
+
+	user_input.grab_focus()
 
 # 完全初始化输入框
 func init():

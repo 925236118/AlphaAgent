@@ -15,7 +15,13 @@ func _disable_plugin() -> void:
 
 func _enter_tree() -> void:
 	print_greetings()
-
+	
+	# 初始化全局设置
+	global_setting.load_global_setting()
+	
+	# 初始化临时文件管理器
+	AgentTempFileManager.get_instance().init()
+	
 	var main_panel = MAIN_PANEL.instantiate()
 	add_control_to_dock(EditorPlugin.DOCK_SLOT_RIGHT_UL, main_panel)
 
@@ -24,10 +30,6 @@ func _enter_tree() -> void:
 	singleton.set_main_panel(main_panel)
 	singleton.set_editor_plugin(self)
 
-	# 初始化临时文件管理器
-	AgentTempFileManager.get_instance().init()
-	# 初始化全局设置
-	global_setting.load_global_setting()
 
 func _exit_tree() -> void:
 	var singleton = AlphaAgentSingleton.get_instance()

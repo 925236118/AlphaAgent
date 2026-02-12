@@ -11,11 +11,14 @@ extends PanelContainer
 @onready var expand_icon: TextureRect = %ExpandIcon
 
 const PLAN_ITEM = preload("uid://58ryyxbn0dby")
+var _last_plan_items: Array[AlphaAgentSingleton.PlanItem] = []
 
 func _ready() -> void:
 	expand_button.pressed.connect(show_plan_list)
 
 func update_list(list: Array[AlphaAgentSingleton.PlanItem]):
+	_last_plan_items = list.duplicate()
+
 	if list.size():
 		show()
 	else:
@@ -48,6 +51,14 @@ func update_list(list: Array[AlphaAgentSingleton.PlanItem]):
 	else:
 		plan_text.text = "正在执行任务 %d / %d" % [active_index + 1, list.size()]
 		all_finished_icon.hide()
+
+func is_all_finished() -> bool:
+	if _last_plan_items.is_empty():
+		return false
+	for item in _last_plan_items:
+		if item.state != AlphaAgentSingleton.PlanState.Finish:
+			return false
+	return true
 
 func clear_items():
 	var count = plan_item_container.get_child_count()

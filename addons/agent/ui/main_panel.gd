@@ -183,6 +183,8 @@ func init_message_list():
 	]
 
 func on_input_container_send_message(user_message: Dictionary, message_content: String):
+	_clear_plan_list_if_all_finished()
+
 	if first_chat:
 		init_message_list()
 
@@ -204,6 +206,10 @@ func on_input_container_send_message(user_message: Dictionary, message_content: 
 	user_message_item.update_user_message_content(message_content)
 
 	send_messages()
+
+func _clear_plan_list_if_all_finished():
+	if plan_list.is_all_finished():
+		plan_list.update_list([])
 
 func send_messages():
 	var use_thinking = input_container.get_use_thinking()

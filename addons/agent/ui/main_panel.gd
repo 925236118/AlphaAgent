@@ -212,6 +212,7 @@ func _clear_plan_list_if_all_finished():
 		plan_list.update_list([])
 
 func send_messages():
+	AlphaAgentPlugin.is_chat_stopped = false
 	var use_thinking = input_container.get_use_thinking()
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 
@@ -323,6 +324,8 @@ func on_use_tool(tool_calls: Array):
 	for tool in tool_calls:
 		#print(tool.id)
 		var content = await tools.use_tool(tool)
+		if AlphaAgentPlugin.is_chat_stopped:
+			return
 
 		messages.push_back({
 			"role": "tool",
@@ -356,11 +359,13 @@ func on_generate_error(error_info: Dictionary):
 	printerr(error_info.data)
 	#current_message_item.update_think_content(current_think, false)
 	current_message_item.update_error_message(error_info.error_msg, error_info.data)
+	AlphaAgentPlugin.is_chat_stopped = true
 
 	input_container.disable = false
 	input_container.switch_button_to("Send")
 
 func on_click_new_chat_button():
+	AlphaAgentPlugin.is_chat_stopped = true
 	if current_chat_stream != null and current_chat_stream.generatting:
 		current_chat_stream.close()
 
@@ -400,6 +405,7 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 	#print("total_tokens ", total_tokens)
 
 	if finish_reason != "tool_calls":
+		AlphaAgentPlugin.is_chat_stopped = true
 		# 彻底结束，否则可能是调用工具
 		input_container.disable = false
 		input_container.switch_button_to("Send")
@@ -567,6 +573,7 @@ func on_click_back_chat_button():
 	show_container(chat_container)
 
 func on_stop_chat():
+	AlphaAgentPlugin.is_chat_stopped = true
 	current_chat_stream.close()
 	input_container.disable = false
 	input_container.switch_button_to("Send")

@@ -143,6 +143,8 @@ static var global_setting := GlobalSetting.new()
 
 static var project_memory: Array[String] = []
 static var global_memory: Array[String] = []
+# 全局对话停止状态：发送时为 false，结束/停止时为 true
+static var is_chat_stopped: bool = true
 
 # ========== 场景树辅助函数 ==========
 

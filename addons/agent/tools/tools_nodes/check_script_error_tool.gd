@@ -119,6 +119,7 @@ func _run_external_syntax_check(path: String, log_file_path: String) -> Dictiona
 		"result_text": text,
 	}
 
+
 func _run_static_parse_check(path: String) -> Dictionary:
 	var source_code := FileAccess.get_file_as_string(path)
 	if FileAccess.get_open_error() != OK:
@@ -127,17 +128,23 @@ func _run_static_parse_check(path: String) -> Dictionary:
 			"phase": "static",
 			"result_text": "静态检查失败：无法读取脚本内容。"
 		}
-
-	var script := GDScript.new()
-	script.source_code = source_code
+	var script:GDScript=ResourceLoader.load(path,"GDScript",ResourceLoader.CACHE_MODE_IGNORE_DEEP)
+	if script==null:
+		return {
+			"ok": false,
+			"phase": "static",
+			"result_text": "静态检查失败：无法装载脚本。"
+		}
+	
 	var reload_error := script.reload()
-
+	
 	return {
 		"ok": reload_error == OK,
 		"phase": "static",
 		"error_code": reload_error,
 		"result_text": "代码没有静态解析错误" if reload_error == OK else "静态解析失败：%s" % error_string(reload_error)
 	}
+
 
 func _read_log_file_result(log_file_path: String) -> Dictionary:
 	if not FileAccess.file_exists(log_file_path):

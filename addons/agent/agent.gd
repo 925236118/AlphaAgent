@@ -96,6 +96,20 @@ class GlobalSetting:
 	var role_manager: AgentRoleConfig.RoleManager = null
 	var skill_manager: AgentSkillConfig.SkillManager = null
 
+	# -- 雇佣模式配置 --
+	var hire_mode_enabled: bool = false
+	var hire_agent: String = "cc"           # "cc" | "pi"
+	var cc_use_alpha_model: bool = true     # CC 是否沿用 Alpha 的模型
+	var cc_max_steps_per_task: int = 10
+	var cc_timeout_per_step: int = 300
+	var cc_max_fix_retries: int = 2
+	var cc_fix_timeout_seconds: int = 120
+	var cc_verbose_output: bool = true
+	var cc_auto_install_skills: bool = true
+	var cc_skills_allow_uninstall: bool = true
+	var pi_timeout_per_step: int = 300
+	var pi_max_fix_retries: int = 2
+
 	func _init() -> void:
 		if Engine.is_editor_hint():
 			setting_dir = EditorInterface.get_editor_paths().get_config_dir() + "/.alpha/"
@@ -131,6 +145,20 @@ class GlobalSetting:
 		self.http_proxy_host = str(json.get("http_proxy_host", ""))
 		self.http_proxy_port = str(json.get("http_proxy_port", ""))
 
+		# -- 加载雇佣模式配置 --
+		self.hire_mode_enabled = json.get("hire_mode_enabled", false)
+		self.hire_agent = json.get("hire_agent", "cc")
+		self.cc_use_alpha_model = json.get("cc_use_alpha_model", true)
+		self.cc_max_steps_per_task = json.get("cc_max_steps_per_task", 10)
+		self.cc_timeout_per_step = json.get("cc_timeout_per_step", 300)
+		self.cc_max_fix_retries = json.get("cc_max_fix_retries", 2)
+		self.cc_fix_timeout_seconds = json.get("cc_fix_timeout_seconds", 120)
+		self.cc_verbose_output = json.get("cc_verbose_output", true)
+		self.cc_auto_install_skills = json.get("cc_auto_install_skills", true)
+		self.cc_skills_allow_uninstall = json.get("cc_skills_allow_uninstall", true)
+		self.pi_timeout_per_step = json.get("pi_timeout_per_step", 300)
+		self.pi_max_fix_retries = json.get("pi_max_fix_retries", 2)
+
 		# 初始化模型管理器
 		model_manager = ModelConfig.ModelManager.new(models_file)
 
@@ -156,6 +184,19 @@ class GlobalSetting:
 			"send_shortcut": self.send_shortcut,
 			"http_proxy_host": self.http_proxy_host,
 			"http_proxy_port": self.http_proxy_port,
+			# -- 雇佣模式配置 --
+			"hire_mode_enabled": self.hire_mode_enabled,
+			"hire_agent": self.hire_agent,
+			"cc_use_alpha_model": self.cc_use_alpha_model,
+			"cc_max_steps_per_task": self.cc_max_steps_per_task,
+			"cc_timeout_per_step": self.cc_timeout_per_step,
+			"cc_max_fix_retries": self.cc_max_fix_retries,
+			"cc_fix_timeout_seconds": self.cc_fix_timeout_seconds,
+			"cc_verbose_output": self.cc_verbose_output,
+			"cc_auto_install_skills": self.cc_auto_install_skills,
+			"cc_skills_allow_uninstall": self.cc_skills_allow_uninstall,
+			"pi_timeout_per_step": self.pi_timeout_per_step,
+			"pi_max_fix_retries": self.pi_max_fix_retries,
 		}
 		var file = FileAccess.open(setting_file, FileAccess.WRITE)
 		file.store_string(JSON.stringify(dict))

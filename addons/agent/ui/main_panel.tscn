@@ -312,6 +312,14 @@ text = "帮助构建游戏项目
 帮助梳理已有功能"
 horizontal_alignment = 1
 
+[node name="HireModeLink" type="LinkButton" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer/WelcomeMessage/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+self_modulate = Color(0.23921569, 0.43137255, 0.67058825, 1)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+text = "切换到雇佣模式 →"
+underline = 0
+
 [node name="MessageContainer" type="ScrollContainer" parent="ScrollContainer/MarginContainer/BackgroundPanelContainer/VBoxContainer/Containers/ChatContainer"]
 unique_name_in_owner = true
 visible = false

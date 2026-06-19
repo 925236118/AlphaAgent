@@ -126,6 +126,44 @@ text = "添加供应商"
 layout_mode = 2
 theme_override_constants/separation = 10
 
+[node name="MarginContainerHire" type="MarginContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+theme_override_constants/margin_bottom = 12
+
+[node name="Label" type="Label" parent="SettingPanel/SettingItemsContainer/MarginContainerHire"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "雇佣设置"
+
+[node name="HireModeEnabled" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("1_ca3bj")]
+layout_mode = 2
+setting_name = "开启雇佣模式"
+setting_key = "hire_mode_enabled"
+
+[node name="HireAgent" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("4_83qt4")]
+layout_mode = 2
+setting_name = "执行 Agent"
+setting_key = "hire_agent"
+
+[node name="SettingNameLabel" parent="SettingPanel/SettingItemsContainer/HireAgent" index="0"]
+text = "执行 Agent"
+
+[node name="OptionButton" parent="SettingPanel/SettingItemsContainer/HireAgent" index="1"]
+item_count = 2
+popup/item_0/text = "Claude Code"
+popup/item_0/id = 0
+popup/item_1/text = "Pi"
+popup/item_1/id = 1
+
+[node name="CCUseAlphaModel" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("1_ca3bj")]
+layout_mode = 2
+setting_name = "CC 沿用 Alpha 模型配置"
+setting_key = "cc_use_alpha_model"
+
+[node name="HSeparatorHire" type="HSeparator" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
 [node name="MarginContainer3" type="MarginContainer" parent="SettingPanel/SettingItemsContainer"]
 layout_mode = 2
 theme_override_constants/margin_bottom = 12

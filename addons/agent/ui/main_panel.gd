@@ -32,6 +32,7 @@ extends Control
 @onready var skill_container: VBoxContainer = %SkillContainer
 
 @onready var plan_list: AgentPlanList = %PlanList
+@onready var hire_mode_link: LinkButton = %HireModeLink
 
 @onready var container_list = [
 	chat_container,
@@ -78,6 +79,9 @@ const MAX_TITLE_GENERATE_RETRY: int = 3
 const MAX_TITLE_LENGTH: int = 20
 const AUTO_SCROLL_BOTTOM_TOLERANCE := 10.0
 
+# -- 雇佣模式状态 --
+var hire_init_notice_shown: bool = false
+
 func _ready() -> void:
 	show_container(chat_container)
 	# 等待插件实例可用后再连接信号
@@ -94,6 +98,7 @@ func _ready() -> void:
 	_bind_message_scroll_events()
 
 	back_chat_button.pressed.connect(on_click_back_chat_button)
+	hire_mode_link.pressed.connect(on_click_hire_mode_link)
 	new_chat_button.pressed.connect(on_click_new_chat_button)
 	setting_button.pressed.connect(on_show_setting)
 	help_button.pressed.connect(show_help_window)
@@ -122,6 +127,7 @@ func _connect_plugin_signals():
 func _on_setting_ready():
 	_init_model_selector()
 	_init_role_selector()
+	_refresh_hire_ui()
 
 # 初始化模型选择器
 func _init_model_selector():
@@ -226,6 +232,12 @@ func _clear_plan_list_if_all_finished():
 
 func send_messages():
 	AlphaAgentPlugin.is_chat_stopped = false
+
+	# -- 雇佣模式分支 --
+	if AlphaAgentPlugin.global_setting.hire_mode_enabled:
+		_send_messages_hire_mode()
+		return
+
 	var use_thinking = input_container.get_use_thinking()
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 
@@ -406,6 +418,9 @@ func on_generate_error(error_info: Dictionary):
 
 func on_click_new_chat_button():
 	AlphaAgentPlugin.is_chat_stopped = true
+	# 解锁雇佣 Agent
+	AlphaAgentSingleton.get_instance().set_hire_agent_locked(false)
+	hire_init_notice_shown = false
 	if current_chat_stream != null and current_chat_stream.generatting:
 		current_chat_stream.close()
 
@@ -647,6 +662,165 @@ func show_container(container: Control):
 
 func on_click_back_chat_button():
 	show_container(chat_container)
+
+# -- 雇佣模式 UI --
+
+## 点击首页「切换到雇佣模式 →」/「← 回到默认模式」
+func on_click_hire_mode_link():
+	var gs = AlphaAgentPlugin.global_setting
+	gs.hire_mode_enabled = not gs.hire_mode_enabled
+	gs.save_global_setting()
+	_refresh_hire_ui()
+
+## 按当前配置刷新雇佣模式 UI
+func _refresh_hire_ui():
+	var hire_enabled = AlphaAgentPlugin.global_setting.hire_mode_enabled
+	var agent_name = "Claude Code" if AlphaAgentPlugin.global_setting.hire_agent == "cc" else "Pi"
+
+	# LinkButton 文案
+	if hire_enabled:
+		hire_mode_link.text = "← 回到默认模式"
+	else:
+		hire_mode_link.text = "切换到雇佣模式 →"
+
+	# 角色选择器显隐
+	input_container.set_role_visible(not hire_enabled)
+
+	# 如果开启雇佣模式，检查 Agent 可用性
+	if hire_enabled:
+		_check_hire_agent_available()
+
+## 检测雇佣 Agent 可用性并在首页展示状态
+func _check_hire_agent_available():
+	var init = AgentHireInitializer.new()
+	init.init_step.connect(_on_hire_init_step)
+	init.init_finished.connect(_on_hire_init_finished)
+	# 异步运行初始化检测（不阻塞 UI）
+	init.initialize(AlphaAgentPlugin.global_setting.hire_agent)
+
+func _on_hire_init_step(step: String, status: String, message: String):
+	var status_text = ""
+	match step:
+		"advertise":
+			status_text = "⏳ 发布招聘中..."
+		"interview":
+			status_text = "⏳ 面试中..."
+		"result":
+			if status == "success":
+				status_text = "✅ 已就绪"
+			else:
+				status_text = "❌ 未通过"
+	if hire_mode_link:
+		hire_mode_link.tooltip_text = "%s
+%s" % [status_text, message]
+	print("[雇佣] %s - %s: %s" % [step, status, message])
+
+func _on_hire_init_finished(success: bool):
+	if success:
+		if hire_mode_link:
+			hire_mode_link.tooltip_text = "✅ Agent 已就绪，可以发送对话"
+	else:
+		if hire_mode_link:
+			hire_mode_link.tooltip_text = "❌ Agent 未就绪，请检查环境"
+		push_warning("[雇佣] Agent 未就绪，请检查环境配置")
+
+# -- 雇佣模式消息发送 --
+
+func _send_messages_hire_mode():
+	var hire_agent = AlphaAgentPlugin.global_setting.hire_agent
+	var init = AgentHireInitializer.new()
+	init.initialize(hire_agent)
+
+	# 等待初始化完成
+	while not init.is_env_checked():
+		await get_tree().process_frame
+
+	if not init.is_ready():
+		push_error("雇佣 Agent (%s) 未就绪，无法发送对话。" % hire_agent)
+		_on_hire_init_failed(hire_agent)
+		return
+
+	# 锁定 Agent（对话开始后不可修改）
+	AlphaAgentSingleton.get_instance().set_hire_agent_locked(true)
+	input_container.set_role_visible(false)
+
+	# 首次对话显示雇佣提示
+	if first_chat and not hire_init_notice_shown:
+		hire_init_notice_shown = true
+		_show_hire_notice(hire_agent)
+
+	# 初始化消息列表
+	if first_chat:
+		init_message_list()
+		show_container(chat_container)
+		welcome_message.hide()
+		message_container.show()
+
+	# -- 雇佣模式工作流展示 --
+	var agent_name = "Claude Code" if hire_agent == "cc" else "Pi"
+	var display = HireWorkflowDisplay.new(self)
+
+	# Phase 1: RESEARCH
+	display.add_phase_header("🔍", "Phase 1: 调研项目上下文",
+		"Alpha 正在使用只读工具收集项目信息...")
+	await _simulate_delay(0.5)
+
+	# Phase 2: PLAN
+	var sample_steps: Array[Dictionary] = [
+		{"title": "分析现有代码结构", "description": "读取相关文件，理解当前项目架构"},
+		{"title": "实现核心逻辑", "description": "在目标文件中添加新功能代码"},
+		{"title": "验证修改结果", "description": "检查语法错误，确认功能正确"}
+	]
+	display.add_plan_steps(sample_steps)
+	await _simulate_delay(0.8)
+
+	# Phase 3: HIRE (模拟执行)
+	for i in sample_steps.size():
+		var step = sample_steps[i]
+		display.add_step_executing(i, step["title"], agent_name)
+		await _simulate_delay(0.4)
+
+	# Phase 4: VERIFY (模拟验证)
+	var report = {
+		"step_title": "实现核心逻辑",
+		"overall_verdict": 0,  # PASS
+		"failed_criteria": [],
+		"warnings": [],
+		"fix_suggestion": {}
+	}
+	display.add_verification(report)
+
+	# 总结
+	display.add_summary({
+		"total": sample_steps.size(),
+		"passed": sample_steps.size(),
+		"failed": 0,
+		"skipped": 0,
+		"agent": agent_name
+	})
+
+	# 解锁输入
+	AlphaAgentPlugin.is_chat_stopped = true
+	input_container.disable = false
+	input_container.switch_button_to("Send")
+
+## 模拟延迟（用于 UI 展示动画效果）
+func _simulate_delay(seconds: float):
+	var tree = get_tree()
+	if tree:
+		await tree.create_timer(seconds).timeout
+
+func _show_hire_notice(agent_type: String):
+	var agent_name = "Claude Code" if agent_type == "cc" else "Pi"
+	var notice = "🔁 您当前处于雇佣模式，我们已为您雇佣 **%s**。对话期间无法修改 Agent。如需更换，请开启新对话。" % agent_name
+	print("[雇佣] %s" % notice)
+
+func _on_hire_init_failed(agent_type: String):
+	var display = HireWorkflowDisplay.new(self)
+	display.add_agent_unavailable(agent_type)
+	AlphaAgentPlugin.is_chat_stopped = true
+	input_container.disable = false
+	input_container.switch_button_to("Send")
 
 func on_stop_chat():
 	AlphaAgentPlugin.is_chat_stopped = true

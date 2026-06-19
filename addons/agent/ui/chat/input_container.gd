@@ -184,6 +184,11 @@ func _on_role_selected(idx: int):
 	var role_id = role_id_list[idx]
 	role_manager.set_current_role(role_id)
 
+## 设置角色选择器可见性（雇佣模式开启时隐藏）
+func set_role_visible(visible: bool) -> void:
+	if role_button:
+		role_button.visible = visible
+
 ## 是否可以将数据拖放到输入框
 func user_input_can_drop (at_position: Vector2, data: Variant):
 	var allow_types = ['files', "files_and_dirs", 'nodes', 'script_list_element', 'shader_list_element']

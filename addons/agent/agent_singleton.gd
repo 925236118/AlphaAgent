@@ -24,8 +24,16 @@ class PlanItem:
 signal update_plan_list(plan_list: Array[PlanItem])
 signal models_changed
 signal roles_changed
+signal hire_lock_changed(locked: bool)
 
 # 主面板引用
+# 雇佣模式 Agent 锁定状态（对话开始后锁定，新对话解锁）
+var hire_agent_locked: bool = false
+
+func set_hire_agent_locked(locked: bool) -> void:
+	if hire_agent_locked != locked:
+		hire_agent_locked = locked
+		hire_lock_changed.emit(locked)
 var main_panel: AgentMainPanel = null
 
 # EditorPlugin 引用（如果可用）

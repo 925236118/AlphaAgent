@@ -40,7 +40,8 @@ func terminate() -> void:
 # -- 对话控制 --
 
 func send_prompt(prompt: String) -> void:
-	var is_new = not session_manager.supports_session() or session_manager.get_session_id().is_empty()
+	# supports_session() 是 AgentAdapter 的方法，调用自身而非 session_manager
+	var is_new = not supports_session() or session_manager.get_session_id().is_empty()
 	CCPromptFileWriter.write_and_send(prompt, session_manager.get_session_id(), is_new, process_manager)
 
 func abort() -> void:

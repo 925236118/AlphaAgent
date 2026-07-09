@@ -81,6 +81,7 @@ const AUTO_SCROLL_BOTTOM_TOLERANCE := 10.0
 
 # -- 雇佣模式状态 --
 var hire_init_notice_shown: bool = false
+var _hire_ui_initialized: bool = false  # 标记 UI 初始设置是否完成
 
 func _ready() -> void:
 	show_container(chat_container)
@@ -127,7 +128,9 @@ func _connect_plugin_signals():
 func _on_setting_ready():
 	_init_model_selector()
 	_init_role_selector()
-	_refresh_hire_ui()
+	# 仅更新 UI 状态（LinkButton 文案、角色选择器显隐），不触发 Agent 检测
+	_refresh_hire_ui_state()
+	_hire_ui_initialized = true
 
 # 初始化模型选择器
 func _init_model_selector():
@@ -659,6 +662,10 @@ func show_container(container: Control):
 
 	if container == chat_container:
 		auto_scroll_enabled = true
+		# 从其他页面（设置/记忆/技能）切回主面板时，若雇佣模式已开启则执行 Agent 检测
+		# 首次 _ready() 中调用 show_container 时 _hire_ui_initialized 为 false，会跳过
+		if _hire_ui_initialized and AlphaAgentPlugin.global_setting.hire_mode_enabled:
+			_check_hire_agent_available()
 
 func on_click_back_chat_button():
 	show_container(chat_container)
@@ -672,10 +679,10 @@ func on_click_hire_mode_link():
 	gs.save_global_setting()
 	_refresh_hire_ui()
 
-## 按当前配置刷新雇佣模式 UI
-func _refresh_hire_ui():
+## 仅刷新雇佣模式 UI 状态（LinkButton 文案、角色选择器显隐）
+## 不触发 Agent 可用性检测，用于初始化阶段或外部页面变更时同步状态
+func _refresh_hire_ui_state():
 	var hire_enabled = AlphaAgentPlugin.global_setting.hire_mode_enabled
-	var agent_name = "Claude Code" if AlphaAgentPlugin.global_setting.hire_agent == "cc" else "Pi"
 
 	# LinkButton 文案
 	if hire_enabled:
@@ -686,8 +693,13 @@ func _refresh_hire_ui():
 	# 角色选择器显隐
 	input_container.set_role_visible(not hire_enabled)
 
-	# 如果开启雇佣模式，检查 Agent 可用性
-	if hire_enabled:
+## 完整刷新雇佣模式 UI（含 Agent 可用性检测）
+## 在 main_panel 可见时调用：用户主动点击切换，或从设置页返回
+func _refresh_hire_ui():
+	_refresh_hire_ui_state()
+
+	# 如果开启雇佣模式，立即检测 Agent 可用性
+	if AlphaAgentPlugin.global_setting.hire_mode_enabled:
 		_check_hire_agent_available()
 
 ## 检测雇佣 Agent 可用性并在首页展示状态
@@ -731,7 +743,6 @@ func _send_messages_hire_mode():
 	var init = AgentHireInitializer.new()
 	init.initialize(hire_agent)
 
-	# 等待初始化完成
 	while not init.is_env_checked():
 		await get_tree().process_frame
 
@@ -765,35 +776,47 @@ func _send_messages_hire_mode():
 		"Alpha 正在使用只读工具收集项目信息...")
 	await _simulate_delay(0.5)
 
-	# Phase 2: PLAN
-	var sample_steps: Array[Dictionary] = [
-		{"title": "分析现有代码结构", "description": "读取相关文件，理解当前项目架构"},
-		{"title": "实现核心逻辑", "description": "在目标文件中添加新功能代码"},
-		{"title": "验证修改结果", "description": "检查语法错误，确认功能正确"}
-	]
-	display.add_plan_steps(sample_steps)
+	# Phase 2: PLAN — 基于用户输入构建步骤
+	var steps: Array[Dictionary] = _build_hire_steps()
+	display.add_plan_steps(steps)
 	await _simulate_delay(0.8)
 
-	# Phase 3: HIRE (模拟执行)
-	for i in sample_steps.size():
-		var step = sample_steps[i]
-		display.add_step_executing(i, step["title"], agent_name)
-		await _simulate_delay(0.4)
+	# Phase 3: HIRE — 对每个步骤执行（先尝试真实 CC，不可用时降级模拟）
+	for i in steps.size():
+		var step = steps[i]
+		var step_title = step.get("title", "步骤 %d" % (i + 1))
 
-	# Phase 4: VERIFY (模拟验证)
-	var report = {
-		"step_title": "实现核心逻辑",
-		"overall_verdict": 0,  # PASS
-		"failed_criteria": [],
-		"warnings": [],
-		"fix_suggestion": {}
-	}
-	display.add_verification(report)
+		# 构造提示词
+		var prompt = CCPromptBuilder.build_step_prompt(step)
+
+		# 创建步骤卡片（可折叠 Prompt + Output）
+		var card = display.begin_step("步骤 %d: %s" % [(i + 1), step_title], prompt)
+
+		# 尝试真实 CC 执行
+		var cc_ok = await _execute_step_via_cc(card, step)
+		if not cc_ok:
+			# 降级：模拟输出展示
+			display.add_agent_output("⚠️ CC 不可用，使用模拟模式展示...\n")
+			await _simulate_step_output(card, step)
+
+		# 结束步骤
+		display.end_step(true)
+
+		# Phase 4: VERIFY
+		var report = {
+			"step_title": step_title,
+			"overall_verdict": 0,  # PASS
+			"failed_criteria": [],
+			"warnings": [],
+			"fix_suggestion": {}
+		}
+		display.add_verification(report)
+		await _simulate_delay(0.3)
 
 	# 总结
 	display.add_summary({
-		"total": sample_steps.size(),
-		"passed": sample_steps.size(),
+		"total": steps.size(),
+		"passed": steps.size(),
 		"failed": 0,
 		"skipped": 0,
 		"agent": agent_name
@@ -804,11 +827,171 @@ func _send_messages_hire_mode():
 	input_container.disable = false
 	input_container.switch_button_to("Send")
 
+## 基于用户输入构建执行步骤
+func _build_hire_steps() -> Array[Dictionary]:
+	# 获取用户最后一条消息作为任务上下文
+	var user_message = ""
+	for i in range(messages.size() - 1, -1, -1):
+		if messages[i].get("role") == "user":
+			user_message = messages[i].get("content", "")
+			break
+
+	# 基于用户输入构造步骤（后续 Phase 1/2 会接入 AI 做真正的调研和规划）
+	var steps: Array[Dictionary] = [
+		{
+			"title": "分析现有代码结构",
+			"description": "读取项目中与任务相关的文件，理解当前代码架构和修改点。\n用户任务: %s" % user_message,
+			"context": "项目是 Godot 4 游戏项目，使用 GDScript。\n当前工作目录是项目根目录。",
+			"acceptance_criteria": ["识别出需要修改的文件", "理解现有代码的接口和结构"],
+			"expected_files": []
+		},
+		{
+			"title": "实现代码变更",
+			"description": "根据任务需求，在目标文件中实现具体的代码修改。\n任务: %s" % user_message,
+			"context": "保持现有代码风格一致，使用 GDScript 最佳实践。",
+			"acceptance_criteria": ["代码可正常运行", "满足任务需求", "无语法错误"],
+			"expected_files": []
+		},
+		{
+			"title": "验证修改结果",
+			"description": "检查修改后的代码：验证语法正确性，确认功能完整。",
+			"context": "使用 Godot 的脚本编辑器检查语法错误。",
+			"acceptance_criteria": ["脚本无静态解析错误", "所有修改的文件语法正确"],
+			"expected_files": []
+		}
+	]
+	return steps
+
+## 尝试通过 CCAdapter 真实执行一个步骤
+## 返回 true 表示 CC 执行完成，false 表示 CC 不可用（需降级到模拟）
+const CC_STEP_TIMEOUT_SECONDS: float = 120.0
+
+func _execute_step_via_cc(card: HireStepCard, step: Dictionary) -> bool:
+	# 检测 CC 是否可用
+	var adapter = CCAdapter.new()
+	if not adapter.check_availability():
+		return false
+
+	# 启动 CC 子进程
+	if not adapter.start():
+		card.append_output("❌ CC 子进程启动失败，降级到模拟模式。\n", true)
+		return false
+
+	# 清空 shell 启动标题头（cmd.exe 会先输出 "Microsoft Windows..." 等非 JSON 文本）
+	await _simulate_delay(0.15)
+	_flush_shell_banner(adapter)
+
+	# 构造并发送提示词
+	var prompt = CCPromptBuilder.build_step_prompt(step)
+	card.set_prompt(prompt)
+	adapter.send_prompt(prompt)
+	card.set_running()
+
+	# 跳过 CC 命令执行前的残留输出（管道命令 echo 等）
+	await _simulate_delay(0.1)
+	_flush_shell_banner(adapter)
+
+	# 事件循环：读取 CC 输出并实时展示
+	var start_time = Time.get_ticks_msec() / 1000.0
+	var finished = false
+
+	while not finished:
+		# 超时检查
+		var elapsed = Time.get_ticks_msec() / 1000.0 - start_time
+		if elapsed > CC_STEP_TIMEOUT_SECONDS:
+			card.append_output("\n⏱ 步骤超时 (%.0f 秒)，强制终止。\n" % elapsed, true)
+			adapter.abort()
+			break
+
+		var event = adapter.read_event()
+		match event.get("type", ""):
+			"text_delta":
+				card.append_output(event.get("text", ""))
+
+			"tool_started":
+				var t_name = event.get("tool_name", "")
+				var t_args = event.get("tool_args", {})
+				card.append_tool_call(t_name, t_args)
+
+			"tool_finished":
+				var t_name = event.get("tool_name", "")
+				var result = event.get("result", {})
+				var result_str = str(result.get("content", result))
+				card.append_tool_result(t_name, result_str)
+
+			"agent_finished":
+				var output_text = card.get_output_text()
+				if output_text.is_empty():
+					card.append_output("(CC 执行完成，无文本输出)\n")
+				finished = true
+
+			"error":
+				var err_msg = event.get("message", "")
+				card.append_output(err_msg + "\n", true)
+
+			"raw":
+				# 非 JSON 行，直接显示
+				card.append_output(event.get("text", ""))
+
+			"empty":
+				# 无数据，短暂等待后继续
+				await _simulate_delay(0.05)
+
+	# 清理
+	adapter.terminate()
+
+	# 检查退出码
+	var exit_code = adapter.get_exit_code()
+	if exit_code != 0 and exit_code != -1:
+		card.append_output("\n⚠️ CC 进程退出码: %d\n" % exit_code, true)
+
+	return true
+
+## 模拟步骤执行输出（CC 不可用时的降级展示）
+func _simulate_step_output(card: HireStepCard, step: Dictionary) -> void:
+	card.append_output("> 分析项目结构...\n")
+	await _simulate_delay(0.3)
+
+	var expected = step.get("expected_files", [])
+	if expected is Array and expected.size() > 0:
+		card.append_output("> 读取相关文件: %s\n" % str(expected))
+		await _simulate_delay(0.3)
+
+	card.append_tool_call("read_file", {"path": "res://scripts/example.gd"})
+	await _simulate_delay(0.2)
+	card.append_tool_result("read_file", "文件内容读取完成 (模拟)")
+
+	await _simulate_delay(0.2)
+	card.append_output("> 分析现有接口与代码风格...\n")
+	await _simulate_delay(0.3)
+	card.append_output("> 实现代码变更...\n")
+	await _simulate_delay(0.4)
+
+	var desc = step.get("description", "")
+	if not desc.is_empty():
+		card.append_output("> 按照以下描述执行:\n")
+		card.append_output(">   %s\n" % desc.replace("\n", "\n>   "))
+
+	await _simulate_delay(0.3)
+	card.append_output("> 修改完成，验证语法正确性...\n")
+	await _simulate_delay(0.2)
+	card.append_output("> ✅ 模拟执行完成。\n")
+
 ## 模拟延迟（用于 UI 展示动画效果）
 func _simulate_delay(seconds: float):
 	var tree = get_tree()
 	if tree:
 		await tree.create_timer(seconds).timeout
+
+## 清空 shell 启动时的标题头输出（cmd.exe 的 "Microsoft Windows..." 等非 JSON 文本）
+## 在 adapter.start() 之后、发送 CC 命令之前调用
+func _flush_shell_banner(adapter: CCAdapter):
+	var flush_count = 0
+	while flush_count < 200:  # 最多读 200 行防止无限循环
+		var event = adapter.read_event()
+		if event.get("type") == "empty":
+			break  # pipe 中没有更多数据
+		flush_count += 1
 
 func _show_hire_notice(agent_type: String):
 	var agent_name = "Claude Code" if agent_type == "cc" else "Pi"

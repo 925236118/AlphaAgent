@@ -103,11 +103,12 @@ func save_settings(setting_item: AgentSettingItemBase):
 	AlphaAgentPlugin.global_setting[setting_item.setting_key] = val
 	AlphaAgentPlugin.global_setting.save_global_setting()
 
-	# 雇佣模式切换时，刷新 main_panel UI
+	# 雇佣模式切换时，仅刷新 main_panel UI 状态（不在设置页触发 Agent 检测）
+	# Agent 检测延迟到用户切回主面板时执行
 	if setting_item.setting_key == "hire_mode_enabled":
 		var singleton = AlphaAgentSingleton.get_instance()
 		if singleton.main_panel:
-			singleton.main_panel._refresh_hire_ui()
+			singleton.main_panel._refresh_hire_ui_state()
 
 func on_click_add_supplier_button():
 	var new_supplier := SUPPLIER_ITEM.instantiate() as AgentSupplierItem

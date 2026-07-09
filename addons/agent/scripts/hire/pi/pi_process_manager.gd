@@ -4,11 +4,14 @@ extends AgentProcessManager
 
 ## Pi 子进程生命周期管理器
 ## 与 CCProcessManager 类似，但 Pi 每次执行完后自动退出，无需维护长连接 Session
+##
+## 非阻塞读取：使用内部缓冲 + get_buffer() 实现真正的非阻塞逐行读取。
 
 var _stdio: FileAccess = null
 var _stderr: FileAccess = null
 var _pid: int = -1
 var _shell_path: String = ""
+var _read_buffer: String = ""  ## 非阻塞读取的内部缓冲区
 
 ## 启动 shell 子进程
 func start() -> bool:
@@ -36,11 +39,27 @@ func write_to_stdin(data: String) -> void:
 	if _stdio:
 		_stdio.store_string(data)
 
-## 非阻塞读取 stdout 的一行
+## 真·非阻塞读取 stdout 的一行
+## 使用内部缓冲 + get_buffer() 避免 get_line() 的阻塞行为
 func read_line() -> String:
 	if not _stdio or _stdio.eof_reached():
+		if not _read_buffer.is_empty():
+			var remaining = _read_buffer
+			_read_buffer = ""
+			return remaining
 		return ""
-	return _stdio.get_line()
+
+	var chunk = _stdio.get_buffer(4096)
+	if not chunk.is_empty():
+		_read_buffer += chunk.get_string_from_utf8()
+
+	var newline_idx = _read_buffer.find("\n")
+	if newline_idx >= 0:
+		var line = _read_buffer.substr(0, newline_idx).strip_edges(false, true)
+		_read_buffer = _read_buffer.substr(newline_idx + 1)
+		return line
+
+	return ""
 
 ## 获取错误输出
 func read_stderr() -> String:

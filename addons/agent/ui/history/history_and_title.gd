@@ -71,18 +71,22 @@ func set_title(title: String):
 	chat_title.text = clean_title
 
 func on_click_history_expand_button():
-	var window_pos = get_tree().root.position
-	var window_width = 296
-	var window_height = min(162 + history_list.size() * 32 + 16, 500)
+	var host_rect := AgentUiLayoutUtils.get_host_rect(self)
+	var margin := AgentUiTokens.POPUP_MARGIN
+	var window_width := mini(296, host_rect.size.x - margin * 2)
+	var window_height := mini(162 + history_list.size() * 32 + 16, 500)
 
-	var popup_pos = Vector2i(global_position) + popup_offset + window_pos
-	# 判断是否在编辑器环境中
-	var singleton = AlphaAgentSingleton.get_instance()
-	# 如果是编辑器运行，限制位置在窗体大小内
-	if singleton.editor_plugin == null:
-		popup_pos = Vector2i(global_position) + popup_offset
+	var popup_pos := Vector2i(global_position) + popup_offset
+	var singleton := AlphaAgentSingleton.get_instance()
+	if singleton.editor_plugin != null:
+		popup_pos += get_tree().root.position
 
-	history_list_window.popup(Rect2i(popup_pos, Vector2i(window_width, window_height)))
+	var popup_rect := AgentUiLayoutUtils.clamp_popup_rect(
+		Rect2i(popup_pos, Vector2i(window_width, window_height)),
+		host_rect,
+		margin
+	)
+	history_list_window.popup(popup_rect)
 	# 在编辑器模式下，需要手动设置窗口可获取焦点
 	if singleton.editor_plugin == null:
 		history_list_window.unfocusable = false

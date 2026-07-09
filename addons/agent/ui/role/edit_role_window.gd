@@ -101,7 +101,7 @@ func alert(title, text):
 	dialog.dialog_text = text
 	dialog.transient = true
 	add_child(dialog)
-	dialog.popup_centered()
+	AgentUiLayoutUtils.popup_centered_clamped(dialog, Vector2i(450, 180), self)
 
 func set_window_mode(mode: WindowMode):
 	match mode:

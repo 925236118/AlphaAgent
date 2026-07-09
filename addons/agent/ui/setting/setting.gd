@@ -77,8 +77,7 @@ func on_click_add_supplier_button():
 	new_supplier.editing = true
 
 func show_supplier_option_window():
-	supplier_option_window.popup_centered()
-	pass
+	AgentUiLayoutUtils.popup_centered_clamped(supplier_option_window, Vector2i(800, 800), self)
 
 func init_models_supplier():
 	supplier_option_window.init_models_supplier()
@@ -106,7 +105,7 @@ func refresh_roles():
 func on_click_manage_role_button():
 		var role_window = ROLE_OPTION_WINDOW.instantiate() as AgentRoleOptionWindow
 		get_tree().root.add_child(role_window)
-		role_window.popup_centered(Vector2i(800, 600))
+		AgentUiLayoutUtils.popup_centered_clamped(role_window, Vector2i(800, 600), get_tree().root)
 
 
 func on_create_role_window_created(role_info: AgentRoleConfig.RoleInfo):

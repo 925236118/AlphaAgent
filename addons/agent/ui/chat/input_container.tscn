@@ -50,11 +50,8 @@ font_size = 11
 font_color = Color(0.14901961, 0.45882353, 0.8509804, 1)
 
 [node name="InputContainer" type="MarginContainer"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
+size_flags_horizontal = 3
 theme = ExtResource("1_k8r8m")
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 5
@@ -127,31 +124,36 @@ scroll_fit_content_height = true
 caret_blink = true
 caret_multiple = false
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/InputBox"]
-layout_mode = 2
-size_flags_vertical = 4
-alignment = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/InputBox/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 4
-
-[node name="RoleButton" type="OptionButton" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer"]
+[node name="ToolbarVBox" type="VBoxContainer" parent="VBoxContainer/InputBox"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ToolbarRow1" type="HBoxContainer" parent="VBoxContainer/InputBox/ToolbarVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="RoleButton" type="OptionButton" parent="VBoxContainer/InputBox/ToolbarVBox/ToolbarRow1"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+clip_text = true
 tooltip_text = "选择角色"
 theme_override_styles/normal = SubResource("StyleBoxFlat_vh1vc")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_k8r8m")
 
-[node name="CustomDropdown" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer" instance=ExtResource("2_c3kby")]
+[node name="CustomDropdown" parent="VBoxContainer/InputBox/ToolbarVBox/ToolbarRow1" instance=ExtResource("2_c3kby")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(96, 30)
 layout_mode = 2
+size_flags_horizontal = 4
 
-[node name="ModelButton" type="OptionButton" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer"]
+[node name="ModelButton" type="OptionButton" parent="VBoxContainer/InputBox/ToolbarVBox/ToolbarRow1"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
+clip_text = true
 tooltip_text = "选择AI模型"
 mouse_default_cursor_shape = 2
 theme_override_constants/h_separation = 2
@@ -160,7 +162,7 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_model_button")
 flat = true
 fit_to_longest_item = false
 
-[node name="UseThinking" type="CheckButton" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer"]
+[node name="UseThinking" type="CheckButton" parent="VBoxContainer/InputBox/ToolbarVBox/ToolbarRow1"]
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "是否启用思考"
@@ -170,18 +172,20 @@ button_pressed = true
 text = "思考"
 flat = true
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/InputBox/HBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 4
-theme_override_constants/separation = 6
-
-[node name="UsageLabel" type="Label" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]
+[node name="ToolbarRow2" type="HBoxContainer" parent="VBoxContainer/InputBox/ToolbarVBox"]
 unique_name_in_owner = true
 layout_mode = 2
+alignment = 2
+theme_override_constants/separation = 6
+
+[node name="UsageLabel" type="Label" parent="VBoxContainer/InputBox/ToolbarVBox/ToolbarRow2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
 mouse_filter = 0
 label_settings = SubResource("LabelSettings_gy7k7")
 
-[node name="ClearButton" type="Button" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]
+[node name="ClearButton" type="Button" parent="VBoxContainer/InputBox/ToolbarVBox/ToolbarRow2"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
@@ -193,7 +197,7 @@ theme_override_colors/font_color = Color(0.46666667, 0.46666667, 0.46666667, 1)
 text = "清空"
 flat = true
 
-[node name="SendButton" type="Button" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]
+[node name="SendButton" type="Button" parent="VBoxContainer/InputBox/ToolbarVBox/ToolbarRow2"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
@@ -203,7 +207,7 @@ mouse_default_cursor_shape = 2
 theme_type_variation = &"PrimaryButton"
 text = "发送"
 
-[node name="StopButton" type="Button" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer2"]
+[node name="StopButton" type="Button" parent="VBoxContainer/InputBox/ToolbarVBox/ToolbarRow2"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2

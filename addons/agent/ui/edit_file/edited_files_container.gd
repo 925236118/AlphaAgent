@@ -42,7 +42,7 @@ func on_show_edit_file(temp_file: AgentTempFileManager.EditedFile, edit_file_nod
 	show_window.target_file_path = temp_file.target_path
 	show_window.load_file()
 	show_window.compare_and_highlight()
-	show_window.popup_centered()
+	AgentUiLayoutUtils.popup_centered_clamped(show_window, Vector2i(800, 600), get_tree().root)
 
 # 保留源文件则需要将源文件内容复制后更新到新文件中
 func on_accept_origin(temp_file: AgentTempFileManager.EditedFile, edit_file_node: AgentEditedFileItem):

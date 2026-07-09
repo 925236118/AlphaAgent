@@ -4,10 +4,7 @@
 [ext_resource type="Script" uid="uid://bbtkl1gjy6vnx" path="res://addons/agent/ui/memory/memory_item.gd" id="1_n2hbk"]
 
 [node name="MemoryItem" type="HBoxContainer"]
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 31.0
-grow_horizontal = 2
+layout_mode = 2
 size_flags_horizontal = 3
 theme = ExtResource("1_ls7f3")
 script = ExtResource("1_n2hbk")

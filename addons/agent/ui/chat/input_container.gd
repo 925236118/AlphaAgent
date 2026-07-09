@@ -767,3 +767,11 @@ func get_project_file_list(start_path: String = "res://", interation: int = -1) 
 						})
 				file_name = dir.get_next()
 	return file_list
+
+
+func update_responsive_layout(panel_width: float) -> void:
+	var narrow := AgentUiLayoutUtils.is_narrow(panel_width)
+	role_button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS if narrow else TextServer.OVERRUN_NO_TRIMMING
+	model_button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS if narrow else TextServer.OVERRUN_NO_TRIMMING
+	custom_dropdown.size_flags_horizontal = Control.SIZE_SHRINK_CENTER if narrow else Control.SIZE_SHRINK_END
+	use_thinking.text = "思考" if not narrow or panel_width >= 380 else "思"

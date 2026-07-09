@@ -33,6 +33,9 @@ extends Control
 
 @onready var plan_list: AgentPlanList = %PlanList
 
+@onready var footer_row1: HBoxContainer = %FooterRow1
+@onready var footer_row2: HBoxContainer = %FooterRow2
+
 @onready var container_list = [
 	chat_container,
 	setting_container,
@@ -97,6 +100,8 @@ func _ready() -> void:
 	else:
 		AlphaAgentPlugin.global_setting.setting_ready.connect(_on_setting_ready, CONNECT_ONE_SHOT)
 	_bind_message_scroll_events()
+	resized.connect(_update_responsive_layout)
+	call_deferred("_update_responsive_layout")
 
 	back_chat_button.pressed.connect(on_click_back_chat_button)
 	new_chat_button.pressed.connect(on_click_new_chat_button)
@@ -806,6 +811,16 @@ func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
 		last_message_item = message_item
 	last_message_item.update_finished_message("Success")
 
+func _update_responsive_layout() -> void:
+	var narrow := AgentUiLayoutUtils.is_narrow(size.x)
+	footer_row2.visible = true
+	for row: HBoxContainer in [footer_row1, footer_row2]:
+		for child in row.get_children():
+			if child is LinkButton:
+				child.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS if narrow else TextServer.OVERRUN_NO_TRIMMING
+	if input_container.has_method("update_responsive_layout"):
+		input_container.update_responsive_layout(size.x)
+
 func show_help_window():
 	if help_window:
 		help_window.show()
@@ -815,7 +830,7 @@ func show_help_window():
 		help_window.add_child(help)
 		help_window.title = "Alpha 帮助"
 		get_tree().root.add_child(help_window)
-		help_window.popup_centered(Vector2(1152, 648))
+		AgentUiLayoutUtils.popup_centered_clamped(help_window, Vector2i(1152, 648), self)
 		help_window.close_requested.connect(help_window.hide)
 
 func on_show_setting():

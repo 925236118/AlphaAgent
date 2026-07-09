@@ -116,9 +116,9 @@ expand_mode = 2
 stretch_mode = 5
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
-custom_minimum_size = Vector2(580, 20)
+custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
-size_flags_horizontal = 2
+size_flags_horizontal = 3
 size_flags_vertical = 4
 theme_override_font_sizes/normal_font_size = 14
 theme_override_font_sizes/bold_font_size = 14

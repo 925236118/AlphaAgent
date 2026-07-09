@@ -33,28 +33,17 @@ layout_mode = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_constants/separation = 8
 
-[node name="Control" type="Control" parent="Control/PanelContainer/VBoxContainer/HBoxContainer"]
+[node name="AcceptOriginButton" type="Button" parent="Control/PanelContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-
-[node name="AcceptOriginButton" type="Button" parent="Control/PanelContainer/VBoxContainer/HBoxContainer/Control"]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 4.0
-offset_right = 108.0
-offset_bottom = 31.0
 text = "回退到旧版本"
 
-[node name="Control2" type="Control" parent="Control/PanelContainer/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="SyncScroll" type="CheckButton" parent="Control/PanelContainer/VBoxContainer/HBoxContainer/Control2"]
+[node name="SyncScroll" type="CheckButton" parent="Control/PanelContainer/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_right = 44.0
-offset_bottom = 24.0
+layout_mode = 2
 button_pressed = true
 text = "同步滚动"
 

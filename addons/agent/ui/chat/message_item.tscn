@@ -70,11 +70,8 @@ font_color = Color(0.5568628, 0.5568628, 0.5568628, 1)
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hhdjy"]
 
 [node name="MessageItem" type="MarginContainer"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_right = 10
 script = ExtResource("1_kn78a")

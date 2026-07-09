@@ -4,10 +4,8 @@
 [ext_resource type="Script" uid="uid://dqul45c41fe3l" path="res://addons/agent/ui/skill/skill_item.gd" id="1_tptle"]
 
 [node name="SkillItem" type="HBoxContainer"]
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 31.0
-grow_horizontal = 2
+layout_mode = 2
+size_flags_horizontal = 3
 theme = ExtResource("1_h7spm")
 script = ExtResource("1_tptle")
 

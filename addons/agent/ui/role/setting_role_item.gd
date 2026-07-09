@@ -33,7 +33,7 @@ func on_click_more_button(id: MoreActionType):
 			var edit_role_window := EDIT_ROLE_WINDOW.instantiate() as AgentEditRoleWindow
 			get_tree().root.add_child(edit_role_window)
 			edit_role_window.set_role_info(role_info)
-			edit_role_window.popup_centered()
+			AgentUiLayoutUtils.popup_centered_clamped(edit_role_window, Vector2i(600, 600), get_tree().root)
 			edit_role_window.title = "编辑角色"
 			edit_role_window.edit_role_node = self
 			edit_role_window.set_window_mode(AgentEditRoleWindow.WindowMode.Edit)

@@ -184,7 +184,7 @@ func on_click_edit_model_button(model_info: ModelConfig.ModelInfo = null):
 	var singleton = AlphaAgentSingleton.get_instance()
 	model_manager_window.models_changed.connect(singleton.models_changed.emit)
 	model_manager_window.create_model.connect(on_create_model)
-	model_manager_window.popup_centered(Vector2i(600, 500))
+	AgentUiLayoutUtils.popup_centered_clamped(model_manager_window, Vector2i(600, 500), get_tree().root)
 	# 当窗口关闭时，销毁
 	model_manager_window.close_requested.connect(func():
 		model_manager_window.queue_free()
@@ -359,4 +359,4 @@ func alert(title, text):
 	dialog.dialog_text = text
 	dialog.transient = true
 	add_child(dialog)
-	dialog.popup_centered()
+	AgentUiLayoutUtils.popup_centered_clamped(dialog, Vector2i(450, 180), self)

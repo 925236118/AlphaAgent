@@ -72,12 +72,8 @@ corner_radius_bottom_left = 4
 
 [node name="SupplierItem" type="PanelContainer"]
 custom_minimum_size = Vector2(0, 100)
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_vertical = 3
+layout_mode = 2
+size_flags_horizontal = 3
 theme = ExtResource("1_3c5pc")
 theme_override_styles/panel = SubResource("StyleBoxFlat_omc8c")
 script = ExtResource("1_cxw2j")

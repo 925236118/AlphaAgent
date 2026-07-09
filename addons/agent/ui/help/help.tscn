@@ -1,4 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://b83qwags1ffo8"]
+[gd_scene load_steps=3 format=3 uid="uid://b83qwags1ffo8"]
+
+[ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_theme"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_tof6w"]
 font_size = 40
@@ -10,6 +12,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_theme")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1

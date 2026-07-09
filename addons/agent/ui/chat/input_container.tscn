@@ -1,8 +1,9 @@
-[gd_scene load_steps=17 format=3 uid="uid://dqkrjn0mak6lh"]
+[gd_scene load_steps=19 format=3 uid="uid://dqkrjn0mak6lh"]
 
 [ext_resource type="Theme" uid="uid://dwqhs78076qut" path="res://addons/agent/ui/resource/AgentTheme.tres" id="1_k8r8m"]
 [ext_resource type="Script" uid="uid://c0gayflg4ovas" path="res://addons/agent/ui/chat/input_container.gd" id="1_xi1dg"]
 [ext_resource type="PackedScene" uid="uid://cr0rgr6uojjsh" path="res://addons/agent/ui/customdropdown/dropdown/custom_dropdown.tscn" id="2_c3kby"]
+[ext_resource type="PackedScene" path="res://addons/agent/ui/common/status_bar.tscn" id="3_status"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xi1dg"]
 bg_color = Color(0.04303915, 0.043039158, 0.043039113, 0.38039216)
@@ -44,6 +45,10 @@ content_margin_bottom = 6.0
 [sub_resource type="LabelSettings" id="LabelSettings_gy7k7"]
 font_color = Color(0.46666667, 0.46666667, 0.46666667, 1)
 
+[sub_resource type="LabelSettings" id="LabelSettings_steering"]
+font_size = 11
+font_color = Color(0.14901961, 0.45882353, 0.8509804, 1)
+
 [node name="InputContainer" type="MarginContainer"]
 anchors_preset = 15
 anchor_right = 1.0
@@ -72,6 +77,17 @@ auto_height = true
 [node name="ReferenceList" type="HFlowContainer" parent="VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="StatusBar" parent="VBoxContainer" instance=ExtResource("3_status")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SteeringBadge" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "已排队 1 条"
+label_settings = SubResource("LabelSettings_steering")
 
 [node name="ConfigModelTip" type="VBoxContainer" parent="VBoxContainer"]
 unique_name_in_owner = true
@@ -130,25 +146,8 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_k8r8m")
 
 [node name="CustomDropdown" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer" instance=ExtResource("2_c3kby")]
 unique_name_in_owner = true
-visible = false
 custom_minimum_size = Vector2(96, 30)
 layout_mode = 2
-
-[node name="InputModeSelect" type="OptionButton" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-size_flags_vertical = 4
-mouse_default_cursor_shape = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_c3kby")
-theme_override_styles/hover = SubResource("StyleBoxFlat_sf386")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_xi1dg")
-selected = 0
-item_count = 2
-popup/item_0/text = "Agent"
-popup/item_0/id = 0
-popup/item_1/text = "Ask"
-popup/item_1/id = 1
 
 [node name="ModelButton" type="OptionButton" parent="VBoxContainer/InputBox/HBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
@@ -216,4 +215,3 @@ theme_type_variation = &"DangerButton"
 text = "停止"
 
 [connection signal="gui_input" from="VBoxContainer/InputBox/UserInput" to="." method="_on_user_input_gui_input"]
-[connection signal="item_selected" from="VBoxContainer/InputBox/HBoxContainer/HBoxContainer/InputModeSelect" to="." method="_on_input_mode_select_item_selected"]

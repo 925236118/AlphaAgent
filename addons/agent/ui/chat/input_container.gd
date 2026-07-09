@@ -16,6 +16,8 @@ extends MarginContainer
 @onready var config_model_tip: VBoxContainer = %ConfigModelTip
 @onready var input_box: VBoxContainer = %InputBox
 @onready var role_button: OptionButton = %RoleButton
+@onready var status_bar: AgentStatusBar = %StatusBar
+@onready var steering_badge: Label = %SteeringBadge
 
 const REFERENCE_ITEM = preload("uid://bewckbivwp036")
 
@@ -444,7 +446,29 @@ func handle_command(command: String, args: PackedStringArray):
 			show_setting.emit()
 			init()
 		_:
-			print("未知命令: ", command)
+			show_status("未知命令: %s" % command, 3.0)
+			init()
+
+func show_status(text: String, duration_sec: float = 0.0) -> void:
+	if status_bar:
+		status_bar.show_status(text, duration_sec)
+
+func hide_status() -> void:
+	if status_bar:
+		status_bar.hide_status()
+
+func set_steering_count(count: int) -> void:
+	if not steering_badge:
+		return
+	if count <= 0:
+		steering_badge.visible = false
+		steering_badge.text = ""
+	else:
+		steering_badge.visible = true
+		steering_badge.text = "已排队 %d 条" % count
+
+func focus_input() -> void:
+	user_input.grab_focus()
 
 func set_usage_label(total_tokens: float, max_content_length: float):
 	var percent := 0.0

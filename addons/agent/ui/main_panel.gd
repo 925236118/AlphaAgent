@@ -188,6 +188,7 @@ func _on_steering_message(user_message: Dictionary, message_content: String) -> 
 			"message": user_message,
 			"content": message_content
 		})
+		input_container.set_steering_count(_steering_queue.size())
 		return
 	on_input_container_send_message(user_message, message_content, false)
 
@@ -303,7 +304,9 @@ func _maybe_compact_messages() -> void:
 		return
 
 	_compaction_in_progress = true
+	input_container.show_status("正在压缩上下文...")
 	var summary := await _request_compaction_summary(to_summarize)
+	input_container.hide_status()
 	if not summary.is_empty():
 		messages = AgentContextCompaction.apply_compaction(messages, summary, cut_index)
 	_compaction_in_progress = false
@@ -453,6 +456,7 @@ func send_messages():
 	current_message_item.message_id = current_random_message_id
 	current_message_item.show_think = use_thinking
 	message_list.add_child(current_message_item)
+	current_message_item.show_generating_placeholder()
 	current_chat_stream.post_message(messages)
 	await get_tree().process_frame
 	scroll_message_container_to_bottom()
@@ -507,6 +511,7 @@ func on_use_tool(tool_calls: Array):
 
 	if not _steering_queue.is_empty():
 		var steering_item = _steering_queue.pop_front()
+		input_container.set_steering_count(_steering_queue.size())
 		var steering_message: Dictionary = steering_item.get("message", {})
 		var steering_content: String = steering_item.get("content", "")
 		steering_message.id = AlphaUtils.generate_random_string(16)
@@ -524,6 +529,7 @@ func on_use_tool(tool_calls: Array):
 	current_message_item.message_id = current_random_message_id
 	current_message_item.show_think = current_chat_stream.use_thinking
 	message_list.add_child(current_message_item)
+	current_message_item.show_generating_placeholder()
 
 	current_chat_stream.post_message(messages)
 
@@ -593,6 +599,7 @@ func on_generate_error(error_info: Dictionary):
 
 	input_container.disable = false
 	input_container.switch_button_to("Send")
+	input_container.focus_input()
 
 func on_click_new_chat_button():
 	AlphaAgentPlugin.is_chat_stopped = true
@@ -623,6 +630,7 @@ func clear():
 	_compaction_in_progress = false
 
 	input_container.init()
+	input_container.set_steering_count(0)
 
 	var message_count = message_list.get_child_count()
 	for i in message_count:
@@ -664,6 +672,7 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 		if current_chat_stream:
 			current_chat_stream.queue_free()
 		show_edited_file_container()
+		input_container.focus_input()
 
 	input_container.set_usage_label(total_tokens, _get_context_window() / 1024.0)
 	#print(messages)
@@ -814,7 +823,7 @@ func on_show_setting():
 	pass
 
 func on_show_memory():
-	pass
+	show_container(memory_container)
 
 func _exit_tree() -> void:
 	if help_window:
@@ -851,6 +860,8 @@ func on_stop_chat():
 	AlphaAgentPlugin.is_chat_stopped = true
 	if current_chat_stream and is_instance_valid(current_chat_stream):
 		current_chat_stream.close()
+	_steering_queue.clear()
+	input_container.set_steering_count(0)
 	input_container.disable = false
 	input_container.switch_button_to("Send")
 	if current_message_item:
@@ -859,6 +870,7 @@ func on_stop_chat():
 		current_message_item.copy.connect(on_copy_output_message.bind(current_message_item))
 	scroll_message_container_to_bottom()
 	reset_message_info()
+	input_container.focus_input()
 
 func on_update_plan_list(plan_array: Array[AlphaAgentSingleton.PlanItem]):
 	plan_list.update_list(plan_array)
@@ -903,9 +915,10 @@ func on_copy_output_message(message_item_node: AgentChatMessageItem):
 		var message_item = message_list.get_child(i) as AgentChatMessageItem
 		if message_item.message_type == AgentChatMessageItem.MessageType.AssistantMessage:
 			assistant_result.push_back(message_item.message_content.text)
-			print("复制成功")
 
 	DisplayServer.clipboard_set("\n".join(assistant_result))
+	if not assistant_result.is_empty():
+		input_container.show_status("已复制到剪贴板", 2.0)
 
 func scroll_message_container_to_bottom():
 	if not auto_scroll_enabled:
@@ -925,3 +938,19 @@ func _is_message_scroll_at_bottom() -> bool:
 	if not v_scroll_bar:
 		return true
 	return (v_scroll_bar.value + v_scroll_bar.page) >= (v_scroll_bar.max_value - AUTO_SCROLL_BOTTOM_TOLERANCE)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not chat_container.visible:
+		return
+	if not event is InputEventKey or not event.pressed or event.echo:
+		return
+
+	if event.keycode == KEY_ESCAPE and not AlphaAgentPlugin.is_chat_stopped:
+		on_stop_chat()
+		get_viewport().set_input_as_handled()
+	elif event.keycode == KEY_N and event.ctrl_pressed:
+		on_click_new_chat_button()
+		get_viewport().set_input_as_handled()
+	elif event.keycode == KEY_L and event.ctrl_pressed:
+		input_container.focus_input()
+		get_viewport().set_input_as_handled()

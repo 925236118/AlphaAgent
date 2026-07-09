@@ -73,6 +73,7 @@ func _process(delta: float) -> void:
 
 func update_think_content(text: String, start_timer: bool = true):
 	message_type = MessageType.AssistantMessage
+	hide_generating_placeholder()
 	# 只有在 show_think 为 true 时才更新 thinking 内容
 	if not show_think:
 		return
@@ -88,6 +89,7 @@ func update_think_content(text: String, start_timer: bool = true):
 
 func update_message_content(text: String):
 	message_type = MessageType.AssistantMessage
+	hide_generating_placeholder()
 	thinking = false
 	set_process(false)
 	if show_think:
@@ -112,6 +114,16 @@ func _on_expand_button_toggled(toggled_on: bool) -> void:
 func set_expand_icon_flip(val: bool):
 	expand_icon.flip_v = val
 
+func show_generating_placeholder() -> void:
+	message_type = MessageType.AssistantMessage
+	wait_using_tool.show()
+	wait_using_tool_rich_text_label.text = "[agent_thinking freq=5.0 span=5.0]正在生成回复...[/agent_thinking]"
+
+func hide_generating_placeholder() -> void:
+	if message_type == MessageType.ToolMessage:
+		return
+	wait_using_tool.hide()
+
 func response_use_tool():
 	message_type = MessageType.ToolMessage
 	wait_using_tool.show()
@@ -133,10 +145,13 @@ func used_tools(tool_calls: Array):
 		use_tool_item.update_title("调用工具 " + tool.function.name)
 		use_tool_item.id = tool.id
 		use_tool_item.update_request(tool.function.arguments)
+		use_tool_item.set_running(true)
 		use_tool_list[tool.id] = use_tool_item
 
 func update_used_tool_result(id: String, result: String):
-	use_tool_list.get(id).update_response(result)
+	var tool_item = use_tool_list.get(id)
+	if tool_item:
+		tool_item.update_response(result)
 
 func on_click_rich_text_url(meta):
 	var meta_string = str(meta)

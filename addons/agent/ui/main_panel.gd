@@ -78,6 +78,11 @@ const MAX_TITLE_GENERATE_RETRY: int = 3
 const MAX_TITLE_LENGTH: int = 20
 const AUTO_SCROLL_BOTTOM_TOLERANCE := 10.0
 
+var _steering_queue: Array[Dictionary] = []
+var _is_tool_executing: bool = false
+var _session_total_tokens: float = 0.0
+var _compaction_in_progress: bool = false
+
 func _ready() -> void:
 	show_container(chat_container)
 	# 等待插件实例可用后再连接信号
@@ -105,6 +110,8 @@ func _ready() -> void:
 	input_container.show_memory.connect(on_show_memory)
 	input_container.stop_chat.connect(on_stop_chat)
 	input_container.model_changed.connect(_on_model_selected)
+	input_container.chat_mode_changed.connect(_on_chat_mode_changed)
+	input_container.steering_message.connect(_on_steering_message)
 
 	history_and_title.recovery.connect(on_recovery_history)
 
@@ -172,6 +179,50 @@ func _on_models_changed():
 func _on_roles_changed():
 	_init_role_selector()
 
+func _on_chat_mode_changed(_mode: String) -> void:
+	pass
+
+func _on_steering_message(user_message: Dictionary, message_content: String) -> void:
+	if current_chat_stream != null and current_chat_stream.generatting:
+		_steering_queue.append({
+			"message": user_message,
+			"content": message_content
+		})
+		return
+	on_input_container_send_message(user_message, message_content, false)
+
+func _get_chat_mode() -> String:
+	return input_container.get_chat_mode()
+
+func _is_ask_mode() -> bool:
+	return _get_chat_mode() == "ASK"
+
+func _get_effective_tools_list() -> Array[Dictionary]:
+	var role_manager = AlphaAgentPlugin.global_setting.role_manager
+	var role = role_manager.get_current_role() if role_manager else null
+
+	if _is_ask_mode():
+		return tools.get_readonly_tools_list()
+
+	if role and not role.tools.is_empty():
+		return tools.get_filtered_tools_list(role.tools)
+
+	# 无角色或角色工具列表为空时，回退只读工具集
+	return tools.get_readonly_tools_list()
+
+func _get_context_window() -> int:
+	var model_manager = AlphaAgentPlugin.global_setting.model_manager
+	if model_manager == null:
+		return AgentContextCompaction.DEFAULT_CONTEXT_WINDOW
+	var model = model_manager.get_current_model()
+	if model == null:
+		return AgentContextCompaction.DEFAULT_CONTEXT_WINDOW
+	return maxi(model.max_tokens * 16, AgentContextCompaction.DEFAULT_CONTEXT_WINDOW)
+
+func _update_usage_label() -> void:
+	var context_window := _get_context_window()
+	input_container.set_usage_label(_session_total_tokens, context_window / 1024.0)
+
 
 func reset_message_info():
 	current_message_item = null
@@ -182,6 +233,15 @@ func reset_message_info():
 func init_message_list():
 	CONFIG = load("uid://b4bcww0bmnxt0")
 	var current_role = AlphaAgentPlugin.global_setting.role_manager.get_current_role()
+	var skill_summary := ""
+	var skill_manager = AlphaAgentPlugin.global_setting.skill_manager
+	if skill_manager:
+		skill_summary = skill_manager.get_skills_xml_summary()
+
+	var mode_hint := ""
+	if _is_ask_mode():
+		mode_hint = "\n当前为 ASK 只读模式：仅可使用查询类工具，不可修改项目文件或执行写操作。"
+
 	messages = [
 		{
 			"role": "system",
@@ -189,12 +249,16 @@ func init_message_list():
 				"project_memory": ''.join(AlphaAgentPlugin.project_memory.map(func(m): return "-" + m + "\n")),
 				"global_memory": ''.join(AlphaAgentPlugin.global_memory.map(func(m): return "-" + m + "\n")),
 				"role_prompt": current_role.prompt if current_role else "无"
-			}),
+			}) + ("\n\n" + skill_summary if not skill_summary.is_empty() else "") + mode_hint,
 			"id": AlphaUtils.generate_random_string(16)
 		}
 	]
 
-func on_input_container_send_message(user_message: Dictionary, message_content: String):
+func on_input_container_send_message(user_message: Dictionary, message_content: String, allow_steering: bool = true):
+	if allow_steering and current_chat_stream != null and (current_chat_stream.generatting or _is_tool_executing):
+		_on_steering_message(user_message, message_content)
+		return
+
 	_clear_plan_list_if_all_finished()
 
 	if first_chat:
@@ -224,8 +288,90 @@ func _clear_plan_list_if_all_finished():
 	if plan_list.is_all_finished():
 		plan_list.update_list([])
 
+func _maybe_compact_messages() -> void:
+	if _compaction_in_progress or messages.is_empty():
+		return
+	if not AgentContextCompaction.should_compact(messages, _get_context_window()):
+		return
+
+	var cut_index := AgentContextCompaction.find_compaction_cut_index(messages)
+	if cut_index <= 0:
+		return
+
+	var to_summarize := messages.slice(1, cut_index)
+	if to_summarize.is_empty():
+		return
+
+	_compaction_in_progress = true
+	var summary := await _request_compaction_summary(to_summarize)
+	if not summary.is_empty():
+		messages = AgentContextCompaction.apply_compaction(messages, summary, cut_index)
+	_compaction_in_progress = false
+
+func _request_compaction_summary(to_summarize: Array) -> String:
+	var model_manager = AlphaAgentPlugin.global_setting.model_manager
+	if model_manager == null:
+		return _fallback_compaction_summary(to_summarize)
+
+	var supplier = model_manager.get_current_supplier()
+	var model = model_manager.get_current_model()
+	if supplier == null or model == null:
+		return _fallback_compaction_summary(to_summarize)
+
+	var compaction_chat = null
+	match supplier.provider:
+		"openai":
+			compaction_chat = OpenAIChat.new()
+		"deepseek":
+			compaction_chat = DeepSeekChat.new()
+		"anthropic":
+			compaction_chat = AnthropicChat.new()
+		"gemini":
+			compaction_chat = GeminiChat.new()
+		"moonshot":
+			compaction_chat = MoonShotChat.new()
+		"minimax":
+			compaction_chat = MiniMaxChat.new()
+		"ollama":
+			compaction_chat = OllamaChat.new()
+		_:
+			return _fallback_compaction_summary(to_summarize)
+
+	compaction_chat.api_base = supplier.base_url
+	compaction_chat.model_name = model.model_name
+	compaction_chat.max_tokens = mini(model.max_tokens, 4096)
+	if "secret_key" in compaction_chat:
+		compaction_chat.secret_key = supplier.api_key
+
+	chat_models.add_child(compaction_chat)
+	var summary := ""
+	var finished := false
+	compaction_chat.generate_finish.connect(func(message: String, _think: String):
+		summary = message
+		finished = true
+	, CONNECT_ONE_SHOT)
+	compaction_chat.post_message(AgentContextCompaction.build_compaction_prompt(to_summarize))
+
+	while not finished:
+		await get_tree().process_frame
+
+	compaction_chat.queue_free()
+	return summary if not summary.is_empty() else _fallback_compaction_summary(to_summarize)
+
+func _fallback_compaction_summary(to_summarize: Array) -> String:
+	var lines: Array[String] = []
+	for msg in to_summarize:
+		if msg is Dictionary:
+			var role := str(msg.get("role", ""))
+			var content := str(msg.get("content", ""))
+			if content.length() > 240:
+				content = content.substr(0, 240) + "..."
+			lines.append("%s: %s" % [role, content])
+	return "\n".join(lines)
+
 func send_messages():
 	AlphaAgentPlugin.is_chat_stopped = false
+	await _maybe_compact_messages()
 	var use_thinking = input_container.get_use_thinking()
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 
@@ -298,15 +444,7 @@ func send_messages():
 	chat_models.add_child(current_chat_stream)
 	chat_models.add_child(current_title_chat)
 
-	# 根据角色设置工具列表
-	var role_manager = AlphaAgentPlugin.global_setting.role_manager
-	if role_manager:
-		var role = role_manager.get_current_role()
-		if role:
-			current_chat_stream.tools = tools.get_filtered_tools_list(role.tools)
-		else:
-			# 没有角色时，默认使用所有工具
-			current_chat_stream.tools = tools.get_tools_list()
+	current_chat_stream.tools = _get_effective_tools_list()
 
 	current_random_message_id = AlphaUtils.generate_random_string(16)
 	current_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
@@ -349,9 +487,7 @@ func on_response_use_tool():
 	scroll_message_container_to_bottom()
 
 func on_use_tool(tool_calls: Array):
-	# 兼容两种ToolCallsInfo类型
 	current_message_item.used_tools(tool_calls)
-	# 存储调用工具信息
 	messages.push_back({
 		"role": "assistant",
 		"content": null,
@@ -360,22 +496,27 @@ func on_use_tool(tool_calls: Array):
 		"id": current_random_message_id
 	})
 
-	for tool in tool_calls:
-		#print(tool.id)
-		var content = await tools.use_tool(tool)
-		if AlphaAgentPlugin.is_chat_stopped:
-			return
+	_is_tool_executing = true
+	await _execute_tool_calls(tool_calls)
+	_is_tool_executing = false
 
-		messages.push_back({
-			"role": "tool",
-			"tool_call_id": tool.id,
-			"content": content,
-			"id": current_random_message_id
-		})
-
-		current_message_item.update_used_tool_result(tool.id, content)
+	if AlphaAgentPlugin.is_chat_stopped:
+		return
 
 	reset_message_info()
+
+	if not _steering_queue.is_empty():
+		var steering_item = _steering_queue.pop_front()
+		var steering_message: Dictionary = steering_item.get("message", {})
+		var steering_content: String = steering_item.get("content", "")
+		steering_message.id = AlphaUtils.generate_random_string(16)
+		messages.push_back(steering_message)
+
+		var steering_message_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
+		steering_message_item.show_think = false
+		steering_message_item.message_id = steering_message.id
+		message_list.add_child(steering_message_item)
+		steering_message_item.update_user_message_content(steering_content)
 
 	await get_tree().create_timer(0.5).timeout
 
@@ -391,6 +532,55 @@ func on_use_tool(tool_calls: Array):
 	if current_history_item:
 		current_history_item.title = current_title
 		history_and_title.update_history(current_id, current_history_item)
+
+func _execute_tool_calls(tool_calls: Array) -> void:
+	var readonly_calls: Array = []
+	var write_calls: Array = []
+
+	for tool in tool_calls:
+		if tools.is_tool_readonly(tool.function.name):
+			readonly_calls.append(tool)
+		else:
+			write_calls.append(tool)
+
+	if not readonly_calls.is_empty():
+		var readonly_results := await _execute_readonly_tools_parallel(readonly_calls)
+		for item in readonly_results:
+			if AlphaAgentPlugin.is_chat_stopped:
+				return
+			_append_tool_result(item.tool, item.content)
+
+	for tool in write_calls:
+		var content = await tools.use_tool(tool)
+		if AlphaAgentPlugin.is_chat_stopped:
+			return
+		_append_tool_result(tool, content)
+
+func _execute_readonly_tools_parallel(readonly_calls: Array) -> Array:
+	var results: Array = []
+	results.resize(readonly_calls.size())
+	var done_count := 0
+
+	for i in range(readonly_calls.size()):
+		_execute_readonly_tool_at_index(i, readonly_calls[i], results, func(): done_count += 1)
+
+	while done_count < readonly_calls.size():
+		await get_tree().process_frame
+	return results
+
+func _execute_readonly_tool_at_index(index: int, tool_call: AgentModelUtils.ToolCallsInfo, results: Array, on_done: Callable) -> void:
+	var content := await tools.use_tool(tool_call)
+	results[index] = {"tool": tool_call, "content": content}
+	on_done.call()
+
+func _append_tool_result(tool: AgentModelUtils.ToolCallsInfo, content: String) -> void:
+	messages.push_back({
+		"role": "tool",
+		"tool_call_id": tool.id,
+		"content": content,
+		"id": current_random_message_id
+	})
+	current_message_item.update_used_tool_result(tool.id, content)
 
 func on_generate_error(error_info: Dictionary):
 	#printerr("发生错误")
@@ -428,6 +618,9 @@ func clear():
 	current_id = ""
 	current_time = ""
 	current_history_item = null
+	_steering_queue.clear()
+	_session_total_tokens = 0.0
+	_compaction_in_progress = false
 
 	input_container.init()
 
@@ -441,11 +634,14 @@ func clear():
 		current_title_chat.queue_free()
 
 func on_agent_finish(finish_reason: String, total_tokens: float):
-	#print("finish_reason ", finish_reason)
-	#print("total_tokens ", total_tokens)
+	AlphaAgentSingleton.get_instance().emit_before_agent_finish(finish_reason, total_tokens)
 	var use_thinking_for_history := false
 	if current_chat_stream:
 		use_thinking_for_history = current_chat_stream.use_thinking
+
+	if total_tokens > 0:
+		_session_total_tokens += total_tokens
+	_update_usage_label()
 
 	if finish_reason != "tool_calls":
 		AlphaAgentPlugin.is_chat_stopped = true
@@ -469,7 +665,7 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 			current_chat_stream.queue_free()
 		show_edited_file_container()
 
-	input_container.set_usage_label(total_tokens, 128)
+	input_container.set_usage_label(total_tokens, _get_context_window() / 1024.0)
 	#print(messages)
 
 	# 仅在本轮对话最终结束时生成标题，避免工具调用中间步骤重复触发并发请求
@@ -488,6 +684,7 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 		current_history_item.message = messages
 		current_history_item.title = current_title
 		current_history_item.time = current_time
+		current_history_item.mode = _get_chat_mode()
 		history_and_title.update_history(current_id, current_history_item)
 
 func on_title_generate_finish(message: String, _think_msg: String):
@@ -555,7 +752,9 @@ func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
 	current_title = history_item.title
 	current_time = history_item.time
 	messages = history_item.message
-	#input_container.set_input_mode(history_item.mode)
+	if history_item.mode != "" and input_container.custom_dropdown:
+		input_container.custom_dropdown.set_mode(history_item.mode, false)
+		input_container.update_user_input_placeholder()
 
 	var message_item = null
 	var last_message_item = null

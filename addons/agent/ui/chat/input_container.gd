@@ -20,11 +20,13 @@ extends MarginContainer
 const REFERENCE_ITEM = preload("uid://bewckbivwp036")
 
 signal send_message(message: Dictionary, message_content: String)
+signal steering_message(message: Dictionary, message_content: String)
 signal stop_chat
 signal show_help
 signal show_setting
 signal show_memory
 signal model_changed(supplier_id: String, model_id: String)
+signal chat_mode_changed(mode: String)
 
 enum MenuListType {
 	None,
@@ -69,7 +71,7 @@ var model_id_list = {}
 var role_id_list = {}
 
 func _ready() -> void:
-	#update_user_input_placeholder()
+	update_user_input_placeholder()
 
 	send_button.pressed.connect(on_click_send_message)
 	clear_button.pressed.connect(on_click_clear_button)
@@ -77,7 +79,7 @@ func _ready() -> void:
 
 	user_input.text_changed.connect(on_user_input_text_changed)
 	input_menu_list.item_selected.connect(on_input_menu_list_item_selected)
-	#custom_dropdown.is_action_mode.connect(update_user_input_placeholder)
+	custom_dropdown.mode_changed.connect(_on_chat_mode_changed)
 	config_model_button.pressed.connect(show_setting.emit)
 
 	# 初始化模型选择器
@@ -183,6 +185,29 @@ func _on_role_selected(idx: int):
 		return
 	var role_id = role_id_list[idx]
 	role_manager.set_current_role(role_id)
+
+func _on_chat_mode_changed(mode: String) -> void:
+	update_user_input_placeholder()
+	chat_mode_changed.emit(mode)
+	AlphaAgentSingleton.get_instance().chat_mode_changed.emit(mode)
+
+func get_chat_mode() -> String:
+	if custom_dropdown:
+		return custom_dropdown.get_now_mode()
+	return "Agent"
+
+func update_user_input_placeholder() -> void:
+	if get_chat_mode() == "ASK":
+		user_input.placeholder_text = "ASK 只读模式：可提问与查询，不会修改项目文件"
+	else:
+		user_input.placeholder_text = "向 Agent 描述你的需求，/ 命令，@ 引用文件"
+
+func _get_command_list() -> Array:
+	var commands = command_list.duplicate()
+	var template_manager = AlphaAgentPlugin.global_setting.prompt_template_manager
+	if template_manager:
+		commands.append_array(template_manager.get_command_list())
+	return commands
 
 ## 是否可以将数据拖放到输入框
 func user_input_can_drop (at_position: Vector2, data: Variant):
@@ -346,23 +371,40 @@ func on_click_send_message():
 	if AlphaAgentPlugin.global_setting.auto_clear:
 		init()
 
+	var info_list = reference_list.get_children().map(func(node): return node.info)
+	var info_list_string = JSON.stringify(info_list)
+	var message_payload = {
+		"role": "user",
+		"content": "用户输入的内容：" + message_text + "\n引用的内容信息：" + info_list_string
+	}
+
+	var is_steering := disable and stop_button.visible
+	if is_steering:
+		steering_message.emit(message_payload, message_text)
+		if AlphaAgentPlugin.global_setting.auto_clear:
+			user_input.text = ""
+			clear_reference_list()
+		return
+
 	# 正常消息处理
 	self.disable = true
 	role_button.disabled = true
 
 	switch_button_to("Stop")
-	#set_input_mode_disable(true)
-	var info_list = reference_list.get_children().map(func(node): return node.info)
-	var info_list_string = JSON.stringify(info_list)
-	send_message.emit({
-		"role": "user",
-		"content": "用户输入的内容：" + message_text + "\n引用的内容信息：" + info_list_string
-	}, message_text)
+	send_message.emit(message_payload, message_text)
 
 
 ## 处理命令
 func handle_command(command: String, args: PackedStringArray):
-	#print("执行命令: ", command, " 参数: ", args)
+	var template_manager = AlphaAgentPlugin.global_setting.prompt_template_manager
+	if template_manager:
+		var template_name := command.trim_prefix("/")
+		var template = template_manager.get_template(template_name)
+		if template:
+			user_input.text = template.content
+			user_input.grab_focus()
+			return
+
 	match command:
 		"/memory":
 			if args.size() == 0:
@@ -405,8 +447,11 @@ func handle_command(command: String, args: PackedStringArray):
 			print("未知命令: ", command)
 
 func set_usage_label(total_tokens: float, max_content_length: float):
-	usage_label.text = "%.2f" % (total_tokens / (max_content_length * 1024)) + "%"
-	usage_label.tooltip_text = ("%.2f" % (total_tokens / (max_content_length * 1024))) + "%" + " | " + ("%d / 128k usage tokens" % total_tokens)
+	var percent := 0.0
+	if max_content_length > 0:
+		percent = total_tokens / (max_content_length * 1024.0) * 100.0
+	usage_label.text = "%.1f%%" % percent
+	usage_label.tooltip_text = "%d / %.0fk tokens" % [int(total_tokens), max_content_length]
 
 func check_disallowed_char(text: String) -> bool:
 	var disallowed_char = [" ", ",", ".", "，", "。"]
@@ -455,9 +500,9 @@ func on_user_input_text_changed():
 		input_menu_list.clear()
 
 		# 过滤命令（只有 / 时显示所有命令）
-		var filtered_commands = command_list
+		var filtered_commands = _get_command_list()
 		if text.length() > 1:
-			filtered_commands = command_list.filter(func (command): return command.command.contains(text))
+			filtered_commands = _get_command_list().filter(func (command): return command.command.contains(text))
 		# 过滤 skill（只有 / 时显示所有 skill）
 		var filtered_skills = get_filtered_skill_list(text if text.length() > 1 else "")
 

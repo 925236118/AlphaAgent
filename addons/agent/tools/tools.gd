@@ -30,6 +30,22 @@ func get_filtered_tools_list(filter_list: Array) -> Array[Dictionary]:
 		return filter_list.has(tool.function.name)
 	)
 
+func get_readonly_tools_list() -> Array[Dictionary]:
+	return get_tools_list().filter(func(tool: Dictionary) -> bool:
+		var tool_name: String = tool.function.name
+		return tool_map.has(tool_name) and tool_map[tool_name].tool_readonly
+	)
+
+func is_tool_readonly(tool_name: String) -> bool:
+	return tool_map.has(tool_name) and tool_map[tool_name].tool_readonly
+
+const MAX_TOOL_OUTPUT_CHARS := 12000
+
+func truncate_tool_output(content: String) -> String:
+	if content.length() <= MAX_TOOL_OUTPUT_CHARS:
+		return content
+	return content.substr(0, MAX_TOOL_OUTPUT_CHARS) + "\n...[输出已截断]"
+
 # 获取工具列表
 func get_tools_list() -> Array[Dictionary]:
 	var tools_list: Array[Dictionary] = []
@@ -39,6 +55,15 @@ func get_tools_list() -> Array[Dictionary]:
 
 # 使用工具
 func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
+	var singleton = AlphaAgentSingleton.get_instance()
+	singleton.emit_before_tool_call(tool_call)
+
+	for interceptor in singleton.tool_call_interceptors:
+		if interceptor.is_valid() and interceptor.call(tool_call):
+			var intercepted := JSON.stringify({"intercepted": true})
+			singleton.emit_after_tool_call(tool_call, intercepted)
+			return intercepted
+
 	var result = {}
 	var function_name = tool_call.function.name
 	if tool_map.has(function_name):
@@ -47,4 +72,6 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 		result = {
 			"error": "错误的function.name"
 		}
-	return JSON.stringify(result)
+	var output := truncate_tool_output(JSON.stringify(result))
+	singleton.emit_after_tool_call(tool_call, output)
+	return output

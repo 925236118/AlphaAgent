@@ -1,3 +1,6 @@
-- 项目名称是Alpha Agent，是一个为Godot 4.x 版本编写的插件，核心代码均在/addons/agent文件夹下。
-- 插件入口是/addons/agent/agent.gd文件。
-- 所有的可以调用的工具均在/addons/agent/tools/tools.tscn中引用。并在/addons/agent/tools/tools_node文件夹下编写逻辑。相应的简介文档在/docs/tools.md文件中
+- 项目名称是 Alpha Agent，是一个为 Godot 4.x 版本编写的插件，核心代码均在 `/addons/agent` 文件夹下。
+- 插件入口是 `/addons/agent/agent.gd` 文件。
+- 所有的可以调用的工具均在 `/addons/agent/tools/tools.tscn` 中引用，并在 `/addons/agent/tools/tools_nodes` 文件夹下编写逻辑。相应的文档在 `/docs/features/tools/` 目录下。
+- 开发者文档导航见 `/docs/README.md`，分为架构文档（`/docs/architecture/`）和功能实现文档（`/docs/features/`）。
+- 内置 Skill 的唯一来源是 `/addons/agent/skills/default_skills/`，每个 Skill 目录下包含 `SKILL.md` 文件。
+- 内置 Prompt 模板位于 `/addons/agent/prompts/`；上下文压缩逻辑在 `/addons/agent/scripts/context_compaction.gd`；扩展钩子见 `/docs/features/extension-api.md`。

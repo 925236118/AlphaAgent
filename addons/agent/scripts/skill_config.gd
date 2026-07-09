@@ -69,6 +69,19 @@ class SkillManager:
 	func get_skill_folder_path(skill_name: String) -> String:
 		return skill_folder_path_map.get(skill_name, "")
 
+	func get_skills_xml_summary() -> String:
+		if skills.is_empty():
+			return ""
+		var lines: Array[String] = ["<available_skills>"]
+		for skill in skills:
+			lines.append('\t<skill name="%s">%s</skill>' % [
+				skill.skill_name,
+				skill.skill_description.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+			])
+		lines.append("</available_skills>")
+		lines.append("使用 load_skill 工具按需加载完整 Skill 内容。")
+		return "\n".join(lines)
+
 	func add_skill(skill: AgentSkillResource):
 		var folder_path = skill_directory + skill.skill_name + "/"
 		DirAccess.make_dir_recursive_absolute(folder_path)

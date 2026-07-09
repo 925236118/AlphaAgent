@@ -24,6 +24,13 @@ class PlanItem:
 signal update_plan_list(plan_list: Array[PlanItem])
 signal models_changed
 signal roles_changed
+signal before_tool_call(tool_call: AgentModelUtils.ToolCallsInfo)
+signal after_tool_call(tool_call: AgentModelUtils.ToolCallsInfo, result: String)
+signal before_agent_finish(finish_reason: String, total_tokens: float)
+signal chat_mode_changed(mode: String)
+
+# 扩展钩子：返回 true 表示拦截默认工具执行
+var tool_call_interceptors: Array[Callable] = []
 
 # 主面板引用
 var main_panel: AgentMainPanel = null
@@ -144,3 +151,19 @@ func wait_for_scene_tree_frame() -> void:
 		await timer.timeout
 	else:
 		push_warning("无法创建定时器，跳过等待帧")
+
+func register_tool_call_interceptor(callback: Callable) -> void:
+	if not tool_call_interceptors.has(callback):
+		tool_call_interceptors.append(callback)
+
+func unregister_tool_call_interceptor(callback: Callable) -> void:
+	tool_call_interceptors.erase(callback)
+
+func emit_before_tool_call(tool_call: AgentModelUtils.ToolCallsInfo) -> void:
+	before_tool_call.emit(tool_call)
+
+func emit_after_tool_call(tool_call: AgentModelUtils.ToolCallsInfo, result: String) -> void:
+	after_tool_call.emit(tool_call, result)
+
+func emit_before_agent_finish(finish_reason: String, total_tokens: float) -> void:
+	before_agent_finish.emit(finish_reason, total_tokens)

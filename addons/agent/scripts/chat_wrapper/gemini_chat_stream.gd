@@ -10,7 +10,7 @@ extends Node
 @export var secret_key: String = ""
 ## 模型名称
 @export var model_name: String = "gemini-3-flash-preview"
-## 是否使用深度思考（Gemini 当前未输出可消费的推理文本，保留字段用于兼容）
+## 是否使用深度思考（Gemini thinking 模型）
 @export var use_thinking: bool = false
 ## 温度值，越高输出越随机，默认为1
 @export_range(0.0, 2.0, 0.1) var temperature: float = 1.0
@@ -335,6 +335,11 @@ func _build_request_data(messages: Array[Dictionary]) -> Dictionary:
 		}
 	}
 
+	if use_thinking:
+		payload["generationConfig"]["thinkingConfig"] = {
+			"thinkingBudget": mini(maxi(1024, int(max_tokens / 2)), max_tokens - 1)
+		}
+
 	if not system_texts.is_empty():
 		payload["systemInstruction"] = {
 			"parts": [{"text": "\n\n".join(system_texts)}]
@@ -403,9 +408,11 @@ func _process_buffer(buffer: PackedByteArray, emitted_finish: bool) -> bool:
 			continue
 
 		var data := parsed as Dictionary
-		var candidate_text = _extract_candidate_text(data)
-		if not candidate_text.is_empty():
-			message.emit(candidate_text)
+		var extracted := _extract_candidate_parts(data)
+		if not extracted.thinking.is_empty():
+			think.emit(extracted.thinking)
+		if not extracted.text.is_empty():
+			message.emit(extracted.text)
 
 		var chunk_tool_calls = _extract_tool_calls(data)
 		if not chunk_tool_calls.is_empty():
@@ -433,28 +440,36 @@ func _process_buffer(buffer: PackedByteArray, emitted_finish: bool) -> bool:
 
 	return emitted_finish
 
-func _extract_candidate_text(data: Dictionary) -> String:
+func _extract_candidate_parts(data: Dictionary) -> Dictionary:
+	var result := {"text": "", "thinking": ""}
 	var candidates = data.get("candidates", [])
 	if not (candidates is Array) or candidates.is_empty():
-		return ""
+		return result
 
 	var first = candidates[0]
 	if not (first is Dictionary):
-		return ""
+		return result
 
 	var content = first.get("content", {})
 	if not (content is Dictionary):
-		return ""
+		return result
 
 	var parts = content.get("parts", [])
 	if not (parts is Array):
-		return ""
+		return result
 
-	var full_text := ""
 	for part in parts:
-		if part is Dictionary and part.has("text"):
-			full_text += str(part["text"])
-	return full_text
+		if not (part is Dictionary) or not part.has("text"):
+			continue
+		var part_text := str(part["text"])
+		if part.get("thought", false):
+			result.thinking += part_text
+		else:
+			result.text += part_text
+	return result
+
+func _extract_candidate_text(data: Dictionary) -> String:
+	return _extract_candidate_parts(data).text
 
 func _extract_finish_reason(data: Dictionary) -> String:
 	var candidates = data.get("candidates", [])

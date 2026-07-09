@@ -1,89 +1,69 @@
-# Godot AI Agent 项目说明
+# Alpha Agent
 
-## 项目概述
-这是一个基于 Godot 4.5.1 的 AI 代理开发项目，我作为 Godot 开发专家，可以协助您完成各种 Godot 相关的开发任务。
+一款为 Godot 4.x 编写的 AI 编辑器助手插件，在编辑器右侧 Dock 提供智能对话、工具调用、Skill 技能系统与角色管理能力。
 
-## ✨ 最新更新：多模型支持
+## 功能亮点
 
-### 🎉 新功能
-AlphaAgent 现在支持多个 AI 模型！不再局限于 DeepSeek，可以使用：
-- OpenAI (GPT-3.5, GPT-4, GPT-4-turbo 等)
-- DeepSeek (Chat / Reasoner)
-- 所有兼容 OpenAI API 的服务
-- 本地模型（Ollama, LM Studio 等）
+- **多模型支持**：OpenAI、Anthropic、DeepSeek、Moonshot、MiniMax、Gemini、Ollama 等 7 家供应商
+- **Agent / ASK 双模式**：Agent 可按角色调用写操作工具；ASK 仅暴露只读工具，适合纯问答
+- **37 个 AI 工具**：文件读写、场景编辑、动画操作、脚本检查、全局搜索等
+- **Skill 技能系统**：19 个内置 Godot 开发 Skill，系统提示渐进披露 + `load_skill` 按需加载
+- **角色管理**：自定义人设与工具权限白名单
+- **上下文管理**：Token 用量显示、超长对话自动 Compaction 摘要
+- **Steering 插队**：对话生成或工具执行中可发送新消息插入队列
+- **计划任务**：复杂任务自动拆分为多阶段执行
+- **文件变更追踪**：编辑文件 diff 对比与回滚
+- **Prompt 模板**：内置常用提示词，`/` 补全快速填入
+- **扩展钩子**：`before_tool_call` / `after_tool_call` 等信号，支持工具拦截
 
-### 🚀 快速开始
-1. 点击插件界面的 **"Manage Models..."** 按钮
-2. 点击 **"添加模型"**
-3. 填写模型配置（API 地址、密钥、模型 ID）
-4. 保存后即可在模型选择器中切换使用
+## 快速开始
 
-### 📖 详细文档
-- [快速开始指南](docs/quick-start-zh.md) - 5分钟上手
-- [多模型支持文档](docs/multi-model-support.md) - 完整功能说明
-- [更新说明](MULTI_MODEL_UPDATE.md) - 技术实现细节
+1. 将 `addons/agent/` 放入你的 Godot 项目
+2. 在 **项目 → 项目设置 → 插件** 中启用 **AlphaAgent**
+3. 点击 **Manage Models...** 配置 API Key 和模型
+4. 在右侧面板选择 **Agent** 或 **ASK** 模式，开始对话
 
-## 我能做什么
+可选：在项目根创建 `res://.alpha/settings.json` 覆盖全局设置（如代理、发送快捷键）。
 
-### 项目信息获取
-- 获取当前 Godot 引擎版本和系统环境信息
-- 查看项目配置、主场景设置
-- 获取项目文件列表和结构
+## 开发者文档
 
-### 文件操作
-- 读取和写入各种文件格式：
-  - 脚本文件 (.gd)
-  - 场景文件 (.tscn)
-  - 资源文件 (.tres)
-  - 着色器文件 (.gdshader)
-  - 文本文件 (.txt, .md)
-  - CSV 文件 (.csv)
-- 创建文件夹和组织项目结构
+| 文档                                    | 说明            |
+| ------------------------------------- | ------------- |
+| [开发者文档导航](docs/README.md)             | 架构文档与功能实现文档索引 |
+| [架构概览](docs/architecture/overview.md) | 插件模块与数据流      |
+| [聊天流程](docs/features/chat-flow.md)   | 消息循环、Compaction、Steering |
+| [工具总索引](docs/features/tools/index.md) | 37 个 AI 工具列表  |
+| [CHANGELOG](CHANGELOG.md)             | 版本变更历史        |
 
-### Godot API 文档查询
-- 查询任何 Godot 原生类的完整文档
-- 获取类的属性、方法、信号、枚举等信息
-- 了解参数类型和返回值
+## 项目结构
 
-### 开发支持
-- 根据需求编写 Godot 脚本和场景
-- 实现游戏逻辑和功能
-- 优化性能和代码结构
-- 解决开发中遇到的问题
+```
+addons/agent/          # 插件核心代码
+├── agent.gd             # 插件入口
+├── scripts/             # 配置、Compaction、Prompt 模板
+├── tools/tools_nodes/   # AI 工具实现
+├── ui/                  # 编辑器面板 UI
+├── prompts/             # 内置 Prompt 模板
+├── scripts/chat_wrapper/ # LLM 供应商适配
+└── skills/default_skills/ # 内置 Skill
+docs/                  # 开发者文档
+├── architecture/      # 架构文档
+└── features/          # 功能实现文档
+```
 
-## 当前项目环境
+## 环境要求
 
-### 系统信息
-- **操作系统**: Windows 10 (10.0.19045)
-- **CPU**: AMD Ryzen 7 4800H with Radeon Graphics
-- **GPU**: NVIDIA GeForce RTX 2060 with Max-Q Design
-- **内存**: 23.4 GB 物理内存
-- **架构**: x86_64
-
-### Godot 配置
-- **引擎版本**: 4.5.1-stable (官方版)
-- **渲染方法**: Forward+
-- **物理帧率**: 60 FPS
-- **主场景**: game.tscn
-
-### 项目文件结构
-- `game.gd` - 主脚本文件
-- `game.tscn` - 主场景文件
-- `project.godot` - 项目配置文件
-- `icon.svg` - 项目图标
-
-## 使用方式
-您可以向我描述您的开发需求，我会：
-1. 分析需求并提供解决方案
-2. 编写相应的代码和资源
-3. 解释实现逻辑和最佳实践
-4. 协助调试和优化
-
-无论是游戏机制、UI界面、物理系统、动画效果还是其他功能，我都能提供专业的 Godot 开发支持。
+- Godot 4.5 或更高版本
+- 至少一个 AI 模型的 API Key
 
 ## 主题色
-Godot图标蓝 `#478cbf`
+
+Godot 图标蓝 `#478cbf`
 
 ## 反馈
-如果您有任何问题或建议，请通过以下链接填写反馈：
-[填写反馈](https://ai.feishu.cn/share/base/form/shrcncDRFhpbbhOqR9AMBKMOuBe)
+
+如有问题或建议，请通过 [反馈表单](https://ai.feishu.cn/share/base/form/shrcncDRFhpbbhOqR9AMBKMOuBe) 提交。
+
+## 许可证
+
+MIT License，详见 [LICENSE.txt](LICENSE.txt)。

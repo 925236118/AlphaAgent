@@ -95,6 +95,8 @@ class GlobalSetting:
 	var model_manager: ModelConfig.ModelManager = null
 	var role_manager: AgentRoleConfig.RoleManager = null
 	var skill_manager: AgentSkillConfig.SkillManager = null
+	var prompt_template_manager: AgentPromptTemplateConfig.PromptTemplateManager = null
+	var project_setting_file: String = ""
 
 	func _init() -> void:
 		if Engine.is_editor_hint():
@@ -109,6 +111,7 @@ class GlobalSetting:
 		skill_directory = setting_dir + "skills_{version}/".format({"version": CONFIG.alpha_version})
 
 		project_alpha_dir = OS.get_user_data_dir() + "/.alpha/"
+		project_setting_file = AlphaAgentPlugin.project_alpha_dir + "settings.json"
 
 	func load_global_setting():
 
@@ -131,6 +134,8 @@ class GlobalSetting:
 		self.http_proxy_host = str(json.get("http_proxy_host", ""))
 		self.http_proxy_port = str(json.get("http_proxy_port", ""))
 
+		_apply_project_settings_override()
+
 		# 初始化模型管理器
 		model_manager = ModelConfig.ModelManager.new(models_file)
 
@@ -145,8 +150,31 @@ class GlobalSetting:
 		# 初始化技能管理器
 		skill_manager = AgentSkillConfig.SkillManager.new(skill_directory)
 
+		var prompt_template_directory = setting_dir + "prompts_{version}/".format({"version": CONFIG.alpha_version})
+		prompt_template_manager = AgentPromptTemplateConfig.PromptTemplateManager.new(prompt_template_directory)
+
 		setting_is_ready = true
 		setting_ready.emit()
+
+	func _apply_project_settings_override() -> void:
+		var path := AlphaAgentPlugin.project_alpha_dir + "settings.json"
+		if not FileAccess.file_exists(path):
+			return
+		var project_json = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if project_json == null or not (project_json is Dictionary):
+			return
+		if project_json.has("auto_clear"):
+			self.auto_clear = project_json.get("auto_clear", self.auto_clear)
+		if project_json.has("auto_expand_think"):
+			self.auto_expand_think = project_json.get("auto_expand_think", self.auto_expand_think)
+		if project_json.has("auto_add_file_ref"):
+			self.auto_add_file_ref = project_json.get("auto_add_file_ref", self.auto_add_file_ref)
+		if project_json.has("send_shortcut"):
+			self.send_shortcut = project_json.get("send_shortcut", self.send_shortcut)
+		if project_json.has("http_proxy_host"):
+			self.http_proxy_host = str(project_json.get("http_proxy_host", self.http_proxy_host))
+		if project_json.has("http_proxy_port"):
+			self.http_proxy_port = str(project_json.get("http_proxy_port", self.http_proxy_port))
 
 	func save_global_setting():
 		var dict = {

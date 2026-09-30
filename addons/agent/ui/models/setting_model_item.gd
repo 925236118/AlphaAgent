@@ -7,6 +7,8 @@ extends PanelContainer
 @onready var model_id: Label = %ModelID
 @onready var support_reasoner: Label = %SupportReasoner
 @onready var support_tool: Label = %SupportTool
+@onready var support_vision: Label = %SupportVision
+@onready var support_image_gen: Label = %SupportImageGen
 @onready var is_active: CheckButton = %IsActive
 @onready var edit_button: Button = %EditButton
 @onready var remove_button: Button = %RemoveButton
@@ -27,6 +29,8 @@ func set_setting_model_info(model: ModelConfig.ModelInfo):
 	model_id.text = model_info.model_name
 	support_reasoner.visible = model_info.supports_thinking
 	support_tool.visible = model_info.supports_tools
+	support_vision.visible = model_info.supports_vision
+	support_image_gen.visible = model_info.supports_image_generation
 	is_active.set_block_signals(true)
 	is_active.button_pressed = model_info.active
 	is_active.set_block_signals(false)

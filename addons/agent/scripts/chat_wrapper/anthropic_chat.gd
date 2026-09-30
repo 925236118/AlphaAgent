@@ -15,6 +15,7 @@ extends Node
 signal generate_finish(msg: String, think_msg: String)
 signal use_tool(tool_calls: Array[AgentModelUtils.ToolCallsInfo])
 signal response_use_tool
+signal error(error_info: Dictionary)
 
 var http_request: HTTPRequest = null
 var generatting: bool = false
@@ -48,23 +49,25 @@ func _http_request_completed(_result: int, response_code: int, _headers: PackedS
 	var body_text := body.get_string_from_utf8()
 
 	if response_code != 200:
-		push_error("Anthropic HTTP错误: " + str(response_code))
-		push_error(body_text)
+		error.emit(AgentModelUtils.map_http_error(response_code, body_text))
 		return
 
 	var json := JSON.new()
 	if json.parse(body_text) != OK:
 		push_error("Anthropic JSON解析失败: " + json.get_error_message())
 		push_error(body_text)
+		error.emit({"error_msg":"响应解析失败: " + json.get_error_message(), "error_code":0, "error_type":"server", "data":body_text, "retryable":true})
 		return
 
 	var data = json.get_data()
 	if not (data is Dictionary):
 		push_error("Anthropic 响应结构无效")
+		error.emit({"error_msg":"无效的响应结构", "error_code":0, "error_type":"server", "data":body_text, "retryable":false})
 		return
 
 	if data.has("error"):
 		push_error("Anthropic API错误: " + JSON.stringify(data["error"]))
+		error.emit({"error_msg":"Anthropic API错误: " + JSON.stringify(data["error"]), "error_code":0, "error_type":"server", "data":body_text, "retryable":false})
 		return
 
 	var content_blocks = data.get("content", [])

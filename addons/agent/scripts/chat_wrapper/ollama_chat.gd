@@ -15,6 +15,8 @@ extends Node
 
 ## 生成结束信号
 signal generate_finish(msg: String, think_msg: String)
+## 失败信号
+signal error(error_info: Dictionary)
 
 ## 发送请求的HTTPRequest节点
 var http_request: HTTPRequest = null
@@ -74,8 +76,7 @@ func _http_request_completed(_result, response_code, _headers, body: PackedByteA
 	generatting = false
 
 	if response_code != 200:
-		push_error("Ollama HTTP错误: " + str(response_code))
-		push_error(body.get_string_from_utf8())
+		error.emit(AgentModelUtils.map_http_error(response_code, body.get_string_from_utf8()))
 		return
 
 	var json = JSON.new()
@@ -83,6 +84,7 @@ func _http_request_completed(_result, response_code, _headers, body: PackedByteA
 	if err != OK:
 		push_error("Ollama JSON解析错误: " + json.get_error_message())
 		push_error(body.get_string_from_utf8())
+		error.emit({"error_msg":"响应解析失败: " + json.get_error_message(), "error_code":0, "error_type":"server", "data":body.get_string_from_utf8(), "retryable":true})
 		return
 
 	var data = json.get_data()

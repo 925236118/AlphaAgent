@@ -50,7 +50,10 @@ class ModelInfo:
 	var model_name: String = ""  # 模型名称（如: gpt-4, deepseek-chat）
 	var supports_thinking: bool = false  # 是否支持深度思考
 	var supports_tools: bool = true  # 是否支持工具调用
-	var max_tokens: int = 8192  # 最大token数
+	var supports_vision: bool = false  # 是否支持图片输入
+	var supports_image_generation: bool = false  # 是否支持图片生成（如 MiniMax image-01）
+	var context_length: int = 0  # 上下文窗口大小（token 数），0 表示未知
+	var max_tokens: int = 8192  # 最大输出token数
 	var active: bool = false  # 是否激活
 	var supplier_id: String = ""  # 所属供应商ID
 
@@ -70,6 +73,9 @@ class ModelInfo:
 			"model_name": model_name,
 			"supports_thinking": supports_thinking,
 			"supports_tools": supports_tools,
+			"supports_vision": supports_vision,
+			"supports_image_generation": supports_image_generation,
+			"context_length": context_length,
 			"max_tokens": max_tokens,
 			"active": active,
 			"supplier_id": supplier_id
@@ -82,9 +88,15 @@ class ModelInfo:
 		info.model_name = data.get("model_name", "")
 		info.supports_thinking = data.get("supports_thinking", false)
 		info.supports_tools = data.get("supports_tools", true)
+		info.supports_vision = data.get("supports_vision", false)
+		info.supports_image_generation = data.get("supports_image_generation", false)
+		info.context_length = data.get("context_length", 0)
 		info.max_tokens = data.get("max_tokens", 8192)
 		info.active = data.get("active", false)
 		info.supplier_id = data.get("supplier_id", "")
+		# 迁移：旧配置没有 context_length 字段，用 max_tokens 作为回退（旧版 max_tokens 实际表示上下文长度）
+		if info.context_length == 0 and info.max_tokens > 0:
+			info.context_length = info.max_tokens
 		return info
 
 ## 模型配置管理器
@@ -122,10 +134,12 @@ class ModelManager:
 		suppliers.append(deepseek_supplier)
 
 		var deepseek_v4_flash_model = ModelInfo.new()
-		deepseek_v4_flash_model.name = "DeepSeek V4 Flash"
-		deepseek_v4_flash_model.model_name = "deepseek-v4-flash"
+		deepseek_v4_flash_model.name = "DeepSeek V4.1 Flash"
+		deepseek_v4_flash_model.model_name = "deepseek-flash"
 		deepseek_v4_flash_model.supports_thinking = true
 		deepseek_v4_flash_model.supports_tools = true
+		deepseek_v4_flash_model.supports_vision = true
+		deepseek_v4_flash_model.context_length = 1048576
 		deepseek_v4_flash_model.max_tokens = 384 * 1024
 		deepseek_v4_flash_model.active = false
 		deepseek_v4_flash_model.supplier_id = deepseek_supplier.id
@@ -136,6 +150,8 @@ class ModelManager:
 		deepseek_v4_pro_model.model_name = "deepseek-v4-pro"
 		deepseek_v4_pro_model.supports_thinking = true
 		deepseek_v4_pro_model.supports_tools = true
+		deepseek_v4_pro_model.supports_vision = false
+		deepseek_v4_pro_model.context_length = 1048576
 		deepseek_v4_pro_model.max_tokens = 384 * 1024
 		deepseek_v4_pro_model.active = false
 		deepseek_v4_pro_model.supplier_id = deepseek_supplier.id
@@ -253,7 +269,8 @@ class ModelManager:
 		minimax_m27_model.model_name = "MiniMax-M2.7"
 		minimax_m27_model.supports_thinking = true
 		minimax_m27_model.supports_tools = true
-		minimax_m27_model.max_tokens = 64 * 1024
+		minimax_m27_model.context_length = 204800
+		minimax_m27_model.max_tokens = 8192
 		minimax_m27_model.active = false
 		minimax_m27_model.supplier_id = minimax_supplier.id
 		minimax_supplier.models.append(minimax_m27_model)
@@ -263,10 +280,49 @@ class ModelManager:
 		minimax_m27_hs_model.model_name = "MiniMax-M2.7-highspeed"
 		minimax_m27_hs_model.supports_thinking = true
 		minimax_m27_hs_model.supports_tools = true
-		minimax_m27_hs_model.max_tokens = 64 * 1024
+		minimax_m27_hs_model.context_length = 204800
+		minimax_m27_hs_model.max_tokens = 8192
 		minimax_m27_hs_model.active = false
 		minimax_m27_hs_model.supplier_id = minimax_supplier.id
 		minimax_supplier.models.append(minimax_m27_hs_model)
+		var minimax_m3_model = ModelInfo.new()
+		minimax_m3_model.name = "MiniMax-M3"
+		minimax_m3_model.model_name = "MiniMax-M3"
+		minimax_m3_model.supports_thinking = true
+		minimax_m3_model.supports_tools = true
+		minimax_m3_model.supports_vision = true
+		minimax_m3_model.context_length = 1048576
+		minimax_m3_model.max_tokens = 8192
+		minimax_m3_model.active = false
+		minimax_m3_model.supplier_id = minimax_supplier.id
+		minimax_supplier.models.append(minimax_m3_model)
+
+		# MiniMax 生图模型
+		var minimax_image_01_model = ModelInfo.new()
+		minimax_image_01_model.name = "MiniMax Image-01"
+		minimax_image_01_model.model_name = "image-01"
+		minimax_image_01_model.supports_thinking = false
+		minimax_image_01_model.supports_tools = false
+		minimax_image_01_model.supports_vision = false
+		minimax_image_01_model.supports_image_generation = true
+		minimax_image_01_model.context_length = 0
+		minimax_image_01_model.max_tokens = 8192
+		minimax_image_01_model.active = false
+		minimax_image_01_model.supplier_id = minimax_supplier.id
+		minimax_supplier.models.append(minimax_image_01_model)
+
+		var minimax_image_01_live_model = ModelInfo.new()
+		minimax_image_01_live_model.name = "MiniMax Image-01-Live"
+		minimax_image_01_live_model.model_name = "image-01-live"
+		minimax_image_01_live_model.supports_thinking = false
+		minimax_image_01_live_model.supports_tools = false
+		minimax_image_01_live_model.supports_vision = false
+		minimax_image_01_live_model.supports_image_generation = true
+		minimax_image_01_live_model.context_length = 0
+		minimax_image_01_live_model.max_tokens = 8192
+		minimax_image_01_live_model.active = false
+		minimax_image_01_live_model.supplier_id = minimax_supplier.id
+		minimax_supplier.models.append(minimax_image_01_live_model)
 
 		# 添加默认Gemini供应商
 		var gemini_supplier = SupplierInfo.new()
@@ -305,6 +361,89 @@ class ModelManager:
 		gemini_25_flash.active = false
 		gemini_25_flash.supplier_id = gemini_supplier.id
 		gemini_supplier.models.append(gemini_25_flash)
+
+		# 添加默认火山引擎供应商
+		var volcengine_supplier = SupplierInfo.new()
+		volcengine_supplier.name = "火山引擎"
+		volcengine_supplier.base_url = "https://ark.cn-beijing.volces.com/api/v3"
+		volcengine_supplier.api_key = ""
+		volcengine_supplier.provider = "volcengine"
+		suppliers.append(volcengine_supplier)
+
+		var doubao_seed_evolving = ModelInfo.new()
+		doubao_seed_evolving.name = "Doubao Seed Evolving"
+		doubao_seed_evolving.model_name = "doubao-seed-evolving"
+		doubao_seed_evolving.supports_thinking = true
+		doubao_seed_evolving.supports_tools = true
+		doubao_seed_evolving.supports_vision = true
+		doubao_seed_evolving.context_length = 1048576
+		doubao_seed_evolving.max_tokens = 8192
+		doubao_seed_evolving.active = false
+		doubao_seed_evolving.supplier_id = volcengine_supplier.id
+		volcengine_supplier.models.append(doubao_seed_evolving)
+
+		var doubao_seed_2_1_pro = ModelInfo.new()
+		doubao_seed_2_1_pro.name = "Doubao Seed 2.1 Pro"
+		doubao_seed_2_1_pro.model_name = "doubao-seed-2-1-pro-260915"
+		doubao_seed_2_1_pro.supports_thinking = true
+		doubao_seed_2_1_pro.supports_tools = true
+		doubao_seed_2_1_pro.supports_vision = true
+		doubao_seed_2_1_pro.context_length = 1048576
+		doubao_seed_2_1_pro.max_tokens = 8192
+		doubao_seed_2_1_pro.active = false
+		doubao_seed_2_1_pro.supplier_id = volcengine_supplier.id
+		volcengine_supplier.models.append(doubao_seed_2_1_pro)
+
+		var doubao_seed_2_1_lite = ModelInfo.new()
+		doubao_seed_2_1_lite.name = "Doubao Seed 2.1 Lite"
+		doubao_seed_2_1_lite.model_name = "doubao-seed-2-1-lite-260915"
+		doubao_seed_2_1_lite.supports_thinking = true
+		doubao_seed_2_1_lite.supports_tools = true
+		doubao_seed_2_1_lite.supports_vision = true
+		doubao_seed_2_1_lite.context_length = 1048576
+		doubao_seed_2_1_lite.max_tokens = 8192
+		doubao_seed_2_1_lite.active = false
+		doubao_seed_2_1_lite.supplier_id = volcengine_supplier.id
+		volcengine_supplier.models.append(doubao_seed_2_1_lite)
+
+		var doubao_seed_2_1_turbo = ModelInfo.new()
+		doubao_seed_2_1_turbo.name = "Doubao Seed 2.1 Turbo"
+		doubao_seed_2_1_turbo.model_name = "doubao-seed-2-1-turbo-260628"
+		doubao_seed_2_1_turbo.supports_thinking = true
+		doubao_seed_2_1_turbo.supports_tools = true
+		doubao_seed_2_1_turbo.supports_vision = true
+		doubao_seed_2_1_turbo.context_length = 262144
+		doubao_seed_2_1_turbo.max_tokens = 8192
+		doubao_seed_2_1_turbo.active = false
+		doubao_seed_2_1_turbo.supplier_id = volcengine_supplier.id
+		volcengine_supplier.models.append(doubao_seed_2_1_turbo)
+
+		# 火山引擎图片生成模型
+		var doubao_seedream_pro = ModelInfo.new()
+		doubao_seedream_pro.name = "Doubao Seedream 5.0 Pro"
+		doubao_seedream_pro.model_name = "doubao-seedream-5-0-pro-260628"
+		doubao_seedream_pro.supports_thinking = false
+		doubao_seedream_pro.supports_tools = false
+		doubao_seedream_pro.supports_vision = false
+		doubao_seedream_pro.supports_image_generation = true
+		doubao_seedream_pro.context_length = 0
+		doubao_seedream_pro.max_tokens = 8192
+		doubao_seedream_pro.active = false
+		doubao_seedream_pro.supplier_id = volcengine_supplier.id
+		volcengine_supplier.models.append(doubao_seedream_pro)
+
+		var doubao_seedream_flash = ModelInfo.new()
+		doubao_seedream_flash.name = "Doubao Seedream 5.0 Flash"
+		doubao_seedream_flash.model_name = "doubao-seedream-5-0-flash-260915"
+		doubao_seedream_flash.supports_thinking = false
+		doubao_seedream_flash.supports_tools = false
+		doubao_seedream_flash.supports_vision = false
+		doubao_seedream_flash.supports_image_generation = true
+		doubao_seedream_flash.context_length = 0
+		doubao_seedream_flash.max_tokens = 8192
+		doubao_seedream_flash.active = false
+		doubao_seedream_flash.supplier_id = volcengine_supplier.id
+		volcengine_supplier.models.append(doubao_seedream_flash)
 
 		# 添加默认OpenRouter供应商
 		var openrouter_supplier = SupplierInfo.new()

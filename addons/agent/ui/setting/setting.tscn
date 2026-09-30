@@ -87,6 +87,37 @@ layout_mode = 2
 setting_name = "端口"
 setting_key = "http_proxy_port"
 
+[node name="QuickModelContainer" type="HBoxContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+
+[node name="QuickModelLabel" type="Label" parent="SettingPanel/SettingItemsContainer/QuickModelContainer"]
+layout_mode = 2
+text = "快速模型："
+
+[node name="QuickModelOption" type="OptionButton" parent="SettingPanel/SettingItemsContainer/QuickModelContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "用于标题生成和上下文压缩，不选则用当前模型"
+
+[node name="CompressThresholdContainer" type="HBoxContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+
+[node name="CompressThresholdLabel" type="Label" parent="SettingPanel/SettingItemsContainer/CompressThresholdContainer"]
+layout_mode = 2
+text = "上下文压缩阈值："
+
+[node name="CompressThresholdSpin" type="SpinBox" parent="SettingPanel/SettingItemsContainer/CompressThresholdContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 100.0
+step = 5.0
+value = 80.0
+suffix = "%"
+tooltip_text = "对话 token 占上下文窗口的比例超过此值时触发压缩（0=每次都压缩）"
+
 [node name="HSeparator" type="HSeparator" parent="SettingPanel/SettingItemsContainer"]
 layout_mode = 2
 theme_override_constants/separation = 10

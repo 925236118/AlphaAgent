@@ -23,6 +23,8 @@ signal generate_finish(msg: String, think_msg: String)
 signal use_tool(tool_calls: Array[AgentModelUtils.ToolCallsInfo])
 ## 正在返回使用工具请求（可选）
 signal response_use_tool
+## 失败信号
+signal error(error_info: Dictionary)
 
 ## 发送请求的HTTPRequest节点
 var http_request: HTTPRequest = null
@@ -64,8 +66,7 @@ func _http_request_completed(_result, response_code, _headers, body: PackedByteA
 	var body_text = body.get_string_from_utf8()
 
 	if response_code != 200:
-		push_error("Gemini HTTP错误: " + str(response_code))
-		push_error(body_text)
+		error.emit(AgentModelUtils.map_http_error(response_code, body_text))
 		return
 
 	var json = JSON.new()
@@ -73,11 +74,13 @@ func _http_request_completed(_result, response_code, _headers, body: PackedByteA
 	if err != OK:
 		push_error("Gemini JSON解析错误: " + json.get_error_message())
 		push_error(body_text)
+		error.emit({"error_msg":"响应解析失败: " + json.get_error_message(), "error_code":0, "error_type":"server", "data":body_text, "retryable":true})
 		return
 
 	var data = json.get_data()
 	if data == null or not (data is Dictionary):
 		push_error("Gemini 无效的响应结构")
+		error.emit({"error_msg":"无效的响应结构", "error_code":0, "error_type":"server", "data":body_text, "retryable":false})
 		return
 
 	tool_calls = _extract_tool_calls(data)

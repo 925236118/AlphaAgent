@@ -92,6 +92,9 @@ class GlobalSetting:
 	var send_shortcut: SendShotcut = SendShotcut.None
 	var http_proxy_host: String = ""
 	var http_proxy_port: String = ""
+	var quick_model_supplier_id: String = ""
+	var quick_model_model_id: String = ""
+	var compress_threshold_ratio: float = 0.8
 	var model_manager: ModelConfig.ModelManager = null
 	var role_manager: AgentRoleConfig.RoleManager = null
 	var skill_manager: AgentSkillConfig.SkillManager = null
@@ -130,6 +133,9 @@ class GlobalSetting:
 		self.send_shortcut = json.get("send_shortcut", SendShotcut.Enter)
 		self.http_proxy_host = str(json.get("http_proxy_host", ""))
 		self.http_proxy_port = str(json.get("http_proxy_port", ""))
+		self.quick_model_supplier_id = str(json.get("quick_model_supplier_id", ""))
+		self.quick_model_model_id = str(json.get("quick_model_model_id", ""))
+		self.compress_threshold_ratio = float(json.get("compress_threshold_ratio", 0.8))
 
 		# 初始化模型管理器
 		model_manager = ModelConfig.ModelManager.new(models_file)
@@ -156,6 +162,9 @@ class GlobalSetting:
 			"send_shortcut": self.send_shortcut,
 			"http_proxy_host": self.http_proxy_host,
 			"http_proxy_port": self.http_proxy_port,
+			"quick_model_supplier_id": self.quick_model_supplier_id,
+			"quick_model_model_id": self.quick_model_model_id,
+			"compress_threshold_ratio": self.compress_threshold_ratio,
 		}
 		var file = FileAccess.open(setting_file, FileAccess.WRITE)
 		file.store_string(JSON.stringify(dict))

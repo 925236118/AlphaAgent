@@ -73,6 +73,11 @@ func post_message(messages: Array[Dictionary]):
 	if tools.size() > 0:
 		request_data["tools"] = tools
 
+	# 允许子类添加额外请求参数（如火山引擎的 thinking）
+	var _extra = _get_extra_request_data()
+	for _k in _extra:
+		request_data[_k] = _extra[_k]
+
 	var request_body = JSON.stringify(request_data)
 
 	if print_log: print("请求消息数据体: ", request_body)
@@ -167,10 +172,7 @@ func post_message(messages: Array[Dictionary]):
 			await get_tree().process_frame
 
 		var error_body = body_chunks.get_string_from_utf8()
-		error.emit({
-			"error_msg": "HTTP错误: " + str(http_client.get_response_code()),
-			"data": error_body
-		})
+		error.emit(AgentModelUtils.map_http_error(http_client.get_response_code(), error_body))
 		generatting = false
 		return
 
@@ -185,6 +187,10 @@ func post_message(messages: Array[Dictionary]):
 		await get_tree().process_frame
 
 	generatting = false
+
+## 子类可覆盖此方法添加额外请求参数
+func _get_extra_request_data() -> Dictionary:
+	return {}
 
 ## 处理流式响应缓冲区
 func _process_buffer(buffer: PackedByteArray):
@@ -307,8 +313,9 @@ func _process_chunk(data: Dictionary):
 			use_tool.emit(tool_calls)
 
 		var total_tokens = 0
-		if data.has("usage"):
-			total_tokens = data["usage"].get("total_tokens", 0)
+		var usage = data.get("usage")
+		if usage is Dictionary:
+			total_tokens = usage.get("total_tokens", 0)
 
 		generate_finish.emit(finish_reason, total_tokens)
 

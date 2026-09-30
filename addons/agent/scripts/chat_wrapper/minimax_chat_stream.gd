@@ -154,10 +154,7 @@ func post_message(messages: Array[Dictionary]):
 			await get_tree().process_frame
 
 		var error_body = body_chunks.get_string_from_utf8()
-		error.emit({
-			"error_msg": "HTTP错误: " + str(http_client.get_response_code()),
-			"data": error_body
-		})
+		error.emit(AgentModelUtils.map_http_error(http_client.get_response_code(), error_body))
 		generatting = false
 		return
 
@@ -256,6 +253,16 @@ func _is_valid_json_string(json_str: String) -> bool:
 
 ## 处理单个数据块
 func _process_chunk(data: Dictionary):
+	# 检查 MiniMax 业务层错误（base_resp.status_code）
+	if data.has("base_resp"):
+		var base_resp = data["base_resp"]
+		if base_resp is Dictionary and int(base_resp.get("status_code", 0)) != 0:
+			generatting = false
+			var err_info = AgentModelUtils.map_minimax_base_resp(int(base_resp.get("status_code", 0)))
+			err_info["data"] = JSON.stringify(data)
+			error.emit(err_info)
+			return
+
 	if not data.has("choices"):
 		return
 

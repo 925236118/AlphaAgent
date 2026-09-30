@@ -162,6 +162,11 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 
+[node name="GeneratedImageContainer" type="HFlowContainer" parent="VBoxContainer/ContentContainer/MessageContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
 [node name="MessageContent" type="RichTextLabel" parent="VBoxContainer/ContentContainer/MessageContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 20)
@@ -184,7 +189,15 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_ckm2q")
 
-[node name="UserMessageContent" type="RichTextLabel" parent="VBoxContainer/ContentContainer/UserMessageContainer"]
+[node name="UserMessageInner" type="VBoxContainer" parent="VBoxContainer/ContentContainer/UserMessageContainer"]
+layout_mode = 2
+
+[node name="UserImageContainer" type="HFlowContainer" parent="VBoxContainer/ContentContainer/UserMessageContainer/UserMessageInner"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="UserMessageContent" type="RichTextLabel" parent="VBoxContainer/ContentContainer/UserMessageContainer/UserMessageInner"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2

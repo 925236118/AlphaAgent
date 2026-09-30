@@ -13,6 +13,9 @@ signal models_changed
 @onready var max_tokens_edit: SpinBox = %MaxTokensEdit
 @onready var thinking_checkbox: CheckBox = %ThinkingCheckBox
 @onready var tool_check_box: CheckBox = %ToolCheckBox
+@onready var vision_checkbox: CheckBox = %VisionCheckBox
+@onready var image_gen_checkbox: CheckBox = %ImageGenCheckBox
+@onready var context_length_edit: SpinBox = %ContextLengthEdit
 @onready var save_button: Button = %SaveButton
 @onready var cancel_button: Button = %CancelButton
 @onready var remove_button: Button = %RemoveButton
@@ -43,25 +46,34 @@ func _show_edit_panel(model: ModelConfig.ModelInfo = null):
 		model_name_edit.text = model.name
 		model_id_edit.text = model.model_name
 		max_tokens_edit.value = model.max_tokens
+		context_length_edit.value = model.context_length if model.context_length > 0 else 131072
 		thinking_checkbox.button_pressed = model.supports_thinking
 		tool_check_box.button_pressed = model.supports_tools
+		vision_checkbox.button_pressed = model.supports_vision
+		image_gen_checkbox.button_pressed = model.supports_image_generation
 
 
 func _clear_edit_fields():
 	model_name_edit.text = ""
 	model_id_edit.text = ""
 	max_tokens_edit.value = 8192
+	context_length_edit.value = 131072
 	thinking_checkbox.button_pressed = false  # OpenAI 默认不支持 thinking
+	vision_checkbox.button_pressed = false
+	image_gen_checkbox.button_pressed = false
 
 func _on_save_pressed():
 	var temp_model_info = ModelConfig.ModelInfo.new()
 	temp_model_info.name = model_name_edit.text
 	temp_model_info.model_name = model_id_edit.text
 	temp_model_info.max_tokens = int(max_tokens_edit.value)
+	temp_model_info.context_length = int(context_length_edit.value)
 	temp_model_info.supplier_id = supplier_info.id
 	# 从复选框读取是否支持 thinking
 	temp_model_info.supports_thinking = thinking_checkbox.button_pressed
 	temp_model_info.supports_tools = tool_check_box.button_pressed
+	temp_model_info.supports_vision = vision_checkbox.button_pressed
+	temp_model_info.supports_image_generation = image_gen_checkbox.button_pressed
 
 	if editing_model_id == "":
 		# 添加新模型

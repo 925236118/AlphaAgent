@@ -36,6 +36,14 @@ theme_override_constants/margin_bottom = 1
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
 layout_mode = 2
 
+[node name="Thumbnail" type="TextureRect" parent="MarginContainer/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 6
+visible = false
+
 [node name="Label" type="Label" parent="MarginContainer/HBoxContainer"]
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2

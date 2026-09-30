@@ -7,6 +7,8 @@ extends ScrollContainer
 @onready var send_shot_cut: BoxContainer = $SettingPanel/SettingItemsContainer/SendShotCut
 @onready var http_proxy_host: BoxContainer = $SettingPanel/SettingItemsContainer/HBoxContainer/HttpProxyHost
 @onready var http_proxy_port: BoxContainer = $SettingPanel/SettingItemsContainer/HBoxContainer/HttpProxyPort
+@onready var quick_model_option: OptionButton = %QuickModelOption
+@onready var compress_threshold_spin: SpinBox = %CompressThresholdSpin
 
 #@onready var config_model_button: Button = $SettingPanel/SettingItemsContainer/ConfigModelButton
 @onready var add_supplier_button: Button = %AddSupplierButton
@@ -93,10 +95,57 @@ func _try_init():
 	init_item_values()
 	init_signals()
 	init_models_supplier()
+	_init_quick_model_option()
+	_init_compress_threshold()
+
+## 填充快速模型下拉框（列出所有对话模型，排除生图模型）
+func _init_quick_model_option():
+	quick_model_option.clear()
+	quick_model_option.add_item("（使用当前模型）", 0)
+	quick_model_option.set_item_metadata(0, {"supplier_id": "", "model_id": ""})
+	var model_manager = AlphaAgentPlugin.global_setting.model_manager
+	if not model_manager:
+		return
+	var idx = 1
+	var current_quick_id = AlphaAgentPlugin.global_setting.quick_model_model_id
+	var select_idx = 0
+	for supplier in model_manager.suppliers:
+		for model in supplier.models:
+			# 排除生图模型（不能用于对话/标题/压缩）
+			if model.supports_image_generation:
+				continue
+			if not model.active:
+				continue
+			quick_model_option.add_item(supplier.name + " / " + model.name, idx)
+			quick_model_option.set_item_metadata(idx, {"supplier_id": supplier.id, "model_id": model.id})
+			if model.id == current_quick_id:
+				select_idx = idx
+			idx += 1
+	quick_model_option.select(select_idx)
+	if not quick_model_option.item_selected.is_connected(_on_quick_model_selected):
+		quick_model_option.item_selected.connect(_on_quick_model_selected)
+
+func _on_quick_model_selected(index: int):
+	var meta = quick_model_option.get_item_metadata(index)
+	if meta is Dictionary:
+		AlphaAgentPlugin.global_setting.quick_model_supplier_id = meta.get("supplier_id", "")
+		AlphaAgentPlugin.global_setting.quick_model_model_id = meta.get("model_id", "")
+		AlphaAgentPlugin.global_setting.save_global_setting()
+
+## 初始化压缩阈值 SpinBox
+func _init_compress_threshold():
+	compress_threshold_spin.value = AlphaAgentPlugin.global_setting.compress_threshold_ratio * 100.0
+	if not compress_threshold_spin.value_changed.is_connected(_on_compress_threshold_changed):
+		compress_threshold_spin.value_changed.connect(_on_compress_threshold_changed)
+
+func _on_compress_threshold_changed(value: float):
+	AlphaAgentPlugin.global_setting.compress_threshold_ratio = value / 100.0
+	AlphaAgentPlugin.global_setting.save_global_setting()
 
 func _on_show_setting():
 	if visible:
 		_try_init()
+		_init_quick_model_option()
 		for supplier in suppliers:
 			supplier.update_current_model()
 

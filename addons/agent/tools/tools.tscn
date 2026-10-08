@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=3 uid="uid://cq2jo5hlpns6j"]
+[gd_scene load_steps=40 format=3 uid="uid://cq2jo5hlpns6j"]
 
 [ext_resource type="Script" uid="uid://brrn1lmlftop0" path="res://addons/agent/tools/tools.gd" id="1_rxf3o"]
 [ext_resource type="Script" uid="uid://bw4aphbgnkejd" path="res://addons/agent/tools/tools_nodes/update_plan_list.gd" id="2_dfgn2"]
@@ -38,6 +38,7 @@
 [ext_resource type="Script" uid="uid://b4w36jh1x81e5" path="res://addons/agent/tools/tools_nodes/delete_animation_library_tool.gd" id="33_t4v8w"]
 [ext_resource type="Script" uid="uid://6ahulpfb8f7k" path="res://addons/agent/tools/tools_nodes/delete_animation_tool.gd" id="34_x5y9z"]
 [ext_resource type="Script" uid="uid://cu7ek23ogmr6b" path="res://addons/agent/tools/tools_nodes/delete_track_or_keyframe_tool.gd" id="35_a1b2c"]
+[ext_resource type="Script" path="res://addons/agent/tools/tools_nodes/web_search_tool.gd" id="36_websearch"]
 
 [node name="Tools" type="Node"]
 script = ExtResource("1_rxf3o")
@@ -179,3 +180,6 @@ metadata/_custom_type_script = "uid://cem5r5a37l4y8"
 [node name="WriteFileTool" type="Node" parent="."]
 script = ExtResource("23_vdjg2")
 metadata/_custom_type_script = "uid://dbp0on28785my"
+
+[node name="WebSearchTool" type="Node" parent="."]
+script = ExtResource("36_websearch")

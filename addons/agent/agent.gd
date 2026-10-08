@@ -95,6 +95,9 @@ class GlobalSetting:
 	var quick_model_supplier_id: String = ""
 	var quick_model_model_id: String = ""
 	var compress_threshold_ratio: float = 0.8
+	var search_provider: String = ""
+	var search_kimi_api_key: String = ""
+	var search_zhihu_access_secret: String = ""
 	var model_manager: ModelConfig.ModelManager = null
 	var role_manager: AgentRoleConfig.RoleManager = null
 	var skill_manager: AgentSkillConfig.SkillManager = null
@@ -136,6 +139,9 @@ class GlobalSetting:
 		self.quick_model_supplier_id = str(json.get("quick_model_supplier_id", ""))
 		self.quick_model_model_id = str(json.get("quick_model_model_id", ""))
 		self.compress_threshold_ratio = float(json.get("compress_threshold_ratio", 0.8))
+		self.search_provider = str(json.get("search_provider", ""))
+		self.search_kimi_api_key = str(json.get("search_kimi_api_key", ""))
+		self.search_zhihu_access_secret = str(json.get("search_zhihu_access_secret", ""))
 
 		# 初始化模型管理器
 		model_manager = ModelConfig.ModelManager.new(models_file)
@@ -165,6 +171,9 @@ class GlobalSetting:
 			"quick_model_supplier_id": self.quick_model_supplier_id,
 			"quick_model_model_id": self.quick_model_model_id,
 			"compress_threshold_ratio": self.compress_threshold_ratio,
+			"search_provider": self.search_provider,
+			"search_kimi_api_key": self.search_kimi_api_key,
+			"search_zhihu_access_secret": self.search_zhihu_access_secret,
 		}
 		var file = FileAccess.open(setting_file, FileAccess.WRITE)
 		file.store_string(JSON.stringify(dict))

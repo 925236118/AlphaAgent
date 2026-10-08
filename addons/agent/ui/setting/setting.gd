@@ -9,6 +9,9 @@ extends ScrollContainer
 @onready var http_proxy_port: BoxContainer = $SettingPanel/SettingItemsContainer/HBoxContainer/HttpProxyPort
 @onready var quick_model_option: OptionButton = %QuickModelOption
 @onready var compress_threshold_spin: SpinBox = %CompressThresholdSpin
+@onready var search_provider_option: OptionButton = %SearchProviderOption
+@onready var search_kimi_key_edit: LineEdit = %SearchKimiKeyEdit
+@onready var search_zhihu_access_secret_edit: LineEdit = %ZhihuAccessSecretEdit
 
 #@onready var config_model_button: Button = $SettingPanel/SettingItemsContainer/ConfigModelButton
 @onready var add_supplier_button: Button = %AddSupplierButton
@@ -97,6 +100,7 @@ func _try_init():
 	init_models_supplier()
 	_init_quick_model_option()
 	_init_compress_threshold()
+	_init_search_config()
 
 ## 填充快速模型下拉框（列出所有对话模型，排除生图模型）
 func _init_quick_model_option():
@@ -142,10 +146,47 @@ func _on_compress_threshold_changed(value: float):
 	AlphaAgentPlugin.global_setting.compress_threshold_ratio = value / 100.0
 	AlphaAgentPlugin.global_setting.save_global_setting()
 
+## 初始化搜索配置
+func _init_search_config():
+	var gs = AlphaAgentPlugin.global_setting
+	var providers = ["", "kimi", "zhihu"]
+	var idx = providers.find(gs.search_provider)
+	search_provider_option.select(idx if idx >= 0 else 0)
+	search_kimi_key_edit.text = gs.search_kimi_api_key
+	search_zhihu_access_secret_edit.text = gs.search_zhihu_access_secret
+	_update_search_config_visibility()
+	if not search_provider_option.item_selected.is_connected(_on_search_provider_selected):
+		search_provider_option.item_selected.connect(_on_search_provider_selected)
+	if not search_kimi_key_edit.text_changed.is_connected(_on_search_kimi_key_changed):
+		search_kimi_key_edit.text_changed.connect(_on_search_kimi_key_changed)
+	if not search_zhihu_access_secret_edit.text_changed.is_connected(_on_search_zhihu_access_secret_changed):
+		search_zhihu_access_secret_edit.text_changed.connect(_on_search_zhihu_access_secret_changed)
+
+func _update_search_config_visibility():
+	var idx = search_provider_option.selected
+	# 0=禁用, 1=kimi, 2=zhihu
+	search_kimi_key_edit.get_parent().visible = idx == 1
+	search_zhihu_access_secret_edit.get_parent().visible = idx == 2
+
+func _on_search_provider_selected(index: int):
+	var providers = ["", "kimi", "zhihu"]
+	AlphaAgentPlugin.global_setting.search_provider = providers[index]
+	AlphaAgentPlugin.global_setting.save_global_setting()
+	_update_search_config_visibility()
+
+func _on_search_kimi_key_changed(new_text: String):
+	AlphaAgentPlugin.global_setting.search_kimi_api_key = new_text
+	AlphaAgentPlugin.global_setting.save_global_setting()
+
+func _on_search_zhihu_access_secret_changed(new_text: String):
+	AlphaAgentPlugin.global_setting.search_zhihu_access_secret = new_text
+	AlphaAgentPlugin.global_setting.save_global_setting()
+
 func _on_show_setting():
 	if visible:
 		_try_init()
 		_init_quick_model_option()
+		_init_search_config()
 		for supplier in suppliers:
 			supplier.update_current_model()
 

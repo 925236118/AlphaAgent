@@ -118,6 +118,62 @@ value = 80.0
 suffix = "%"
 tooltip_text = "对话 token 占上下文窗口的比例超过此值时触发压缩（0=每次都压缩）"
 
+[node name="SearchConfigMargin" type="MarginContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+theme_override_constants/margin_bottom = 12
+
+[node name="Label" type="Label" parent="SettingPanel/SettingItemsContainer/SearchConfigMargin"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "搜索配置"
+
+[node name="SearchProviderContainer" type="HBoxContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+
+[node name="SearchProviderLabel" type="Label" parent="SettingPanel/SettingItemsContainer/SearchProviderContainer"]
+layout_mode = 2
+text = "搜索供应商："
+
+[node name="SearchProviderOption" type="OptionButton" parent="SettingPanel/SettingItemsContainer/SearchProviderContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "选择联网搜索的供应商，不选则禁用网络搜索"
+item_count = 3
+popup/item_0/text = "禁用"
+popup/item_1/text = "Kimi (Moonshot)"
+popup/item_2/text = "知乎"
+
+[node name="SearchKimiKeyContainer" type="HBoxContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+visible = false
+
+[node name="Label" type="Label" parent="SettingPanel/SettingItemsContainer/SearchKimiKeyContainer"]
+layout_mode = 2
+text = "Kimi API Key："
+
+[node name="SearchKimiKeyEdit" type="LineEdit" parent="SettingPanel/SettingItemsContainer/SearchKimiKeyContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Moonshot API Key"
+secret = true
+
+[node name="SearchZhihuContainer" type="HBoxContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+visible = false
+
+[node name="ZhihuAccessSecretLabel" type="Label" parent="SettingPanel/SettingItemsContainer/SearchZhihuContainer"]
+layout_mode = 2
+text = "Access Secret："
+
+[node name="ZhihuAccessSecretEdit" type="LineEdit" parent="SettingPanel/SettingItemsContainer/SearchZhihuContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "知乎开放平台 Access Secret"
+secret = true
+
 [node name="HSeparator" type="HSeparator" parent="SettingPanel/SettingItemsContainer"]
 layout_mode = 2
 theme_override_constants/separation = 10

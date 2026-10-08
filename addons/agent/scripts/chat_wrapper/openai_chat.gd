@@ -87,6 +87,9 @@ func post_message(messages: Array[Dictionary]):
 	elif url.ends_with("/v3"):
 		# 豆包等使用 v3，只添加 /chat/completions
 		url += "/chat/completions"
+	elif url.ends_with("/v4"):
+		# GLM 使用 v4，只添加 /chat/completions
+		url += "/chat/completions"
 	elif url.ends_with("/v2"):
 		# 讯飞 codeplan 使用v2
 		url += "/chat/completions"

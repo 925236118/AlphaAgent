@@ -120,6 +120,9 @@ func post_message(messages: Array[Dictionary]):
 		elif base_path.ends_with("/v3"):
 			# 豆包等使用 v3，只添加 /chat/completions
 			path = base_path + "/chat/completions"
+		elif base_path.ends_with("/v4"):
+			# GLM 使用 v4，只添加 /chat/completions
+			path = base_path + "/chat/completions"
 		elif base_path.ends_with("/v1"):
 			# 标准 OpenAI，只添加 /chat/completions
 			path = base_path + "/chat/completions"

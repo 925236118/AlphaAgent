@@ -90,8 +90,14 @@ var _compress_chat = null
 
 # 余额查询相关
 var balance_request: HTTPRequest = null
+var startup_complete: bool = false
+var reload_locked: bool = false
+var _finalizing_reply: bool = false
+var history_sidebar: PanelContainer = null
+var layout_split: HSplitContainer = null
 
 func _ready() -> void:
+	_setup_plugin_layout()
 	show_container(chat_container)
 	# 等待插件实例可用后再连接信号
 	_connect_plugin_signals()
@@ -124,6 +130,7 @@ func _ready() -> void:
 	input_container.model_changed.connect(_on_model_selected)
 
 	history_and_title.recovery.connect(on_recovery_history)
+	history_and_title.history_deleted.connect(_on_history_deleted)
 
 	setting_tab_memory.pressed.connect(func(): show_container(memory_container))
 	setting_tab_setting.pressed.connect(func(): show_container(setting_container))
@@ -141,6 +148,103 @@ func _on_setting_ready():
 	_init_role_selector()
 	# 加载完成后获取余额
 	_fetch_balance()
+	_finish_startup.call_deferred()
+
+func _finish_startup() -> void:
+	if startup_complete:
+		return
+	var controller = EditorInterface.get_base_control().get_node_or_null("AlphaAgentReloadController") if Engine.is_editor_hint() else null
+	var restoring = controller != null and controller.running
+	var host = EditorInterface.get_base_control() if Engine.is_editor_hint() else null
+	if host != null and host.has_meta("alphaagent_reload_recovery"):
+		var recovery_state = host.get_meta("alphaagent_reload_recovery")
+		host.remove_meta("alphaagent_reload_recovery")
+		await restore_reload_state(recovery_state)
+	elif not restoring and AlphaAgentPlugin.global_setting.load_recent_chat_on_start:
+		var recent = history_and_title.get_recent_history()
+		if recent != null:
+			on_recovery_history(recent)
+	startup_complete = true
+
+func _setup_plugin_layout() -> void:
+	if int(get_meta("plugin_layout", 0)) != AlphaAgentPlugin.PluginLayout.MAIN_SCREEN:
+		return
+	var content = $ScrollContainer
+	layout_split = HSplitContainer.new()
+	layout_split.name = "MainScreenSplit"
+	add_child(layout_split)
+	layout_split.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	layout_split.split_offset = 260
+	history_sidebar = PanelContainer.new()
+	history_sidebar.name = "ConversationSidebar"
+	history_sidebar.custom_minimum_size.x = 220
+	layout_split.add_child(history_sidebar)
+	content.reparent(layout_split)
+	content.custom_minimum_size.x = 420
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	history_and_title.set_inline_host(history_sidebar)
+
+func is_busy_for_reload() -> bool:
+	if not AlphaAgentPlugin.is_chat_stopped or _compressing or _finalizing_reply or tools.active_calls > 0:
+		return true
+	for client in [current_chat_stream, current_title_chat, _compress_chat]:
+		if is_instance_valid(client) and not client.is_queued_for_deletion() and "generatting" in client and client.generatting:
+			return true
+	return false
+
+func capture_reload_state() -> Dictionary:
+	var view = 0
+	for i in container_list.size():
+		if container_list[i].visible:
+			view = i
+	return {
+		"history": current_history_item.to_dict().duplicate(true) if current_history_item != null else {},
+		"messages": messages.duplicate(true), "first_chat": first_chat,
+		"id": current_id, "title": current_title, "time": current_time,
+		"draft": input_container.capture_draft(), "view": view,
+		"scroll": message_container.scroll_vertical, "auto_scroll": auto_scroll_enabled,
+		"plans": plan_list._last_plan_items.duplicate(),
+		"edited_files": AgentTempFileManager.get_instance().temp_file_array.duplicate(),
+		"split": layout_split.split_offset if layout_split != null else 260
+	}
+
+func restore_reload_state(state: Dictionary) -> void:
+	if state.is_empty():
+		return
+	var was_locked = reload_locked
+	reload_locked = false
+	var history_data = state.get("history", {})
+	var item = AgentHistoryAndTitle.HistoryItem.from_dict(history_data) if not history_data.is_empty() else null
+	if item != null:
+		on_recovery_history(item)
+	else:
+		on_click_new_chat_button()
+	messages.assign(state.get("messages", []))
+	first_chat = state.get("first_chat", true)
+	current_id = state.get("id", "")
+	current_title = state.get("title", "新对话")
+	current_time = state.get("time", "")
+	current_history_item = item
+	history_and_title.set_selected_history(current_id)
+	input_container.restore_draft(state.get("draft", {}))
+	var plans: Array[AlphaAgentSingleton.PlanItem] = []
+	plans.assign(state.get("plans", []))
+	plan_list.update_list(plans)
+	AgentTempFileManager.get_instance().temp_file_array.assign(state.get("edited_files", []))
+	show_edited_file_container()
+	show_container(container_list[clampi(state.get("view", 0), 0, container_list.size() - 1)])
+	if layout_split != null:
+		layout_split.split_offset = state.get("split", 260)
+	reload_locked = true
+	await get_tree().process_frame
+	auto_scroll_enabled = state.get("auto_scroll", true)
+	message_container.scroll_vertical = state.get("scroll", 0)
+	reload_locked = was_locked
+
+func _on_history_deleted(id: String) -> void:
+	if current_id == id:
+		on_click_new_chat_button()
 
 # 初始化模型选择器
 func _init_model_selector():
@@ -180,6 +284,7 @@ func _on_model_selected(supplier_id: String, model_id: String):
 		return
 
 	model_manager.set_current_model(supplier_id, model_id)
+	input_container.clear_usage_label()
 
 	# 更新输入容器的模型选择器显示
 	_init_model_selector()
@@ -289,6 +394,7 @@ func _decode_image_from_data_url(url: String) -> Image:
 
 # 模型配置变更回调
 func _on_models_changed():
+	input_container.clear_usage_label()
 	_init_model_selector()
 
 func _on_roles_changed():
@@ -317,6 +423,8 @@ func init_message_list():
 	]
 
 func on_input_container_send_message(user_message: Dictionary, message_content: String):
+	if reload_locked:
+		return
 	_clear_plan_list_if_all_finished()
 
 	if first_chat:
@@ -706,6 +814,8 @@ func on_generate_error(error_info: Dictionary):
 	input_container.switch_button_to("Send")
 
 func on_click_new_chat_button():
+	if reload_locked or is_busy_for_reload():
+		return
 	AlphaAgentPlugin.is_chat_stopped = true
 	if current_chat_stream != null and current_chat_stream.generatting:
 		current_chat_stream.close()
@@ -717,6 +827,7 @@ func on_click_new_chat_button():
 	input_container.disable = false
 	show_container(chat_container)
 	plan_list.update_list([])
+	history_and_title.set_selected_history("")
 
 func clear():
 	welcome_message.show()
@@ -736,12 +847,13 @@ func clear():
 	for i in message_count:
 		message_list.get_child(message_count - i - 1).queue_free()
 
-	if current_chat_stream:
+	if is_instance_valid(current_chat_stream):
 		current_chat_stream.queue_free()
-	if current_title_chat:
+	if is_instance_valid(current_title_chat):
 		current_title_chat.queue_free()
 
 func on_agent_finish(finish_reason: String, total_tokens: float):
+	_finalizing_reply = finish_reason != "tool_calls"
 	# 成功结束，重置重试计数
 	_chat_retry_count = 0
 	#print("finish_reason ", finish_reason)
@@ -774,8 +886,8 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 
 	var _mm = AlphaAgentPlugin.global_setting.model_manager if AlphaAgentPlugin.global_setting else null
 	var _m = _mm.get_current_model() if _mm else null
-	var _ctx_k = (_m.context_length / 1024.0) if _m and _m.context_length > 0 else 128.0
-	input_container.set_usage_label(total_tokens, _ctx_k)
+	var context_length: int = _m.context_length if _m else 0
+	input_container.set_usage_label(total_tokens, context_length, AlphaAgentPlugin.global_setting.compress_threshold_ratio)
 	#print(messages)
 
 	# 检查是否需要压缩上下文（达到压缩阈值时触发）
@@ -803,6 +915,7 @@ func on_agent_finish(finish_reason: String, total_tokens: float):
 		current_history_item.title = current_title
 		current_history_item.time = current_time
 		history_and_title.update_history(current_id, current_history_item)
+	_finalizing_reply = false
 
 func on_title_generate_finish(message: String, _think_msg: String):
 	# 验证标题长度，超过20字则打回重新生成
@@ -823,7 +936,7 @@ func on_title_generate_finish(message: String, _think_msg: String):
 	first_chat = false
 	if current_history_item:
 		current_history_item.title = current_title
-	history_and_title.update_history(current_id, current_history_item)
+	history_and_title.update_history(current_id, current_history_item, false)
 
 	current_title_chat.queue_free()
 
@@ -836,24 +949,27 @@ func on_title_chat_error(error_info: Dictionary):
 	current_title = _get_fallback_title()
 	if current_history_item:
 		current_history_item.title = current_title
-		history_and_title.update_history(current_id, current_history_item)
+		history_and_title.update_history(current_id, current_history_item, false)
 	if current_title_chat:
 		current_title_chat.queue_free()
 
-## 检查是否需要压缩上下文（达到最大上下文的 80%）
+## 使用配置的上下文窗口和阈值检查是否需要压缩。
 func _check_context_compression(total_tokens: float):
-	if _compressing:
-		return
+	if _should_compress_context(total_tokens):
+		_compress_context()
+
+func _should_compress_context(total_tokens: float) -> bool:
+	if _compressing or not is_finite(total_tokens) or total_tokens <= 0:
+		return false
 	var model_manager = AlphaAgentPlugin.global_setting.model_manager
 	if not model_manager:
-		return
+		return false
 	var model = model_manager.get_current_model()
 	if not model or model.context_length <= 0:
-		return
+		return false
 	var threshold_ratio = AlphaAgentPlugin.global_setting.compress_threshold_ratio if AlphaAgentPlugin.global_setting else 0.8
 	var threshold = int(model.context_length * threshold_ratio)
-	if total_tokens >= threshold:
-		_compress_context()
+	return total_tokens >= threshold
 
 ## 压缩上下文：将对话历史压缩成摘要，替换为新的初始上下文
 func _compress_context():
@@ -868,17 +984,11 @@ func _compress_context():
 		_compressing = false
 		return
 
-	_compress_chat = _try_create_quick_chat()
-	if _compress_chat == null:
-		_compress_chat = _create_compress_chat(supplier)
+	_compress_chat = _create_context_compression_chat(supplier, model)
 	if _compress_chat == null:
 		printerr("上下文压缩：不支持该供应商 ", supplier.provider)
 		_compressing = false
 		return
-	_compress_chat.secret_key = supplier.api_key
-	_compress_chat.api_base = supplier.base_url
-	_compress_chat.model_name = model.model_name
-	_compress_chat.max_tokens = model.max_tokens
 
 	chat_models.add_child(_compress_chat)
 	_compress_chat.generate_finish.connect(_on_compress_finish)
@@ -887,25 +997,10 @@ func _compress_context():
 
 	_compress_chat.post_message(_build_compress_messages())
 
-## 创建压缩用非流式 chat 实例
-func _create_compress_chat(supplier) -> Node:
-	match supplier.provider:
-		"deepseek":
-			return DeepSeekChat.new()
-		"minimax":
-			return MiniMaxChat.new()
-		"openai":
-			return OpenAIChat.new()
-		"moonshot":
-			return MoonShotChat.new()
-		"gemini":
-			return GeminiChat.new()
-		"ollama":
-			return OllamaChat.new()
-		"anthropic":
-			return AnthropicChat.new()
-		_:
-			return null
+## 保留快速模型自己的供应商和参数；未配置时使用当前模型。
+func _create_context_compression_chat(supplier, model) -> Node:
+	var quick_chat = _try_create_quick_chat()
+	return quick_chat if quick_chat != null else _create_chat_by_provider(supplier, model)
 
 ## 构造压缩请求消息（序列化历史，丢弃图片 base64）
 ## 尝试用快速模型创建非流式 chat 实例，如果未配置快速模型则返回 null
@@ -917,7 +1012,7 @@ func _try_create_quick_chat() -> Node:
 	if quick_id.is_empty():
 		return null
 	var model = model_manager.get_model_by_id(quick_id)
-	if not model:
+	if not model or not model.active or model.supports_image_generation:
 		return null
 	var supplier = model_manager.get_supplier_by_id(model.supplier_id)
 	if not supplier:
@@ -1025,6 +1120,7 @@ func _on_compress_finish(message: String, _think_msg: String):
 		_compress_chat = null
 	_compressing = false
 	# 在消息列表中展示压缩摘要
+	input_container.clear_usage_label("上下文已压缩，等待下一次请求返回新的用量统计。")
 	var compress_item = MESSAGE_ITEM.instantiate() as AgentChatMessageItem
 	compress_item.show_think = false
 	message_list.add_child(compress_item)
@@ -1068,6 +1164,8 @@ func show_edited_file_container():
 	edited_files_container.generate_edited_file_list(AgentTempFileManager.get_instance().temp_file_array)
 
 func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
+	if reload_locked or is_busy_for_reload() or history_item == null:
+		return
 	show_container(chat_container)
 
 	clear()
@@ -1080,6 +1178,7 @@ func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
 	current_id = history_item.id
 	current_title = history_item.title
 	current_time = history_item.time
+	history_and_title.set_selected_history(history_item.id)
 	messages = history_item.message
 	#input_container.set_input_mode(history_item.mode)
 
@@ -1087,6 +1186,12 @@ func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
 	var last_message_item = null
 	for message in messages:
 		if message.role == "system" :
+			if message.get("content") is String and message.content.begins_with("## 对话上下文摘要"):
+				message_item = MESSAGE_ITEM.instantiate()
+				message_item.show_think = false
+				message_list.add_child(message_item)
+				message_item.update_message_content(message.content)
+				last_message_item = message_item
 			continue
 		if message.role != "tool":
 			message_item = MESSAGE_ITEM.instantiate()
@@ -1107,8 +1212,8 @@ func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
 					# 根据当前 chat_stream 类型创建对应的 ToolCallsInfo
 					var tool_call_info
 					tool_call_info = AgentModelUtils.ToolCallsInfo.new()
-					tool_call_info.id = tool_call.get("id")
-					tool_call_info.type = tool_call.get("type")
+					tool_call_info.id = str(tool_call.get("id", ""))
+					tool_call_info.type = str(tool_call.get("type", "function"))
 					tool_call_info.thought_signature = tool_call.get("thought_signature", tool_call.get("thoughtSignature", ""))
 					tool_call_info.function = AgentModelUtils.ToolCallsInfoFunc.new()
 					tool_call_info.function.arguments = tool_call.get("function").get("arguments")
@@ -1122,11 +1227,13 @@ func on_recovery_history(history_item: AgentHistoryAndTitle.HistoryItem):
 				if message.has("generated_images"):
 					message_item.show_generated_images(message.generated_images)
 		elif message.role == "tool":
-			message_item.update_used_tool_result(message.tool_call_id, message.content)
+			if message_item != null:
+				message_item.update_used_tool_result(message.tool_call_id, message.content)
 		if message_item:
-			(message_item as AgentChatMessageItem).message_id = message.get("id")
+			(message_item as AgentChatMessageItem).message_id = str(message.get("id", ""))
 		last_message_item = message_item
-	last_message_item.update_finished_message("Success")
+	if last_message_item:
+		last_message_item.update_finished_message("Success")
 
 func show_help_window():
 	if help_window:
@@ -1148,6 +1255,9 @@ func on_show_memory():
 	pass
 
 func _exit_tree() -> void:
+	AlphaAgentPlugin.is_chat_stopped = true
+	if is_instance_valid(current_chat_stream) and current_chat_stream.has_method("close"):
+		current_chat_stream.close()
 	if help_window:
 		help_window.queue_free()
 

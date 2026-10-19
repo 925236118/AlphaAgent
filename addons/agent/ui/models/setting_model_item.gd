@@ -51,5 +51,6 @@ func on_remove_button_click():
 	var supplier_id = model_info.supplier_id
 	var model_id = model_info.id
 	AlphaAgentPlugin.global_setting.model_manager.remove_model(supplier_id, model_id)
+	AlphaAgentSingleton.get_instance().models_changed.emit()
 	#_refresh_model_list()
 	remove.emit()

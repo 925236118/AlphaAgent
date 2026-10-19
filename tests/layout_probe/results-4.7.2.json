@@ -1,0 +1,131 @@
+{
+  "checks": 31,
+  "engine": "4.7.2-stable (official)",
+  "failed": 0,
+  "results": [
+    {
+      "check": "Original AlphaAgent panel initialized",
+      "passed": true
+    },
+    {
+      "check": "Initial dock registration",
+      "passed": true
+    },
+    {
+      "check": "Refresh confirmation is presented",
+      "passed": true
+    },
+    {
+      "check": "Later preserves current plugin instance",
+      "passed": true
+    },
+    {
+      "check": "Pending preference does not change old instance lifecycle",
+      "passed": true
+    },
+    {
+      "check": "External timer disables and re-enables plugin",
+      "passed": true
+    },
+    {
+      "check": "New instance registers as main screen",
+      "passed": true
+    },
+    {
+      "check": "Real AlphaAgent UI mounted in main screen",
+      "passed": true
+    },
+    {
+      "check": "AlphaAgent main screen can be selected",
+      "passed": true
+    },
+    {
+      "check": "Existing open_resource tool opens and locates script",
+      "passed": true
+    },
+    {
+      "check": "Target script active",
+      "passed": true
+    },
+    {
+      "check": "Opening script switches from AlphaAgent to Script",
+      "passed": true
+    },
+    {
+      "check": "Script has an actual unsaved edit",
+      "passed": true
+    },
+    {
+      "check": "Switch back to AlphaAgent",
+      "passed": true
+    },
+    {
+      "check": "Hidden main screen still processes background work",
+      "passed": true
+    },
+    {
+      "check": "Workspace switch preserves unsaved script and caret",
+      "passed": true
+    },
+    {
+      "check": "Script save menu available with main-screen plugin",
+      "passed": true
+    },
+    {
+      "check": "Built-in editor saves script while AlphaAgent is main-screen plugin",
+      "passed": true
+    },
+    {
+      "check": "Second edit remains unsaved before reload",
+      "passed": true
+    },
+    {
+      "check": "Old main-screen mode remains fixed before removal",
+      "passed": true
+    },
+    {
+      "check": "Timer reload switches back to dock",
+      "passed": true
+    },
+    {
+      "check": "Reload preserves unsaved script buffer",
+      "passed": true
+    },
+    {
+      "check": "Script save menu action found",
+      "passed": true
+    },
+    {
+      "check": "Built-in editor saves script after plugin reload",
+      "passed": true
+    },
+    {
+      "check": "Repeated layout round trip: true",
+      "passed": true
+    },
+    {
+      "check": "Exactly one AlphaAgent panel after round trip",
+      "passed": true
+    },
+    {
+      "check": "Repeated layout round trip: false",
+      "passed": true
+    },
+    {
+      "check": "Exactly one AlphaAgent panel after round trip",
+      "passed": true
+    },
+    {
+      "check": "Repeated layout round trip: true",
+      "passed": true
+    },
+    {
+      "check": "Exactly one AlphaAgent panel after round trip",
+      "passed": true
+    },
+    {
+      "check": "Existing open_resource tool still opens scene",
+      "passed": true
+    }
+  ]
+}

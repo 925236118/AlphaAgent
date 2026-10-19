@@ -1,0 +1,66 @@
+@tool
+extends EditorPlugin
+
+var results: Array[Dictionary] = []
+var finished: bool = false
+
+func _enter_tree() -> void:
+    _run.call_deferred()
+
+func check(value: bool, label: String) -> void:
+    results.append({"check": label, "passed": value})
+    print("UI ", "PASS " if value else "FAIL ", label)
+
+func frames(count: int = 8) -> void:
+    for i in count:
+        await get_tree().process_frame
+
+func _run() -> void:
+    get_tree().create_timer(20.0).timeout.connect(func():
+        if not finished:
+            check(false, "UI check completed within timeout")
+            _finish()
+    )
+    await get_tree().create_timer(1.0).timeout
+    while EditorInterface.get_resource_filesystem().is_scanning():
+        await get_tree().process_frame
+    var settings = AlphaAgentPlugin.global_setting
+    DirAccess.make_dir_recursive_absolute(settings.setting_dir)
+    settings.save_global_setting()
+    EditorInterface.set_plugin_enabled("agent", true)
+    while not is_instance_valid(AlphaAgentSingleton.get_instance().main_panel) or not AlphaAgentSingleton.get_instance().main_panel.startup_complete:
+        await get_tree().process_frame
+
+    var viewport = SubViewport.new()
+    viewport.size = Vector2i(480, 300)
+    add_child(viewport)
+    var skills = load("res://addons/agent/ui/skill/skill_container.tscn").instantiate()
+    viewport.add_child(skills)
+    skills._try_render()
+    await frames()
+    var scroll = skills.get_node("%SkillListScroll") as ScrollContainer
+    var list = skills.get_node("%SkillList")
+    var header = skills.get_node("%AddSkillButton")
+    var header_position = header.global_position
+    check(list.get_child_count() >= 19, "Render actual default skill rows")
+    check(scroll.get_v_scroll_bar().max_value > scroll.get_v_scroll_bar().page, "Skill list overflows constrained viewport with vertical scrolling")
+    scroll.scroll_vertical = int(scroll.get_v_scroll_bar().max_value)
+    await frames()
+    var last = list.get_child(-1)
+    check(scroll.scroll_vertical > 0 and last.get_global_rect().end.y <= scroll.get_global_rect().end.y + 1.0 and last.get_global_rect().end.y > scroll.global_position.y, "Last skill row is reachable by scrolling")
+    check(header.global_position == header_position and header.get_global_rect().end.y < viewport.size.y, "List heading and add button stay fixed and accessible")
+    check(scroll.horizontal_scroll_mode == ScrollContainer.SCROLL_MODE_DISABLED and list.size.x <= scroll.size.x, "Skill list fits available width without horizontal scrolling")
+    skills.on_add_skill_button_pressed()
+    check(skills.skill_edit_container.visible and not skills.skill_list_container.visible, "Add skill still opens editor after scrolling")
+    skills.on_cancel_button_pressed()
+    check(skills.skill_list_container.visible, "Returning from editor restores list")
+    viewport.queue_free()
+    _finish()
+
+func _finish() -> void:
+    finished = true
+    var failed = results.filter(func(item): return not item.passed).size()
+    var file = FileAccess.open("res://results.json", FileAccess.WRITE)
+    file.store_string(JSON.stringify({"engine": Engine.get_version_info().string, "checks": results.size(), "failed": failed, "results": results}))
+    file.close()
+    get_tree().quit(0 if failed == 0 else 1)

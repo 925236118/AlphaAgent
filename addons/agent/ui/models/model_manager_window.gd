@@ -46,7 +46,7 @@ func _show_edit_panel(model: ModelConfig.ModelInfo = null):
 		model_name_edit.text = model.name
 		model_id_edit.text = model.model_name
 		max_tokens_edit.value = model.max_tokens
-		context_length_edit.value = model.context_length if model.context_length > 0 else 131072
+		context_length_edit.value = model.context_length
 		thinking_checkbox.button_pressed = model.supports_thinking
 		tool_check_box.button_pressed = model.supports_tools
 		vision_checkbox.button_pressed = model.supports_vision
@@ -57,7 +57,7 @@ func _clear_edit_fields():
 	model_name_edit.text = ""
 	model_id_edit.text = ""
 	max_tokens_edit.value = 8192
-	context_length_edit.value = 131072
+	context_length_edit.value = 0
 	thinking_checkbox.button_pressed = false  # OpenAI 默认不支持 thinking
 	vision_checkbox.button_pressed = false
 	image_gen_checkbox.button_pressed = false

@@ -76,6 +76,7 @@ var model_id_list = {}
 var role_id_list = {}
 
 func _ready() -> void:
+	clear_usage_label()
 	#update_user_input_placeholder()
 
 	send_button.pressed.connect(on_click_send_message)
@@ -334,7 +335,7 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 # 完全初始化输入框
 func init():
 	user_input.text = ""
-	usage_label.text = ""
+	clear_usage_label()
 	clear_reference_list()
 	#set_input_mode_disable(false)
 	switch_button_to("Send")
@@ -346,6 +347,42 @@ func clear_reference_list():
 	var ref_count = reference_list.get_child_count()
 	for i in ref_count:
 		reference_list.get_child(ref_count - i - 1).queue_free()
+
+## 仅用于插件布局重载，保留草稿及附件，不发送请求。
+func capture_draft() -> Dictionary:
+	var refs: Array = []
+	for node in reference_list.get_children():
+		if not node.is_queued_for_deletion():
+			refs.append({"info": node.info.duplicate(true), "label": node.label.text, "tooltip": node.tooltip_text})
+	return {
+		"text": user_input.text, "line": user_input.get_caret_line(), "column": user_input.get_caret_column(),
+		"references": refs, "thinking": use_thinking.button_pressed,
+		"aspect": aspect_ratio_option.selected, "style": style_option.selected
+	}
+
+func restore_draft(draft: Dictionary) -> void:
+	for node in reference_list.get_children():
+		reference_list.remove_child(node)
+		node.queue_free()
+	user_input.text = draft.get("text", "")
+	user_input.set_caret_line(draft.get("line", 0))
+	user_input.set_caret_column(draft.get("column", 0))
+	for reference in draft.get("references", []):
+		var node = REFERENCE_ITEM.instantiate()
+		node.info = reference.info.duplicate(true)
+		reference_list.add_child(node)
+		node.set_label(reference.label)
+		node.set_tooltip(reference.tooltip)
+		if node.info.get("type") == "image" and FileAccess.file_exists(node.info.get("path", "")):
+			node.set_image(node.info.path)
+			node.image_clicked.connect(_on_reference_image_clicked)
+	use_thinking.button_pressed = draft.get("thinking", false)
+	if draft.get("aspect", -1) >= 0:
+		aspect_ratio_option.select(draft.aspect)
+	if draft.get("style", -1) >= 0:
+		style_option.select(draft.style)
+	# 用量不是草稿内容；旧快照中的百分比缺少容量和来源，不能恢复为当前统计。
+	clear_usage_label()
 
 ## 清空内容
 func on_click_clear_button():
@@ -502,13 +539,25 @@ func handle_command(command: String, args: PackedStringArray):
 		_:
 			print("未知命令: ", command)
 
-func set_usage_label(total_tokens: float, max_content_length: float):
-	var max_tokens = max_content_length * 1024
-	var ratio: float = total_tokens / max_tokens if max_tokens > 0 else 0.0
-	usage_label.text = "%.1f%%" % (ratio * 100)
-	usage_label.tooltip_text = "%s / %s usage tokens" % [_format_tokens(total_tokens), _format_tokens(max_tokens)]
-	# 超过 80% 时高亮提示（上下文即将压缩）
-	if ratio >= 0.8:
+func clear_usage_label(reason: String = "暂无当前上下文的用量统计，等待下一次请求返回。") -> void:
+	usage_label.text = "—"
+	usage_label.tooltip_text = reason
+	usage_label.remove_theme_color_override("font_color")
+
+## 参数统一使用 token 数，不把最大输出长度当成上下文容量。
+func set_usage_label(total_tokens: float, context_length: float, threshold_ratio: float = 0.8):
+	if not is_finite(total_tokens) or total_tokens <= 0:
+		clear_usage_label()
+		return
+	if not is_finite(context_length) or context_length <= 0:
+		clear_usage_label("本轮报告用量：%s tokens。\n模型未设置上下文窗口，无法计算占比；请在模型配置中填写实际窗口大小。" % _format_tokens(total_tokens))
+		return
+	var ratio: float = total_tokens / context_length
+	usage_label.text = "100.0%+" if ratio > 1.0 else "%.1f%%" % (ratio * 100)
+	usage_label.tooltip_text = "本轮报告用量：%s / %s tokens（%.1f%%）" % [_format_tokens(total_tokens), _format_tokens(context_length), ratio * 100]
+	if ratio > 1.0:
+		usage_label.tooltip_text += "\n报告用量已超过配置的上下文窗口，请核对模型窗口设置。"
+	if ratio >= threshold_ratio:
 		usage_label.add_theme_color_override("font_color", Color(0.9, 0.6, 0.2))
 	else:
 		usage_label.remove_theme_color_override("font_color")

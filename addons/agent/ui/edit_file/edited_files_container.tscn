@@ -5,3 +5,21 @@
 [node name="EditedFilesContainer" type="VBoxContainer"]
 visible = false
 script = ExtResource("1_oih3i")
+
+[node name="Header" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "修改文件"
+
+[node name="AcceptAllButton" type="Button" parent="Header"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "保留当前所有文件修改，并清除对应的待确认记录"
+text = "全部同意"
+
+[node name="FileList" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2

@@ -13,6 +13,11 @@ extends ScrollContainer
 @onready var search_kimi_key_edit: LineEdit = %SearchKimiKeyEdit
 @onready var search_deepseek_key_edit: LineEdit = %SearchDeepSeekKeyEdit
 @onready var search_zhihu_access_secret_edit: LineEdit = %ZhihuAccessSecretEdit
+@onready var load_recent_chat_setting: BoxContainer = %LoadRecentChatSetting
+@onready var show_modified_files_setting: BoxContainer = %ShowModifiedFilesSetting
+@onready var layout_option: OptionButton = %PluginLayoutOption
+@onready var layout_status: Label = %PluginLayoutStatus
+@onready var refresh_layout_button: Button = %RefreshLayoutButton
 
 #@onready var config_model_button: Button = $SettingPanel/SettingItemsContainer/ConfigModelButton
 @onready var add_supplier_button: Button = %AddSupplierButton
@@ -30,6 +35,8 @@ const ROLE_OPTION_WINDOW = preload("uid://dma1q8o2by3nq")
 # 添加新节点后需要在这里注册
 @onready var setting_item_nodes = [
 	auto_clear_setting,
+	load_recent_chat_setting,
+	show_modified_files_setting,
 	auto_expand_think_setting,
 	auto_add_file_ref_setting,
 	send_shot_cut,
@@ -43,6 +50,7 @@ var _did_init: bool = false
 var _setting_ready_connected: bool = false
 
 func _ready() -> void:
+	%ResetConfigButton.pressed.connect(_on_reset_config_pressed)
 	#print("settings ready")
 	#init_item_values()
 	supplier_option_button.pressed.connect(show_supplier_option_window)
@@ -55,6 +63,7 @@ func _ready() -> void:
 	# 连接角色变更信号
 	var singleton = AlphaAgentSingleton.get_instance()
 	singleton.roles_changed.connect(refresh_roles)
+	singleton.models_changed.connect(_init_quick_model_option)
 
 	# 等待 setting_ready 后执行一次性初始化
 	if AlphaAgentPlugin.global_setting.setting_is_ready:
@@ -62,6 +71,16 @@ func _ready() -> void:
 	elif not _setting_ready_connected:
 		_setting_ready_connected = true
 		AlphaAgentPlugin.global_setting.setting_ready.connect(_try_init, CONNECT_ONE_SHOT)
+
+func _on_reset_config_pressed() -> void:
+	var host := EditorInterface.get_base_control()
+	var controller = host.get_node_or_null("AlphaAgentResetController")
+	if controller == null:
+		controller = load("res://addons/agent/scripts/plugin_reset_controller.gd").new()
+		controller.name = "AlphaAgentResetController"
+		host.add_child(controller)
+	elif not controller.running:
+		controller.dialog.popup_centered()
 
 func init_item_values():
 	for setting_item in setting_item_nodes:
@@ -76,6 +95,10 @@ func init_signals():
 func save_settings(setting_item: AgentSettingItemBase):
 	AlphaAgentPlugin.global_setting[setting_item.setting_key] = setting_item.get_value()
 	AlphaAgentPlugin.global_setting.save_global_setting()
+	if setting_item.setting_key == "show_modified_files":
+		var panel = AlphaAgentSingleton.get_instance().main_panel
+		if is_instance_valid(panel):
+			panel.show_edited_file_container()
 
 func on_click_add_supplier_button():
 	var new_supplier := SUPPLIER_ITEM.instantiate() as AgentSupplierItem
@@ -102,8 +125,32 @@ func _try_init():
 	_init_quick_model_option()
 	_init_compress_threshold()
 	_init_search_config()
+	_init_layout_config()
 
-## 填充快速模型下拉框（列出所有对话模型，排除生图模型）
+func _init_layout_config() -> void:
+	layout_option.select(AlphaAgentPlugin.global_setting.plugin_layout)
+	if not layout_option.item_selected.is_connected(_on_layout_selected):
+		layout_option.item_selected.connect(_on_layout_selected)
+	if not refresh_layout_button.pressed.is_connected(AlphaAgentPlugin.request_layout_refresh):
+		refresh_layout_button.pressed.connect(AlphaAgentPlugin.request_layout_refresh)
+	update_layout_status()
+
+func _on_layout_selected(index: int) -> void:
+	AlphaAgentPlugin.global_setting.plugin_layout = index
+	AlphaAgentPlugin.global_setting.save_global_setting()
+	update_layout_status()
+	var plugin = AlphaAgentSingleton.get_instance().editor_plugin
+	if is_instance_valid(plugin) and plugin.instance_layout != index:
+		AlphaAgentPlugin.request_layout_refresh()
+
+func update_layout_status() -> void:
+	var plugin = AlphaAgentSingleton.get_instance().editor_plugin
+	var pending = is_instance_valid(plugin) and plugin.instance_layout != AlphaAgentPlugin.global_setting.plugin_layout
+	layout_status.visible = pending
+	refresh_layout_button.visible = pending
+	layout_option.select(AlphaAgentPlugin.global_setting.plugin_layout)
+
+## 模型配置变化时同步可用的快速模型，排除停用和生图模型。
 func _init_quick_model_option():
 	quick_model_option.clear()
 	quick_model_option.add_item("（使用当前模型）", 0)
@@ -113,6 +160,7 @@ func _init_quick_model_option():
 		return
 	var idx = 1
 	var current_quick_id = AlphaAgentPlugin.global_setting.quick_model_model_id
+	var current_quick_supplier_id = AlphaAgentPlugin.global_setting.quick_model_supplier_id
 	var select_idx = 0
 	for supplier in model_manager.suppliers:
 		for model in supplier.models:
@@ -123,10 +171,13 @@ func _init_quick_model_option():
 				continue
 			quick_model_option.add_item(supplier.name + " / " + model.name, idx)
 			quick_model_option.set_item_metadata(idx, {"supplier_id": supplier.id, "model_id": model.id})
-			if model.id == current_quick_id:
+			if model.id == current_quick_id and supplier.id == current_quick_supplier_id:
 				select_idx = idx
 			idx += 1
 	quick_model_option.select(select_idx)
+	# 当前快速模型已停用、删除或改为生图模型时，同步清除持久化选择。
+	if select_idx == 0 and (not current_quick_id.is_empty() or not current_quick_supplier_id.is_empty()):
+		_on_quick_model_selected(0)
 	if not quick_model_option.item_selected.is_connected(_on_quick_model_selected):
 		quick_model_option.item_selected.connect(_on_quick_model_selected)
 
@@ -196,6 +247,7 @@ func _on_show_setting():
 		_try_init()
 		_init_quick_model_option()
 		_init_search_config()
+		_init_layout_config()
 		for supplier in suppliers:
 			supplier.update_current_model()
 
@@ -204,7 +256,7 @@ func refresh_roles():
 
 func on_click_manage_role_button():
 		var role_window = ROLE_OPTION_WINDOW.instantiate() as AgentRoleOptionWindow
-		get_tree().root.add_child(role_window)
+		add_child(role_window)
 		role_window.popup_centered(Vector2i(800, 600))
 
 

@@ -3,6 +3,7 @@ class_name AgentTools
 extends Node
 
 var tool_map: Dictionary[String, AgentToolBase] = {}
+var active_calls: int = 0
 
 func _ready():
 	register_tools()
@@ -42,7 +43,9 @@ func use_tool(tool_call: AgentModelUtils.ToolCallsInfo) -> String:
 	var result = {}
 	var function_name = tool_call.function.name
 	if tool_map.has(function_name):
+		active_calls += 1
 		result = await tool_map[function_name].do_action(tool_call)
+		active_calls -= 1
 	else:
 		result = {
 			"error": "错误的function.name"

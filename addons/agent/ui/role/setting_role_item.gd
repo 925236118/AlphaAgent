@@ -31,7 +31,7 @@ func on_click_more_button(id: MoreActionType):
 	match id:
 		MoreActionType.Edit:
 			var edit_role_window := EDIT_ROLE_WINDOW.instantiate() as AgentEditRoleWindow
-			get_tree().root.add_child(edit_role_window)
+			add_child(edit_role_window)
 			edit_role_window.set_role_info(role_info)
 			edit_role_window.popup_centered()
 			edit_role_window.title = "编辑角色"

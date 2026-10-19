@@ -176,16 +176,15 @@ layout_mode = 2
 
 [node name="ContextLengthLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
 layout_mode = 2
-text = "上下文窗口大小："
+text = "上下文窗口（Tokens，0 为未知）："
 
 [node name="ContextLengthEdit" type="SpinBox" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-min_value = 1024.0
+min_value = 0.0
 max_value = 1048576.0
 step = 1024.0
-value = 131072.0
-tooltip_text = "上下文窗口大小（token数），达到80%时触发上下文压缩"
+tooltip_text = "上下文窗口大小（token 数），请按模型实际能力填写。0 表示未知，不计算占比或触发自动压缩；最大输出 Tokens 不代表上下文窗口。"
 
 [node name="VisionLabel" type="Label" parent="EditPanel/MarginContainer/VBoxContainer/ScrollContainer/FormContainer"]
 layout_mode = 2

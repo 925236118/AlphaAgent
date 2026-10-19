@@ -90,13 +90,11 @@ class ModelInfo:
 		info.supports_tools = data.get("supports_tools", true)
 		info.supports_vision = data.get("supports_vision", false)
 		info.supports_image_generation = data.get("supports_image_generation", false)
-		info.context_length = data.get("context_length", 0)
+		info.context_length = maxi(int(data.get("context_length", 0)), 0)
 		info.max_tokens = data.get("max_tokens", 8192)
 		info.active = data.get("active", false)
 		info.supplier_id = data.get("supplier_id", "")
-		# 迁移：旧配置没有 context_length 字段，用 max_tokens 作为回退（旧版 max_tokens 实际表示上下文长度）
-		if info.context_length == 0 and info.max_tokens > 0:
-			info.context_length = info.max_tokens
+		# max_tokens 是请求的输出上限，不能用于推断上下文窗口；缺失时保留未知。
 		return info
 
 ## 模型配置管理器

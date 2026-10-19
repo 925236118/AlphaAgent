@@ -180,7 +180,7 @@ func init_edit_fields():
 # 打开模型管理窗口
 func on_click_edit_model_button(model_info: ModelConfig.ModelInfo = null):
 	model_manager_window = MODEL_MANAGER.instantiate()
-	get_tree().root.add_child(model_manager_window)
+	add_child(model_manager_window)
 	model_manager_window.set_supplier_info(supplier_info)
 	model_manager_window.set_edit_model(model_info)
 

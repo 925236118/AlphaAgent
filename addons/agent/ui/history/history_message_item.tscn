@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://eq8fe48g3uch"]
+[gd_scene load_steps=8 format=3 uid="uid://eq8fe48g3uch"]
 
 [ext_resource type="Script" uid="uid://dwggmve0otlal" path="res://addons/agent/ui/history/history_message_item.gd" id="1_56ktc"]
 [ext_resource type="Texture2D" uid="uid://bj6c0vfw4s6an" path="res://addons/agent/icons/newicon/icon_reason.svg" id="2_r1w1x"]
@@ -14,13 +14,6 @@ corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_r1w1x"]
-
-[sub_resource type="LabelSettings" id="LabelSettings_35iu3"]
-font_size = 14
-
-[sub_resource type="LabelSettings" id="LabelSettings_hd88h"]
-font_size = 12
-font_color = Color(0.7647059, 0.7647059, 0.7647059, 0.5254902)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_udg46"]
 
@@ -72,7 +65,6 @@ size_flags_vertical = 0
 unique_name_in_owner = true
 layout_mode = 2
 text = "Title"
-label_settings = SubResource("LabelSettings_35iu3")
 clip_text = true
 text_overrun_behavior = 3
 
@@ -81,7 +73,7 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 text = "Time"
-label_settings = SubResource("LabelSettings_hd88h")
+theme_override_colors/font_color = Color(0.7647059, 0.7647059, 0.7647059, 0.5254902)
 
 [node name="RecoveryButton" type="Button" parent="HBoxContainer/PanelContainer"]
 unique_name_in_owner = true

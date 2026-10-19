@@ -46,6 +46,17 @@ func set_time(time: String):
 	if history_message_time:
 		history_message_time.text = time
 
+func set_selected(value: bool) -> void:
+	if value:
+		var style = StyleBoxFlat.new()
+		style.bg_color = Color(0.16, 0.23, 0.29)
+		style.content_margin_left = 10.0
+		style.content_margin_right = 10.0
+		style.set_corner_radius_all(5)
+		add_theme_stylebox_override("panel", style)
+	else:
+		remove_theme_stylebox_override("panel")
+
 func _on_recovery_button_mouse_exited() -> void:
 	if is_instance_valid(button_container):
 		button_container.hide()

@@ -63,6 +63,8 @@ func do_action(tool_call: AgentModelUtils.ToolCallsInfo) -> Dictionary:
 					return { "error": "类型错误：script 模式仅支持脚本资源。" }
 				var line = json.get("line", -1)
 				var column = json.get("column", 0)
+				EditorInterface.set_main_screen_editor("Script")
+				await get_tree().process_frame
 				EditorInterface.edit_script(resource, line, column)
 				await get_tree().process_frame
 				var current_script = EditorInterface.get_script_editor().get_current_script()

@@ -149,7 +149,6 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 theme_override_colors/default_color = Color(0.46666667, 0.46666667, 0.46666667, 1)
-theme_override_font_sizes/normal_font_size = 12
 theme_override_styles/normal = SubResource("StyleBoxEmpty_kn78a")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_q4qcv")
 theme_override_styles/background = SubResource("StyleBoxEmpty_tt4f8")

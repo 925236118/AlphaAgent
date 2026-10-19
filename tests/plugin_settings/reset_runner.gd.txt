@@ -1,0 +1,173 @@
+@tool
+extends EditorPlugin
+
+const RESET = preload("res://addons/agent/scripts/config_reset.gd")
+var results: Array[Dictionary] = []
+var finished: bool = false
+
+func _enter_tree() -> void:
+    _run.call_deferred()
+
+func check(value: bool, label: String) -> void:
+    results.append({"check": label, "passed": value})
+    print("RESET ", "PASS " if value else "FAIL ", label)
+
+func write_text(path: String, content: String) -> void:
+    var file = FileAccess.open(path, FileAccess.WRITE)
+    file.store_string(content)
+    file.close()
+
+func panel():
+    return AlphaAgentSingleton.get_instance().main_panel
+
+func controller():
+    return EditorInterface.get_base_control().get_node_or_null("AlphaAgentResetController")
+
+func frames(count: int = 4) -> void:
+    for i in count:
+        await get_tree().process_frame
+
+func open_reset():
+    panel().setting_container.get_node("%ResetConfigButton").pressed.emit()
+    return controller()
+
+func _run() -> void:
+    get_tree().create_timer(35.0).timeout.connect(func():
+        if not finished:
+            check(false, "Reset completed within timeout")
+            _finish()
+    )
+    await get_tree().create_timer(1.0).timeout
+    while EditorInterface.get_resource_filesystem().is_scanning():
+        await get_tree().process_frame
+    var settings = AlphaAgentPlugin.global_setting
+    var config = AlphaAgentPlugin.CONFIG
+    DirAccess.make_dir_recursive_absolute(settings.setting_dir)
+    write_text(settings.setting_file, JSON.stringify({"plugin_layout": 1, "search_provider": "deepseek", "search_deepseek_api_key": "reset-secret", "http_proxy_host": "custom-proxy", "show_modified_files": true}))
+    write_text(settings.memory_file, '["custom global memory"]')
+    config.memory.assign(["custom project memory"])
+    ResourceSaver.save(AlphaAgentPlugin.CONFIG, "res://addons/agent/config.tres")
+    var original_prompt: String = config.system_prompt
+    EditorInterface.set_plugin_enabled("agent", true)
+    while not is_instance_valid(panel()) or not panel().startup_complete:
+        await get_tree().process_frame
+    var button = panel().setting_container.get_node("%ResetConfigButton")
+    check(button.text == "初始化所有配置" and button.theme_type_variation == &"DangerButton", "Settings exposes danger reset button")
+    check(AlphaAgentSingleton.get_instance().editor_plugin._has_main_screen(), "Start in main screen layout")
+    var first = open_reset()
+    check(first.dialog.dialog_text.contains("会删除所有的模型配置、角色、记忆、技能等内容。请谨慎选择。"), "Confirmation includes requested warning")
+    check(first.dialog.dialog_text.contains(config.alpha_version), "Warning identifies configuration version")
+    first.dialog.canceled.emit()
+    await frames()
+    check(controller() == null and FileAccess.get_file_as_string(settings.setting_file).contains("reset-secret"), "Cancel leaves configuration untouched")
+    AlphaAgentPlugin.is_chat_stopped = false
+    panel().reload_locked = true
+    var busy = open_reset()
+    busy.dialog.confirmed.emit()
+    check(not busy.running and busy.dialog.dialog_text.contains("当前有任务"), "Active task blocks reset without deleting settings")
+    check(panel().reload_locked, "Blocked reset preserves existing reload lock")
+    panel().reload_locked = false
+    AlphaAgentPlugin.is_chat_stopped = true
+    busy.dialog.canceled.emit()
+    await frames()
+    var nested: String = settings.skill_directory.path_join("custom-reset-skill/nested")
+    DirAccess.make_dir_recursive_absolute(nested)
+    write_text(nested.path_join(".hidden"), "custom skill data")
+    write_text(settings.setting_dir.path_join("setting.other.json"), "other version")
+    var other_skills: String = settings.setting_dir.path_join("skills_other")
+    DirAccess.make_dir_recursive_absolute(other_skills)
+    write_text(other_skills.path_join("keep.txt"), "other skill")
+    var root_file: String = settings.setting_dir.path_join("keep.txt")
+    write_text(root_file, "unrelated")
+    var invalid_plan = RESET.collect_files(settings, "../unsafe")
+    check(not invalid_plan.error.is_empty(), "Unsafe version fails preflight")
+    check(not RESET.collect_files(settings, null).error.is_empty(), "Nil version returns validation error instead of argument type crash")
+    var legacy = {"config_version": null}
+    for key in ["setting_dir", "setting_file", "models_file", "roles_file", "memory_file", "skill_directory"]:
+        legacy[key] = settings.get(key)
+    check(RESET.loaded_version(legacy) == config.alpha_version, "Legacy settings with nil new field resolve version from loaded file")
+    check(RESET.collect_files(legacy, RESET.loaded_version(legacy)).error.is_empty(), "Legacy settings with nil version field still pass safe preflight")
+    legacy.roles_file = settings.setting_dir.path_join("roles.wrong-version.json")
+    check(not RESET.collect_files(legacy, RESET.loaded_version(legacy)).error.is_empty(), "Mixed version paths reject reset")
+    legacy.setting_file = null
+    check(RESET.loaded_version(legacy).is_empty(), "Missing loaded path has no guessed version")
+    legacy.setting_dir = null
+    check(RESET.collect_files(legacy, config.alpha_version).error.contains("配置目录未就绪"), "Nil configuration directory fails without a type crash")
+    var changed = open_reset()
+    var previous_path: String = settings.setting_file
+    settings.setting_file = settings.setting_dir.path_join("setting.changed.json")
+    changed.dialog.confirmed.emit()
+    check(not changed.running and changed.dialog.dialog_text.contains("已经变化"), "Version changed after warning blocks deletion")
+    settings.setting_file = previous_path
+    changed.target_version = ""
+    changed.dialog.confirmed.emit()
+    check(not changed.running and changed.dialog.dialog_text.contains("重新打开"), "Existing warning with uninitialized target version safely asks to reopen")
+    changed.dialog.canceled.emit()
+    await frames()
+    var plan = RESET.collect_files(settings, config.alpha_version)
+    check(plan.error.is_empty() and plan.files.has(nested.path_join(".hidden")), "Preflight includes nested and hidden custom skill content")
+    settings.model_manager.suppliers[0].api_key = "custom-model-secret"
+    settings.model_manager.save_datas()
+    settings.role_manager.roles[0].name = "custom reset role"
+    settings.role_manager.save_datas()
+    var history_path: String = settings.project_alpha_dir.path_join("history.json")
+    write_text(history_path, JSON.stringify([{"id": "reset-preserved-history", "title": "Keep history", "message": [{"role": "user", "content": "preserved message"}], "time": "2026-10-19T10:00:00"}]))
+    var history_before: String = FileAccess.get_file_as_string(history_path) if FileAccess.file_exists(history_path) else ""
+    write_text("res://reset_keep.txt", "original project file")
+    AgentTempFileManager.get_instance().create_temp_file("res://reset_keep.txt")
+    write_text("res://reset_keep.txt", "edited project file")
+    var record = AgentTempFileManager.get_instance().temp_file_array[0]
+    AlphaAgentPlugin.global_memory.assign(["cached global"])
+    AlphaAgentPlugin.project_memory.assign(["cached project"])
+    panel().setting_container.on_click_manage_role_button()
+    var role_window = panel().setting_container.get_children().filter(func(node): return node is AgentRoleOptionWindow)[-1]
+    var window_reference = weakref(role_window)
+    settings.config_version = ""
+    var reset = open_reset()
+    check(reset.target_version == config.alpha_version, "Reset warning uses loaded paths even when new version field is uninitialized")
+    reset.dialog.confirmed.emit()
+    reset.dialog.confirmed.emit()
+    check(reset.running, "Confirm starts reset and repeated confirmation is ignored")
+    while reset.running:
+        await get_tree().process_frame
+    check(reset.dialog.dialog_text.contains("已恢复默认配置"), "Reset completes with success feedback")
+    check(is_instance_valid(panel()) and panel().startup_complete, "Plugin automatically reinitializes")
+    check(not is_instance_valid(window_reference.get_ref()), "Old configuration windows close during reset")
+    check(not AlphaAgentSingleton.get_instance().editor_plugin._has_main_screen() and settings.plugin_layout == 0, "Reset restores default dock layout")
+    check(settings.search_deepseek_api_key.is_empty() and settings.search_provider.is_empty() and settings.http_proxy_host.is_empty() and not settings.show_modified_files, "Search credentials and preferences reset in memory")
+    var models_text: String = FileAccess.get_file_as_string(settings.models_file)
+    check(not models_text.contains("custom-model-secret") and not settings.model_manager.suppliers.is_empty(), "Model credentials removed and defaults regenerated")
+    check(not FileAccess.get_file_as_string(settings.roles_file).contains("custom reset role") and not settings.role_manager.roles.is_empty(), "Custom roles removed and defaults regenerated")
+    check(not DirAccess.dir_exists_absolute(settings.skill_directory.path_join("custom-reset-skill")) and not settings.skill_manager.skills.is_empty(), "Custom skills removed recursively and defaults regenerated")
+    check(not FileAccess.file_exists(settings.memory_file) and config.memory.is_empty() and AlphaAgentPlugin.global_memory.is_empty() and AlphaAgentPlugin.project_memory.is_empty(), "Global and project memories clear on disk and in memory")
+    check(config.system_prompt == original_prompt, "Bundled configuration and prompts preserved")
+    check(FileAccess.get_file_as_string(root_file) == "unrelated" and FileAccess.get_file_as_string(settings.setting_dir.path_join("setting.other.json")) == "other version" and FileAccess.get_file_as_string(other_skills.path_join("keep.txt")) == "other skill", "Other versions and unrelated configuration files preserved")
+    check(FileAccess.get_file_as_string("res://reset_keep.txt") == "edited project file" and FileAccess.file_exists(record.origin_path) and AgentTempFileManager.get_instance().temp_file_array.has(record), "Project files and pending review snapshots preserved")
+    var history_after: String = FileAccess.get_file_as_string(history_path) if FileAccess.file_exists(history_path) else ""
+    check(history_before == history_after, "History file preserved")
+    reset.dialog.canceled.emit()
+    await frames()
+    check(controller() == null, "Controller closes cleanly after result")
+    # 模拟外部修改 config.tres：磁盘版本改变，但预加载资源与静态路径仍是旧值。
+    var old_settings_file: String = settings.setting_file
+    var old_version: String = config.alpha_version
+    var changed_config = config.duplicate()
+    changed_config.alpha_version = old_version + "-next"
+    ResourceSaver.save(changed_config, "res://addons/agent/config.tres")
+    check(settings.setting_file == old_settings_file, "Version paths remain cached before reactivation")
+    EditorInterface.set_plugin_enabled("agent", false)
+    await get_tree().create_timer(0.2).timeout
+    EditorInterface.set_plugin_enabled("agent", true)
+    while not is_instance_valid(panel()) or not panel().startup_complete:
+        await get_tree().process_frame
+    check(config.alpha_version == changed_config.alpha_version, "Reactivation refreshes preloaded version from disk")
+    check(settings.setting_file.ends_with("setting." + changed_config.alpha_version + ".json") and settings.setting_file != old_settings_file, "Reactivation updates static settings storage path")
+    check(settings.models_file.ends_with("models." + changed_config.alpha_version + ".json") and settings.roles_file.ends_with("roles." + changed_config.alpha_version + ".json") and settings.memory_file.ends_with("memory." + changed_config.alpha_version + ".json") and settings.skill_directory.ends_with("skills_" + changed_config.alpha_version + "/"), "All versioned configuration paths switch together")
+    check(settings.model_manager.config_file == settings.models_file and settings.role_manager.config_file == settings.roles_file and settings.skill_manager.skill_directory == settings.skill_directory, "Managers use new version storage after reactivation")
+    _finish()
+
+func _finish() -> void:
+    finished = true
+    var failed = results.filter(func(item): return not item.passed).size()
+    write_text("res://results.json", JSON.stringify({"engine": Engine.get_version_info().string, "checks": results.size(), "failed": failed, "results": results}))
+    get_tree().quit(0 if failed == 0 else 1)

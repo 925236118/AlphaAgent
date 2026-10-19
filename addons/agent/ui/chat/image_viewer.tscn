@@ -1,0 +1,77 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://addons/agent/ui/chat/image_viewer.gd" id="1_viewer"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0, 0, 0, 0.9)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tb"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_zoom"]
+font_color = Color(0.9, 0.9, 0.9, 1)
+font_size = 12
+
+[node name="ImageViewer" type="Window"]
+title = "图片查看器"
+initial_position = 2
+size = Vector2i(1024, 768)
+wrap_controls = true
+script = ExtResource("1_viewer")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.9)
+mouse_filter = 0
+
+[node name="ImageTextureRect" type="TextureRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 0
+
+[node name="Toolbar" type="HBoxContainer" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+offset_bottom = 40.0
+alignment = 1
+z_index = 10
+theme_override_styles/panel = SubResource("StyleBoxEmpty_tb")
+
+[node name="ZoomOutButton" type="Button" parent="Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "➖"
+
+[node name="ZoomLabel" type="Label" parent="Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(60, 0)
+horizontal_alignment = 1
+label_settings = SubResource("LabelSettings_zoom")
+text = "100%"
+
+[node name="ZoomInButton" type="Button" parent="Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "➕"
+
+[node name="ResetButton" type="Button" parent="Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "重置"
+
+[node name="SaveButton" type="Button" parent="Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "保存"
+
+[node name="CloseButton" type="Button" parent="Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "✕"

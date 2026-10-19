@@ -1,0 +1,294 @@
+@tool
+extends EditorPlugin
+
+var results: Array[Dictionary] = []
+var finished: bool = false
+var tool_finished: bool = false
+
+class DelayTool extends WebSearchTool:
+    func do_action(_call: AgentModelUtils.ToolCallsInfo) -> Dictionary:
+        await get_tree().create_timer(0.8).timeout
+        return {"success": true}
+
+func _enter_tree() -> void:
+    _run.call_deferred()
+
+func check(value: bool, label: String) -> void:
+    results.append({"check": label, "passed": value})
+    print("SETTINGS ", "PASS " if value else "FAIL ", label)
+
+func panel():
+    return AlphaAgentSingleton.get_instance().main_panel
+
+func plugin():
+    return AlphaAgentSingleton.get_instance().editor_plugin
+
+func controller():
+    return EditorInterface.get_base_control().get_node_or_null("AlphaAgentReloadController")
+
+func frames(count: int = 4) -> void:
+    for i in count:
+        await get_tree().process_frame
+
+func wait_initialized() -> bool:
+    var deadline = Time.get_ticks_msec() + 8000
+    while Time.get_ticks_msec() < deadline:
+        if is_instance_valid(panel()) and panel().startup_complete and controller() == null:
+            await frames()
+            return true
+        await get_tree().process_frame
+    check(false, "Plugin initialization completed within timeout")
+    return false
+
+func make_history(id: String, time: String, updated: float = 0.0) -> Dictionary:
+    return {"id": id, "title": id, "time": time, "updated_at": updated, "use_thinking": false, "mode": "", "message": [
+        {"role": "user", "content": "hello " + id, "id": id + "u"},
+        {"role": "assistant", "content": "answer " + id, "id": id + "a"}
+    ]}
+
+func write_json(path: String, data) -> void:
+    var file = FileAccess.open(path, FileAccess.WRITE)
+    file.store_string(JSON.stringify(data))
+    file.close()
+
+func manual_restart() -> void:
+    EditorInterface.set_plugin_enabled("agent", false)
+    await get_tree().create_timer(0.2).timeout
+    EditorInterface.set_plugin_enabled("agent", true)
+    await wait_initialized()
+
+func confirm_layout(mode: int) -> void:
+    panel().setting_container._on_layout_selected(mode)
+    await frames()
+    if controller() != null:
+        controller().dialog.get_ok_button().pressed.emit()
+    await wait_initialized()
+
+func _run_tool(manager: AgentTools, call: AgentModelUtils.ToolCallsInfo) -> void:
+    await manager.use_tool(call)
+    tool_finished = true
+
+func _run() -> void:
+    get_tree().create_timer(55.0).timeout.connect(func():
+        if not finished:
+            check(false, "Suite completed within timeout")
+            _finish()
+    )
+    await get_tree().create_timer(1.0).timeout
+    while EditorInterface.get_resource_filesystem().is_scanning():
+        await get_tree().process_frame
+    var settings = AlphaAgentPlugin.global_setting
+    DirAccess.make_dir_recursive_absolute(settings.setting_dir)
+    settings.plugin_layout = 0
+    settings.load_recent_chat_on_start = false
+    settings.save_global_setting()
+    var history_dir = OS.get_user_data_dir() + "/.alpha/"
+    DirAccess.make_dir_recursive_absolute(history_dir)
+    var history_path = history_dir + "history.json"
+    write_json(history_path, [make_history("created-newer", "2026-10-18T10:00:00", 100), make_history("updated-newer", "2026-10-15T10:00:00", 200), {"id": "broken", "message": 123}])
+    EditorInterface.set_plugin_enabled("agent", true)
+    if not await wait_initialized():
+        _finish()
+        return
+    check(panel().current_id.is_empty(), "Disabled startup restoration leaves new chat")
+    check(not plugin()._has_main_screen(), "Default layout is dock")
+    var editor_info = GetEditorInfoTool.new()
+    add_child(editor_info)
+    var editor_call = AgentModelUtils.ToolCallsInfo.new()
+    var no_scene_info = await editor_info.do_action(editor_call)
+    # Godot 4.7 may keep an empty scene tab (opened_scenes contains "") with no root.
+    check(EditorInterface.get_edited_scene_root() == null and no_scene_info.editor.current_edited_scene == "" and no_scene_info.editor.current_scene_root_node == null and no_scene_info.editor.opened_scenes == EditorInterface.get_open_scenes(), "Editor info handles no open scene without a null dereference")
+    EditorInterface.open_scene_from_path("res://sample.tscn")
+    await frames()
+    var scene_info = await editor_info.do_action(editor_call)
+    check(scene_info.editor.current_edited_scene == "res://sample.tscn" and is_instance_valid(scene_info.editor.current_scene_root_node), "Editor info still reports an open scene")
+    EditorInterface.close_scene()
+    editor_info.queue_free()
+    check(panel().history_and_title.history_list.size() == 2, "Skip malformed history entry")
+    check(panel().history_and_title.get_recent_history().id == "updated-newer", "Recent uses content update time")
+    var legacy = AgentHistoryAndTitle.HistoryItem.from_dict(make_history("legacy", "2026-10-17T10:00:00"))
+    check(AgentHistoryAndTitle.history_timestamp(legacy) > 0, "Legacy history falls back to creation time")
+    var local_now = Time.get_datetime_dict_from_system()
+    var local_now_string = "%04d-%02d-%02dT%02d:%02d:%02d" % [local_now.year, local_now.month, local_now.day, local_now.hour, local_now.minute, local_now.second]
+    var timezone_sample = AgentHistoryAndTitle.HistoryItem.from_dict(make_history("timezone", local_now_string))
+    check(absf(AgentHistoryAndTitle.history_timestamp(timezone_sample) - Time.get_unix_time_from_system()) < 2.0, "Legacy local time is normalized against UTC updates")
+    panel().setting_container.load_recent_chat_setting.check_button.button_pressed = true
+    var saved = JSON.parse_string(FileAccess.get_file_as_string(settings.setting_file))
+    check(saved.load_recent_chat_on_start, "Startup setting is persisted through UI signal")
+    await manual_restart()
+    check(panel().current_id == "updated-newer" and panel().message_list.get_child_count() == 2, "Startup restores latest conversation and renders messages")
+    check(panel().current_chat_stream == null and panel().tools.active_calls == 0, "History restore performs no model or tool calls")
+    var chosen = panel().history_and_title.get_history_by_id("created-newer")
+    panel().history_and_title.on_recovery_history_item(chosen)
+    check(panel().current_id == chosen.id, "History selection recovers chosen conversation")
+    panel().input_container.user_input.text = "unfinished draft"
+    panel().input_container.user_input.set_caret_column(5)
+    var ref = panel().input_container.REFERENCE_ITEM.instantiate()
+    ref.info = {"type": "file", "path": "res://sample.gd"}
+    panel().input_container.reference_list.add_child(ref)
+    ref.set_label("sample.gd")
+    ref.set_tooltip("res://sample.gd")
+    var image = Image.create(4, 4, false, Image.FORMAT_RGBA8)
+    image.fill(Color.BLUE)
+    image.save_png("res://attachment.png")
+    panel().input_container._on_image_file_selected("res://attachment.png")
+    var plan: Array[AlphaAgentSingleton.PlanItem] = [AlphaAgentSingleton.PlanItem.new("preserved plan", AlphaAgentSingleton.PlanState.Plan)]
+    panel().plan_list.update_list(plan)
+    var temp_file = AgentTempFileManager.EditedFile.new()
+    temp_file.target_path = "res://sample.gd"
+    temp_file.origin_path = "res://sample.gd"
+    temp_file.origin_exist = true
+    AgentTempFileManager.get_instance().temp_file_array.append(temp_file)
+    panel().on_show_setting()
+    var old_id = plugin().get_instance_id()
+    panel().setting_container._on_layout_selected(1)
+    await frames()
+    check(controller() != null and controller().dialog.visible, "Layout change opens refresh confirmation")
+    check(not plugin()._has_main_screen(), "Pending preference leaves old lifecycle mode fixed")
+    controller().dialog.get_cancel_button().pressed.emit()
+    await frames()
+    check(plugin().get_instance_id() == old_id and controller() == null, "Later preserves active instance")
+    check(panel().setting_container.refresh_layout_button.visible, "Later leaves apply-pending refresh button")
+    panel().setting_container.refresh_layout_button.pressed.emit()
+    await frames()
+    controller().dialog.get_ok_button().pressed.emit()
+    if not await wait_initialized():
+        _finish()
+        return
+    check(plugin().get_instance_id() != old_id and plugin()._has_main_screen(), "External timer recreates actual main-screen plugin")
+    check(panel().history_sidebar != null and panel().layout_split.get_child_count() == 2, "Main screen has left history and right panel")
+    check(not panel().history_and_title.history_expand_button.visible, "Main-screen title has no history dropdown")
+    check(not panel().history_and_title.history_list_window.visible, "Main screen does not open history popup")
+    check(panel().history_sidebar.is_ancestor_of(panel().history_and_title.today_history_container), "Sidebar and popup share one list instance")
+    check(panel().current_id == "created-newer", "Layout reload prefers current conversation over latest history")
+    check(panel().input_container.user_input.text == "unfinished draft" and panel().input_container.user_input.get_caret_column() == 5, "Reload preserves draft and caret")
+    check(panel().input_container.reference_list.get_child_count() == 2, "Reload preserves file and image attachments")
+    check(panel().plan_list._last_plan_items.size() == 1 and AgentTempFileManager.get_instance().temp_file_array.size() == 1, "Reload preserves plan and reversible file edits")
+    check(panel().setting_container.visible and panel().history_sidebar.is_visible_in_tree(), "Settings stay on right while history stays visible")
+    var recent_before = panel().history_and_title.get_recent_history()
+    var saved_time = recent_before.updated_at
+    panel().history_and_title.update_history(recent_before.id, recent_before, false)
+    check(recent_before.updated_at == saved_time, "Title-only saves do not bump recency")
+    panel().history_and_title.update_history("created-newer", panel().current_history_item)
+    check(panel().history_and_title.get_recent_history().id == "created-newer", "Continued older conversation becomes most recent")
+
+    # Actual asynchronous tool activity must block reload; waiting is cancelable.
+    var delay = DelayTool.new()
+    panel().tools.add_child(delay)
+    panel().tools.tool_map["delay_test"] = delay
+    var call = AgentModelUtils.ToolCallsInfo.new()
+    call.function.name = "delay_test"
+    _run_tool(panel().tools, call)
+    check(panel().tools.active_calls == 1 and panel().is_busy_for_reload(), "Async tool counter makes plugin busy")
+    panel().setting_container._on_layout_selected(0)
+    await frames()
+    controller().dialog.get_ok_button().pressed.emit()
+    await get_tree().create_timer(0.25).timeout
+    check(controller() != null and controller().waiting and plugin()._has_main_screen(), "Busy task defers refresh without canceling tool")
+    controller().dialog.get_cancel_button().pressed.emit()
+    await get_tree().create_timer(0.7).timeout
+    check(tool_finished and plugin()._has_main_screen() and controller() == null, "Cancel waiting leaves task and layout intact")
+    tool_finished = false
+    _run_tool(panel().tools, call)
+    panel().setting_container.refresh_layout_button.pressed.emit()
+    await frames()
+    controller().dialog.get_ok_button().pressed.emit()
+    await wait_initialized()
+    check(tool_finished, "Waiting automatically resumes refresh after async tool completes")
+    check(not plugin()._has_main_screen() and panel().history_sidebar == null, "Switch back restores dock-only layout")
+    check(panel().history_and_title.history_expand_button.visible, "Dock retains title history dropdown")
+
+    # Preserve empty new-chat intent even when auto-load is enabled.
+    panel().on_click_new_chat_button()
+    await confirm_layout(1)
+    check(panel().current_id.is_empty() and panel().first_chat, "Reload keeps blank new chat instead of auto-loading history")
+
+    var open_tool = OpenResourceTool.new()
+    add_child(open_tool)
+    call.function.name = "open_resource"
+    call.function.arguments = JSON.stringify({"path": "res://sample.gd", "type": "script", "line": 2})
+    check((await open_tool.do_action(call)).has("success"), "Script tool opens from main screen")
+    var script_editor = EditorInterface.get_script_editor()
+    check(script_editor.is_visible_in_tree() and not panel().is_visible_in_tree(), "Script opening activates Script workspace")
+    var code = script_editor.get_current_editor().get_base_editor() as CodeEdit
+    code.set_caret_line(2)
+    code.set_caret_column(code.get_line(2).length())
+    code.insert_text_at_caret(" # unchanged-through-reload")
+    var buffer = code.text
+    EditorInterface.set_main_screen_editor("AlphaAgent")
+    await frames()
+    EditorInterface.set_main_screen_editor("Script")
+    await frames()
+    check(code.text == buffer, "Workspace round trip keeps unsaved script")
+    await confirm_layout(0)
+    check(code.text == buffer, "Real plugin reload keeps unsaved script")
+    EditorInterface.set_main_screen_editor("Script")
+    check(_save_script(script_editor), "Script save menu still available")
+    await frames(10)
+    check(FileAccess.get_file_as_string("res://sample.gd") == buffer, "Script saving works after actual layout reload")
+
+    # Simulate startup failure to exercise controller rollback.
+    panel().input_container.user_input.text = "rollback draft"
+    panel().on_show_setting()
+    panel().setting_container._on_layout_selected(1)
+    await frames()
+    controller().dialog.get_ok_button().pressed.emit()
+    var pending = controller()
+    while plugin() != null and not plugin()._has_main_screen():
+        await get_tree().process_frame
+    while plugin() == null:
+        await get_tree().process_frame
+    panel().startup_complete = false
+    pending.deadline = 0
+    var rollback_deadline = Time.get_ticks_msec() + 8000
+    while Time.get_ticks_msec() < rollback_deadline and (controller() == null or not controller().restoring or plugin() == null or plugin()._has_main_screen()):
+        await get_tree().process_frame
+    await get_tree().create_timer(0.5).timeout
+    check(plugin() != null and not plugin()._has_main_screen(), "Initialization timeout rolls back to original layout")
+    check(AlphaAgentPlugin.global_setting.plugin_layout == 0, "Rollback persists original layout preference")
+    check(panel().input_container.user_input.text == "rollback draft", "Rollback recovers draft snapshot")
+    if controller() != null:
+        controller().dialog.get_cancel_button().pressed.emit()
+    await frames()
+    check(_count_panels(get_tree().root) == 1, "Repeated real reloads leave exactly one plugin panel")
+
+    # Bad top-level JSON must remain untouched; valid empty histories stay usable.
+    var file = FileAccess.open(history_path, FileAccess.WRITE)
+    file.store_string("{broken history")
+    file.close()
+    await manual_restart()
+    check(panel().current_id.is_empty() and FileAccess.get_file_as_string(history_path) == "{broken history", "Corrupt history safely leaves new chat and preserves file")
+    write_json(history_path, [])
+    await manual_restart()
+    check(panel().current_id.is_empty() and panel().history_and_title.get_recent_history() == null, "Empty history initialization succeeds")
+    var compressed = make_history("compressed", "2026-10-19T10:00:00", Time.get_unix_time_from_system())
+    compressed.message = [{"role": "system", "content": "context", "id": "system"}, {"role": "system", "content": "## 对话上下文摘要\nA previous conversation", "id": "summary"}]
+    write_json(history_path, [compressed])
+    await manual_restart()
+    check(panel().current_id == "compressed" and panel().message_list.get_child_count() == 1, "Compressed history restores its summary without empty-view failure")
+    open_tool.queue_free()
+    _finish()
+
+func _save_script(node: Node) -> bool:
+    if node is PopupMenu:
+        for i in node.item_count:
+            if node.get_item_text(i) in ["Save", "保存"]:
+                node.id_pressed.emit(node.get_item_id(i))
+                return true
+    for child in node.get_children(true):
+        if _save_script(child):
+            return true
+    return false
+
+func _count_panels(node: Node) -> int:
+    var count = 1 if node is AgentMainPanel else 0
+    for child in node.get_children():
+        count += _count_panels(child)
+    return count
+
+func _finish() -> void:
+    finished = true
+    var failed = results.filter(func(item): return not item.passed).size()
+    write_json("res://results.json", {"engine": Engine.get_version_info().string, "checks": results.size(), "failed": failed, "results": results})
+    print("SETTINGS TESTS: ", results.size(), " checks, ", failed, " failures")
+    get_tree().quit(0 if failed == 0 else 1)

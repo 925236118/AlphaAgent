@@ -34,7 +34,7 @@ func _ready() -> void:
 	)
 
 func _process(delta: float) -> void:
-	if sync_scroll.button_pressed:
+	if sync_scroll.button_pressed and diff_res != null:
 		sync_code_edit_scroll_vertical()
 
 func load_file():

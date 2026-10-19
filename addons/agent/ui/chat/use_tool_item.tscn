@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://b7p6nfdynggrc"]
+[gd_scene load_steps=7 format=3 uid="uid://b7p6nfdynggrc"]
 
 [ext_resource type="Script" uid="uid://dn6fte72bh5ht" path="res://addons/agent/ui/chat/use_tool_item.gd" id="1_dv7ai"]
 
@@ -9,10 +9,6 @@ bg_color = Color(0.1254902, 0.1254902, 0.1254902, 1)
 content_margin_left = 5.0
 content_margin_top = 3.0
 content_margin_bottom = 3.0
-
-[sub_resource type="LabelSettings" id="LabelSettings_dv7ai"]
-font_size = 12
-font_color = Color(1, 1, 1, 0.5294118)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6vtcw"]
 
@@ -53,7 +49,7 @@ layout_mode = 2
 [node name="Label" type="Label" parent="VBoxContainer/DetailContainer"]
 layout_mode = 2
 text = "请求工具参数"
-label_settings = SubResource("LabelSettings_dv7ai")
+theme_override_colors/font_color = Color(1, 1, 1, 0.5294118)
 
 [node name="ToolRequest" type="TextEdit" parent="VBoxContainer/DetailContainer"]
 unique_name_in_owner = true
@@ -68,7 +64,7 @@ scroll_fit_content_height = true
 [node name="Label2" type="Label" parent="VBoxContainer/DetailContainer"]
 layout_mode = 2
 text = "返回工具结果"
-label_settings = SubResource("LabelSettings_dv7ai")
+theme_override_colors/font_color = Color(1, 1, 1, 0.5294118)
 
 [node name="ToolResponse" type="TextEdit" parent="VBoxContainer/DetailContainer"]
 unique_name_in_owner = true

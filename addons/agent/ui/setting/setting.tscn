@@ -51,6 +51,54 @@ layout_mode = 2
 setting_name = "自动展示思考内容"
 setting_key = "auto_expand_think"
 
+[node name="LoadRecentChatSetting" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("1_ca3bj")]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "下次插件初始化时，自动加载当前项目最近更新的对话"
+setting_name = "初始化时加载最近对话"
+setting_key = "load_recent_chat_on_start"
+
+[node name="ShowModifiedFilesSetting" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("1_ca3bj")]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "显示可查看差异、同意或撤销的文件修改列表。关闭仅隐藏列表，保留修改记录。"
+setting_name = "显示修改文件列表"
+setting_key = "show_modified_files"
+
+[node name="PluginLayoutContainer" type="HBoxContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="SettingPanel/SettingItemsContainer/PluginLayoutContainer"]
+layout_mode = 2
+text = "插件布局"
+
+[node name="PluginLayoutOption" type="OptionButton" parent="SettingPanel/SettingItemsContainer/PluginLayoutContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+selected = 0
+item_count = 2
+popup/item_0/text = "侧边栏"
+popup/item_0/id = 0
+popup/item_1/text = "主屏幕"
+popup/item_1/id = 1
+
+[node name="PluginLayoutPending" type="HBoxContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+
+[node name="PluginLayoutStatus" type="Label" parent="SettingPanel/SettingItemsContainer/PluginLayoutPending"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+text = "布局待应用，下次启用时生效"
+
+[node name="RefreshLayoutButton" type="Button" parent="SettingPanel/SettingItemsContainer/PluginLayoutPending"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "刷新插件"
+
 [node name="AutoAddFileRefSetting" parent="SettingPanel/SettingItemsContainer" instance=ExtResource("1_ca3bj")]
 layout_mode = 2
 setting_name = "自动添加引用的文件名称"
@@ -66,6 +114,7 @@ text = "输入框发送快捷键"
 
 [node name="OptionButton" parent="SettingPanel/SettingItemsContainer/SendShotCut" index="1"]
 tooltip_text = "选择发送快捷键"
+selected = 1
 item_count = 3
 popup/item_0/text = "不使用快捷键"
 popup/item_1/text = "Enter"
@@ -86,6 +135,125 @@ setting_key = "http_proxy_host"
 layout_mode = 2
 setting_name = "端口"
 setting_key = "http_proxy_port"
+
+[node name="QuickModelContainer" type="HBoxContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+
+[node name="QuickModelLabel" type="Label" parent="SettingPanel/SettingItemsContainer/QuickModelContainer"]
+layout_mode = 2
+text = "快速模型："
+
+[node name="QuickModelOption" type="OptionButton" parent="SettingPanel/SettingItemsContainer/QuickModelContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "用于标题生成和上下文压缩，不选则用当前模型"
+selected = 1
+item_count = 4
+popup/item_0/text = "（使用当前模型）"
+popup/item_0/id = 0
+popup/item_1/text = "DeepSeek / DeepSeek V4.1 Flash"
+popup/item_1/id = 1
+popup/item_2/text = "MiniMax / MiniMax-M2.7"
+popup/item_2/id = 2
+popup/item_3/text = "火山引擎 / Doubao Seed Evolving"
+popup/item_3/id = 3
+
+[node name="CompressThresholdContainer" type="HBoxContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+
+[node name="CompressThresholdLabel" type="Label" parent="SettingPanel/SettingItemsContainer/CompressThresholdContainer"]
+layout_mode = 2
+text = "上下文压缩阈值："
+
+[node name="CompressThresholdSpin" type="SpinBox" parent="SettingPanel/SettingItemsContainer/CompressThresholdContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "对话 token 占上下文窗口的比例超过此值时触发压缩（0=每次都压缩）"
+step = 5.0
+value = 80.0
+suffix = "%"
+
+[node name="SearchConfigMargin" type="MarginContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+theme_override_constants/margin_bottom = 12
+
+[node name="Label" type="Label" parent="SettingPanel/SettingItemsContainer/SearchConfigMargin"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "搜索配置"
+
+[node name="SearchProviderContainer" type="HBoxContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+
+[node name="SearchProviderLabel" type="Label" parent="SettingPanel/SettingItemsContainer/SearchProviderContainer"]
+layout_mode = 2
+text = "搜索供应商："
+
+[node name="SearchProviderOption" type="OptionButton" parent="SettingPanel/SettingItemsContainer/SearchProviderContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "选择联网搜索的供应商，不选则禁用网络搜索"
+selected = 3
+item_count = 4
+popup/item_0/text = "禁用"
+popup/item_0/id = 0
+popup/item_1/text = "Kimi (Moonshot)"
+popup/item_1/id = 1
+popup/item_2/text = "知乎"
+popup/item_2/id = 2
+popup/item_3/text = "DeepSeek"
+popup/item_3/id = 3
+
+[node name="SearchKimiKeyContainer" type="HBoxContainer" parent="SettingPanel/SettingItemsContainer"]
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="SettingPanel/SettingItemsContainer/SearchKimiKeyContainer"]
+layout_mode = 2
+text = "Kimi API Key："
+
+[node name="SearchKimiKeyEdit" type="LineEdit" parent="SettingPanel/SettingItemsContainer/SearchKimiKeyContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "sk-SeLRKAqkrQBKgu1VWzbKm51ve1eszbekF7WZaLcPpjtM1ZtF"
+placeholder_text = "Moonshot API Key"
+secret = true
+
+[node name="SearchZhihuContainer" type="HBoxContainer" parent="SettingPanel/SettingItemsContainer"]
+visible = false
+layout_mode = 2
+
+[node name="ZhihuAccessSecretLabel" type="Label" parent="SettingPanel/SettingItemsContainer/SearchZhihuContainer"]
+layout_mode = 2
+text = "Access Secret："
+
+[node name="ZhihuAccessSecretEdit" type="LineEdit" parent="SettingPanel/SettingItemsContainer/SearchZhihuContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "687ce623a5f1a7f8d0c8aad518a5f8c212578671"
+placeholder_text = "知乎开放平台 Access Secret"
+secret = true
+
+[node name="SearchDeepSeekKeyContainer" type="HBoxContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="SettingPanel/SettingItemsContainer/SearchDeepSeekKeyContainer"]
+layout_mode = 2
+text = "DeepSeek API Key："
+
+[node name="SearchDeepSeekKeyEdit" type="LineEdit" parent="SettingPanel/SettingItemsContainer/SearchDeepSeekKeyContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "使用 DeepSeek 开放平台的 API Key，与 DeepSeek 对话 API 使用相同类型的密钥"
+text = "sk-67a0699b55d144d08235770d06bb8925"
+placeholder_text = "DeepSeek API Key"
+secret = true
 
 [node name="HSeparator" type="HSeparator" parent="SettingPanel/SettingItemsContainer"]
 layout_mode = 2
@@ -146,6 +314,26 @@ tooltip_text = "管理角色配置"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"PrimaryButton"
 text = "管理角色"
+
+[node name="ResetSeparator" type="HSeparator" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+
+[node name="MarginContainer4" type="MarginContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+theme_override_constants/margin_bottom = 12
+
+[node name="Label" type="Label" parent="SettingPanel/SettingItemsContainer/MarginContainer4"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "插件管理"
+
+[node name="ResetConfigButton" type="Button" parent="SettingPanel/SettingItemsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "删除当前版本配置并恢复默认值，操作前需要确认"
+mouse_default_cursor_shape = 2
+theme_type_variation = &"DangerButton"
+text = "初始化所有配置"
 
 [node name="SupplierOptionWindow" parent="." instance=ExtResource("4_k4cyc")]
 visible = false

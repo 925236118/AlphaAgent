@@ -1,0 +1,133 @@
+@tool
+extends EditorPlugin
+
+var results: Array[Dictionary] = []
+var finished: bool = false
+
+func _enter_tree() -> void:
+    _run.call_deferred()
+
+func check(value: bool, label: String) -> void:
+    results.append({"check": label, "passed": value})
+    print("FILES ", "PASS " if value else "FAIL ", label)
+
+func frames(count: int = 4) -> void:
+    for i in count:
+        await get_tree().process_frame
+
+func write_text(path: String, content: String) -> void:
+    var file = FileAccess.open(path, FileAccess.WRITE)
+    file.store_string(content)
+    file.close()
+
+func panel():
+    return AlphaAgentSingleton.get_instance().main_panel
+
+func manager():
+    return AgentTempFileManager.get_instance()
+
+func list():
+    return panel().edited_files_container
+
+func checkbox():
+    return panel().setting_container.show_modified_files_setting.check_button
+
+func _run() -> void:
+    get_tree().create_timer(25.0).timeout.connect(func():
+        if not finished:
+            check(false, "File review checks completed within timeout")
+            _finish()
+    )
+    await get_tree().create_timer(1.0).timeout
+    while EditorInterface.get_resource_filesystem().is_scanning():
+        await get_tree().process_frame
+    var settings = AlphaAgentPlugin.global_setting
+    DirAccess.make_dir_recursive_absolute(settings.setting_dir)
+    # Simulate older saved settings which do not have the new key.
+    write_text(settings.setting_file, "{}")
+    EditorInterface.set_plugin_enabled("agent", true)
+    while not is_instance_valid(panel()) or not panel().startup_complete:
+        await get_tree().process_frame
+    check(not settings.show_modified_files and not checkbox().button_pressed, "Missing setting defaults to hidden file review")
+
+    write_text("res://file_a.txt", "original A\n")
+    write_text("res://file_b.txt", "original B\n")
+    for name in ["a", "b", "new"]:
+        var path = "res://file_" + name + ".txt"
+        manager().create_temp_file(path)
+        write_text(path, "changed " + name + "\n")
+    var records = manager().temp_file_array.duplicate()
+    panel().show_edited_file_container()
+    check(not list().visible and list().file_list.get_child_count() == 0, "Disabled review hides list")
+    check(records.size() == 3 and FileAccess.file_exists(records[0].origin_path), "Disabled review still keeps original snapshots")
+
+    checkbox().button_pressed = true
+    check(list().visible and list().file_list.get_child_count() == 3, "Enable setting immediately renders pending files")
+    check(list().accept_all_button.text == "全部同意" and not list().accept_all_button.disabled, "Accept all button is available with pending files")
+    var saved = JSON.parse_string(FileAccess.get_file_as_string(settings.setting_file))
+    check(saved.show_modified_files, "Visibility setting is persisted")
+    checkbox().button_pressed = false
+    check(not list().visible and manager().temp_file_array.size() == 3, "Turning off hides without accepting or deleting pending records")
+    list().on_accept_all()
+    check(manager().temp_file_array.size() == 3, "Hidden review cannot batch accept")
+    checkbox().button_pressed = true
+    check(list().file_list.get_child_count() == 3, "Re-enable restores same pending list")
+
+    list().file_list.get_child(1).accept.emit()
+    check(manager().temp_file_array.size() == 2 and not manager().temp_file_array.has(records[1]), "Accepting middle row removes correct record despite header")
+    check(FileAccess.get_file_as_string("res://file_b.txt") == "changed b\n" and not FileAccess.file_exists(records[1].origin_path), "Single acceptance keeps target and removes only its backup")
+    list().file_list.get_child(0).undo.emit()
+    check(FileAccess.get_file_as_string("res://file_a.txt") == "original A\n" and manager().temp_file_array.size() == 1, "Undo restores correct original after row indices change")
+    list().file_list.get_child(0).undo.emit()
+    check(not FileAccess.file_exists("res://file_new.txt") and manager().temp_file_array.is_empty(), "Undo of newly created file still removes that file")
+    check(not list().visible and list().accept_all_button.disabled, "Empty list and accept-all control hide")
+
+    for i in 5:
+        var path = "res://batch_%d.txt" % i
+        if i < 2:
+            write_text(path, "before\n")
+        manager().create_temp_file(path)
+        write_text(path, "after %d\n" % i)
+    var batch = manager().temp_file_array.duplicate()
+    panel().show_edited_file_container()
+    # New-file diff must not try to load a nonexistent original or sync a missing diff.
+    list().on_show_edit_file(batch[2])
+    await frames()
+    check(is_instance_valid(list()._review_windows.get(batch[2])), "New file preview opens without an original snapshot")
+    list().accept_all_button.pressed.emit()
+    await frames()
+    check(manager().temp_file_array.is_empty() and not list().visible, "Accept all clears all pending records and hides list")
+    var targets_kept = true
+    var backups_removed = true
+    for i in batch.size():
+        targets_kept = targets_kept and FileAccess.get_file_as_string(batch[i].target_path) == "after %d\n" % i
+        backups_removed = backups_removed and not FileAccess.file_exists(batch[i].origin_path)
+    check(targets_kept, "Accept all preserves contents of existing and new target files")
+    check(backups_removed and list()._review_windows.is_empty(), "Accept all cleans backups and closes review windows")
+    list().accept_all_button.pressed.emit()
+    check(manager().temp_file_array.is_empty(), "Repeated accept all is harmless")
+
+    for path in ["res://stale_a.txt", "res://stale_b.txt"]:
+        write_text(path, "before\n")
+        manager().create_temp_file(path)
+        write_text(path, "after\n")
+    panel().show_edited_file_container()
+    var stale_row = list().file_list.get_child(0)
+    stale_row.accept.emit()
+    stale_row.accept.emit()
+    check(manager().temp_file_array.size() == 1 and manager().temp_file_array[0].target_path == "res://stale_b.txt", "Repeated stale-row signal cannot accept a different file")
+    list().accept_all_button.pressed.emit()
+    EditorInterface.set_plugin_enabled("agent", false)
+    await get_tree().create_timer(0.2).timeout
+    EditorInterface.set_plugin_enabled("agent", true)
+    while not is_instance_valid(panel()) or not panel().startup_complete:
+        await get_tree().process_frame
+    check(checkbox().button_pressed and settings.show_modified_files, "Enabled setting survives plugin restart")
+    check(not list().visible, "Enabled review stays hidden when no pending files exist")
+    _finish()
+
+func _finish() -> void:
+    finished = true
+    var failed = results.filter(func(item): return not item.passed).size()
+    write_text("res://results.json", JSON.stringify({"engine": Engine.get_version_info().string, "checks": results.size(), "failed": failed, "results": results}))
+    get_tree().quit(0 if failed == 0 else 1)

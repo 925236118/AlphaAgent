@@ -108,11 +108,61 @@ text = "[b][font_size=18][color=#FF6B35]α - 始于初心，无限可能[/color]
 "
 fit_content = true
 
+[node name="供应商配置" type="ScrollContainer" parent="MarginContainer/VBoxContainer/TabContainer"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+metadata/_tab_index = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TabContainer/供应商配置"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/供应商配置/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RichTextLabel" type="RichTextLabel" parent="MarginContainer/VBoxContainer/TabContainer/供应商配置/MarginContainer/VBoxContainer"]
+layout_mode = 2
+bbcode_enabled = true
+text = "[b][color=#4A90E2]供应商与模型配置[/color][/b]
+打开「设置 → 供应商管理」，选择已有供应商或新增，填写名称、接口类型、API Base 和 API Key，保存后再配置模型。
+
+[b]选择接口类型[/b]
+• DeepSeek、MoonShot（Kimi）、MiniMax、Gemini、Ollama、Anthropic、火山引擎：使用对应的接口类型。
+• OpenAI：用于 Chat Completions 格式及兼容该格式的服务。是否可用取决于服务的具体接口和模型能力。
+• Ollama：填写本机或局域网服务地址，并使用服务中已安装的模型。
+
+[b]填写模型信息[/b]
+模型名称用于界面展示；模型 ID 必须填写服务实际接受的标识。
+在模型配置中按真实能力设置 Thinking、工具调用、图片输入、图片生成、上下文窗口和最大输出 Tokens，然后保存并开启模型。
+只有开启的模型才会出现在对话和快速模型选项中；图片生成模型不参与快速模型选择。
+「远程获取」需要供应商提供模型列表接口；无法获取时，可以手动添加模型。
+
+[b]连接与验证[/b]
+API Base 应与接口类型匹配。通过供应商的验证入口检查连接后，再进行一次实际对话。
+需要代理时，在 Alpha 设置中填写 HTTP 代理主机和端口。订阅账号的登录凭证不一定可直接用于 API，请使用对应接口的调用凭证。
+
+[b]快速模型[/b]
+「设置 → 快速模型」用于标题生成和上下文压缩。默认使用当前模型；可以另选一个已开启的对话模型。停用选中的快速模型后，会自动恢复为使用当前模型。
+
+[b]联网搜索单独配置[/b]
+在「设置 → 搜索配置」选择 DeepSeek、Kimi 或知乎，填写对应密钥。搜索源独立于当前对话模型。
+当前角色还需要启用 web_search 工具，模型才能调用联网搜索。"
+fit_content = true
+scroll_active = false
+selection_enabled = true
+
 [node name="对话" type="ScrollContainer" parent="MarginContainer/VBoxContainer/TabContainer"]
 visible = false
 layout_mode = 2
 size_flags_vertical = 3
-metadata/_tab_index = 1
+metadata/_tab_index = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TabContainer/对话"]
 layout_mode = 2
@@ -129,32 +179,37 @@ size_flags_horizontal = 3
 [node name="RichTextLabel" type="RichTextLabel" parent="MarginContainer/VBoxContainer/TabContainer/对话/MarginContainer/VBoxContainer"]
 layout_mode = 2
 bbcode_enabled = true
-text = "[b][font_size=16][color=#4A90E2]🎇 使用[/color][/font_size][/b]
-激活插件后，即可在右侧侧边栏中发现Alpha。
+text = "[b][color=#4A90E2]开始对话[/color][/b]
+在输入框中输入需求，选择已开启的模型和角色，点击发送。发送快捷键可在设置中选择 Enter、Ctrl + Enter 或不使用快捷键。
+生成期间可点击停止。新对话、历史切换和插件刷新会检查当前任务状态，避免打断仍在执行的工具操作。
 
-[b][font_size=16][color=#4A90E2]🗨 对话[/color][/font_size][/b]
+[b]模型与思考[/b]
+Thinking 开关仅对支持思考且已正确配置的模型显示。思考过程可展开或收起；「自动展示思考内容」决定是否自动展开。
+模型选择器只显示已开启的模型。图片输入、图片生成及工具调用是否可用，还取决于模型的实际能力和对应配置。
 
-在Alpha下方的输入框中输入问题，点击发送即可与AI对话。
+[b]角色与工具[/b]
+角色包含提示词和可用工具集合，可在「设置 → 管理角色」中编辑。
+当模型调用工具时，对话中会显示工具条目，展开可查看请求参数和返回结果。可用工具由当前角色和模型共同决定。
 
-[b][font_size=16][color=#4A90E2]✨ 角色[/color][/font_size][/b]
-Alpha支持角色功能，可以选择一个角色进行对话。
+[b]文件、节点与图片引用[/b]
+可以从文件系统、场景树和脚本列表向输入框拖入引用。发送后，模型会收到引用信息，并可通过工具读取相关内容。
+图片可通过输入区的图片按钮添加，也可预览；图片理解需要支持图片输入的模型。
+选择图片生成模型后，输入区会显示适用的生成选项，生成图片会展示在对话中。
 
-[b][font_size=16][color=#4A90E2]✨ 模型[/color][/font_size][/b]
-Alpha支持多供应商配置，可以在多个供应商和模型中选择一个进行对话。
+[b]上下文与长对话[/b]
+输入区显示上下文使用情况。接近设置的压缩阈值时，插件会尝试总结已有上下文，再继续对话。阈值可在设置中调整，压缩可使用快速模型。
+上下文窗口须按模型实际能力填写，最大输出 Tokens 不代表上下文容量。窗口为 0 时表示未知，显示「—」，不计算占比或触发自动压缩。
+压缩后等待下一次请求返回新的用量统计；报告用量超过已配置窗口时显示「100.0%+」，鼠标提示中保留实际比例，请核对窗口设置。
 
-[b][font_size=16][color=#4A90E2]🧲 引用[/color][/font_size][/b]
-如果你想要引用某一个文件，可以将它从编辑器中拖动到输入框内。
-目前你可以从文件系统侧边栏、场景树、脚本编辑器侧边栏中拖入文件、文件夹或节点。
-
-发送了引用的文件后，Alpha会优先读取其文件内容。回答的内容更加准确。
-"
+[b]常用命令[/b]
+[code]/setting[/code] 打开设置；[code]/help[/code] 打开帮助；[code]/memory[/code] 打开记忆面板。"
 fit_content = true
 
 [node name="历史记录" type="ScrollContainer" parent="MarginContainer/VBoxContainer/TabContainer"]
 visible = false
 layout_mode = 2
 size_flags_vertical = 3
-metadata/_tab_index = 2
+metadata/_tab_index = 3
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TabContainer/历史记录"]
 layout_mode = 2
@@ -171,22 +226,27 @@ size_flags_horizontal = 3
 [node name="RichTextLabel" type="RichTextLabel" parent="MarginContainer/VBoxContainer/TabContainer/历史记录/MarginContainer/VBoxContainer"]
 layout_mode = 2
 bbcode_enabled = true
-text = "Alpha会记录每一次对话的内容，只需要在左上角点击历史记录，即可查看对话的记录。
+text = "[b][color=#4A90E2]查找与继续对话[/color][/b]
+已保存的对话按最近内容更新时间排序，并按日期分组。点击一条记录即可恢复内容并继续对话。
+侧边栏布局：点击当前对话标题，打开历史弹窗。
+主屏幕布局：左侧常驻对话列表，可直接选择，无需点击标题打开弹窗。
 
-点击历史记录可以恢复这次对话，并继续对话。
+[b]初始化时恢复最近对话[/b]
+「设置 → 初始化时加载最近对话」默认关闭。开启后，每次初始化会查找当前项目最近更新的有效对话并加载。
+恢复只展示已保存内容，不会自动发送请求或重新执行历史工具。没有可用记录时显示新对话。
+切换布局刷新插件时，优先恢复切换前的会话和草稿；切换前是空白新对话时，也会保持空白。
 
-点击删除按钮可以删除这条对话记录。无法撤销。
-
-历史记录保存在项目配置下，如果需要查询，可以点击godot的项目>打开\"用户数据\"文件夹
-
-在打开的文件夹中可以找到.alpha文件夹，其中history.json文件就是历史记录。"
+[b]删除与保存位置[/b]
+点击记录旁的删除按钮可删除该条历史，删除后无法通过列表恢复。
+历史位于当前项目的用户数据目录：.alpha/history.json。
+可通过 Godot 的「项目 → 打开用户数据文件夹」查看。历史文件格式异常时，插件会保留原文件。"
 fit_content = true
 
 [node name="记忆" type="ScrollContainer" parent="MarginContainer/VBoxContainer/TabContainer"]
 visible = false
 layout_mode = 2
 size_flags_vertical = 3
-metadata/_tab_index = 3
+metadata/_tab_index = 4
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TabContainer/记忆"]
 layout_mode = 2
@@ -203,24 +263,70 @@ size_flags_horizontal = 3
 [node name="RichTextLabel" type="RichTextLabel" parent="MarginContainer/VBoxContainer/TabContainer/记忆/MarginContainer/VBoxContainer"]
 layout_mode = 2
 bbcode_enabled = true
-text = "Alpha有可以记录用户输入的记忆的功能。
+text = "[b][color=#4A90E2]记忆[/color][/b]
+在设置面板中选择「记忆」，可以查看、添加和删除记忆。
+项目记忆用于当前项目，全局记忆可在不同项目中复用。记忆会作为后续对话的背景信息。
 
-只需要在输入框内键入 [code]/memory[/code]，并指定存储的位置（[code]global[/code]或[code]project[/code]）。然后再输入要保存的记忆。
-
-发送后即可保存。
-
-尝试一下，在命令行中输入 [code]/memory project 我是xxx[/code]，保存成功后，向Alpha提问”我是谁？“
-
-也可以在设置面板中在右上角选择记忆。然后输入要保存的记忆。
-
-注意：如果要删除记忆，可以在设置面板中在右上角选择记忆。然后删除相关记忆。"
+也可以在输入框使用命令：
+[code]/memory project 这里填写项目约定[/code]
+[code]/memory global 这里填写通用偏好[/code]
+[code]/memory[/code] 打开记忆面板。"
 fit_content = true
+
+[node name="设置与工具" type="ScrollContainer" parent="MarginContainer/VBoxContainer/TabContainer"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+metadata/_tab_index = 5
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TabContainer/设置与工具"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/设置与工具/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RichTextLabel" type="RichTextLabel" parent="MarginContainer/VBoxContainer/TabContainer/设置与工具/MarginContainer/VBoxContainer"]
+layout_mode = 2
+bbcode_enabled = true
+text = "[b][color=#4A90E2]对话与输入设置[/color][/b]
+可调整发送后自动清空、自动展示思考内容、自动插入引用文件名称及发送快捷键。需要连接代理时，填写 HTTP 代理主机和端口。
+
+[b]插件布局[/b]
+默认使用侧边栏。在「设置 → 插件布局」中可切换为主屏幕：左侧为对话列表，右侧保留对话、设置、记忆和技能功能。
+修改布局后会询问是否刷新。「立即刷新」会等待当前任务结束后重新加载；「稍后」保留设置，当前布局继续使用，可通过「刷新插件」按钮应用。
+刷新会保留当前会话、草稿和引用附件。主屏幕与 Godot 的脚本工作区共享中间区域；打开脚本时会切换到脚本工作区。
+
+[b]修改文件列表[/b]
+「设置 → 显示修改文件列表」默认关闭。开启后，在对话中展示待确认的文件修改，可以查看差异、同意或撤销。
+文件修改工具会直接写入目标文件；列表用于事后检查。关闭开关仅隐藏列表，已有记录和快照会保留，再次开启可继续查看。
+「全部同意」会保留当前文件内容，清除待确认记录及对应快照；同意后，这些记录不再提供撤销入口。
+
+[b]技能[/b]
+在设置面板切换到「技能」，可新增、编辑、删除技能，或打开技能目录。列表支持纵向滚动，标题和新增按钮保持可见。
+模型可通过当前角色允许的 load_skill 工具读取技能内容。技能内容提供工作方法，可执行操作仍取决于角色可用工具。
+
+[b]初始化所有配置[/b]
+设置底部的红色「初始化所有配置」按钮会先弹出警告，确认后删除当前配置版本的模型、供应商密钥、角色、全局记忆、技能和其他设置，同时清空当前项目记忆。插件会自动刷新并恢复默认配置。
+此操作不可撤销。历史对话、其他配置版本和项目文件保留；正在执行任务或刷新插件时无法初始化。
+
+[b]联网搜索[/b]
+选择搜索供应商并填写密钥后，具有 web_search 工具权限的角色可以请求搜索。搜索结果会作为工具结果返回给模型，帮助回答需要外部信息的问题。"
+fit_content = true
+scroll_active = false
+selection_enabled = true
 
 [node name="关于" type="ScrollContainer" parent="MarginContainer/VBoxContainer/TabContainer"]
 visible = false
 layout_mode = 2
 size_flags_vertical = 3
-metadata/_tab_index = 4
+metadata/_tab_index = 6
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TabContainer/关于"]
 layout_mode = 2

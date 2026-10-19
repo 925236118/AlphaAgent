@@ -79,6 +79,10 @@ const ProviderConfig = [
 	{
 		"name": "Anthropic",
 		"provider": "anthropic"
+	},
+	{
+		"name": "火山引擎",
+		"provider": "volcengine"
 	}
 ]
 
@@ -176,7 +180,7 @@ func init_edit_fields():
 # 打开模型管理窗口
 func on_click_edit_model_button(model_info: ModelConfig.ModelInfo = null):
 	model_manager_window = MODEL_MANAGER.instantiate()
-	get_tree().root.add_child(model_manager_window)
+	add_child(model_manager_window)
 	model_manager_window.set_supplier_info(supplier_info)
 	model_manager_window.set_edit_model(model_info)
 
@@ -252,6 +256,8 @@ func _get_provider_home_page_url(provider: String, current_name: String, current
 			return "https://ollama.com/"
 		"anthropic":
 			return "https://console.anthropic.com/"
+		"volcengine":
+			return "https://www.volcengine.com/"
 		_:
 			return ""
 
@@ -279,6 +285,9 @@ func _update_default_api_base(provider_index: int):
 		6: # Anthropic
 			supplier_base_url.text = "https://api.anthropic.com"
 			supplier_secret_key.placeholder_text = "输入 Anthropic API Key"
+		7: # 火山引擎
+			supplier_base_url.text = "https://ark.cn-beijing.volces.com/api/v3"
+			supplier_secret_key.placeholder_text = "输入火山引擎 API Key"
 
 func update_current_model():
 	if supplier_info.id == AlphaAgentPlugin.global_setting.model_manager.current_supplier_id:

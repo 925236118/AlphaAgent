@@ -27,6 +27,8 @@ extends Node
 
 ## 生成结束信号
 signal generate_finish(msg: String, think_msg: String)
+## 失败信号
+signal error(error_info: Dictionary)
 
 ## 发送请求的HTTPRequest节点
 var http_request: HTTPRequest = null
@@ -97,11 +99,19 @@ func post_message(messages: Array[Dictionary]):
 
 func _http_request_completed(_result, _response_code, _headers, body: PackedByteArray):
 	generatting = false
+	var body_str = body.get_string_from_utf8()
+
+	# 检查 HTTP 状态码
+	if _response_code != 200:
+		error.emit(AgentModelUtils.map_http_error(_response_code, body_str))
+		return
+
 	var json = JSON.new()
-	var err = json.parse(body.get_string_from_utf8())
+	var err = json.parse(body_str)
 	if err != OK:
 		push_error("JSON解析错误: " + json.get_error_message())
-		push_error(body.get_string_from_utf8())
+		push_error(body_str)
+		error.emit({"error_msg":"响应解析失败: " + json.get_error_message(), "error_code":0, "error_type":"server", "data":body_str, "retryable":true})
 		return
 
 	var data = json.get_data()
@@ -122,11 +132,10 @@ func _http_request_completed(_result, _response_code, _headers, body: PackedByte
 					error_msg = error_info["message"]
 				if error_info.has("type"):
 					error_msg += " (类型: " + str(error_info["type"]) + ")"
-			push_error(error_msg)
-			print("完整错误信息: ", JSON.stringify(data))
+			error.emit({"error_msg":error_msg, "error_code":0, "error_type":"server", "data":JSON.stringify(data), "retryable":false})
 		else:
 			print(data)
-			push_error("无效的响应结构")
+			error.emit({"error_msg":"无效的响应结构", "error_code":0, "error_type":"server", "data":body_str, "retryable":false})
 
 ## 结束请求
 func close():

@@ -173,10 +173,7 @@ func post_message(messages: Array[Dictionary]):
 			await get_tree().process_frame
 
 		var error_body = body_chunks.get_string_from_utf8()
-		error.emit({
-			"error_msg": "HTTP错误: " + str(http_client.get_response_code()),
-			"data": error_body
-		})
+		error.emit(AgentModelUtils.map_http_error(http_client.get_response_code(), error_body))
 		generatting = false
 		return
 

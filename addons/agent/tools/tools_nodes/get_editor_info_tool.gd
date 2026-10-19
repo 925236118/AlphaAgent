@@ -25,6 +25,8 @@ func _get_tool_group() -> AgentToolBase.ToolGroup:
 	return ToolGroup.QUERY
 
 func do_action(_tool_call: AgentModelUtils.ToolCallsInfo) -> Dictionary:
+	var scene_root = EditorInterface.get_edited_scene_root()
+	var scene_path = scene_root.get_scene_file_path() if is_instance_valid(scene_root) else ""
 	var script_editor := EditorInterface.get_script_editor()
 	var editor_file_list: ItemList = script_editor.get_child(0).get_child(1).get_child(0).get_child(0).get_child(1)
 	var selected := editor_file_list.get_selected_items()
@@ -45,8 +47,8 @@ func do_action(_tool_call: AgentModelUtils.ToolCallsInfo) -> Dictionary:
 	return {
 		"editor": {
 			"opened_scenes": EditorInterface.get_open_scenes(),
-			"current_edited_scene": EditorInterface.get_edited_scene_root().get_scene_file_path(),
-			"current_scene_root_node": EditorInterface.get_edited_scene_root(),
+			"current_edited_scene": scene_path,
+			"current_scene_root_node": scene_root,
 			"current_opend_script": current_opend_script,
 			"opend_scripts": edit_file_list
 		},

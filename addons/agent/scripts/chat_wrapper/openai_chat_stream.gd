@@ -120,6 +120,9 @@ func post_message(messages: Array[Dictionary]):
 		elif base_path.ends_with("/v3"):
 			# 豆包等使用 v3，只添加 /chat/completions
 			path = base_path + "/chat/completions"
+		elif base_path.ends_with("/v4"):
+			# GLM 使用 v4，只添加 /chat/completions
+			path = base_path + "/chat/completions"
 		elif base_path.ends_with("/v1"):
 			# 标准 OpenAI，只添加 /chat/completions
 			path = base_path + "/chat/completions"
@@ -167,10 +170,7 @@ func post_message(messages: Array[Dictionary]):
 			await get_tree().process_frame
 
 		var error_body = body_chunks.get_string_from_utf8()
-		error.emit({
-			"error_msg": "HTTP错误: " + str(http_client.get_response_code()),
-			"data": error_body
-		})
+		error.emit(AgentModelUtils.map_http_error(http_client.get_response_code(), error_body))
 		generatting = false
 		return
 
@@ -307,8 +307,9 @@ func _process_chunk(data: Dictionary):
 			use_tool.emit(tool_calls)
 
 		var total_tokens = 0
-		if data.has("usage"):
-			total_tokens = data["usage"].get("total_tokens", 0)
+		var usage = data.get("usage")
+		if usage is Dictionary:
+			total_tokens = usage.get("total_tokens", 0)
 
 		generate_finish.emit(finish_reason, total_tokens)
 

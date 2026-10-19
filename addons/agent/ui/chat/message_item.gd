@@ -8,8 +8,10 @@ extends MarginContainer
 @onready var think_content: RichTextLabel = %ThinkContent
 @onready var message_container: VBoxContainer = %MessageContainer
 @onready var message_content: RichTextLabel = %MessageContent
+@onready var generated_image_container: HFlowContainer = %GeneratedImageContainer
 @onready var user_message_container: PanelContainer = %UserMessageContainer
 @onready var user_message_content: RichTextLabel = %UserMessageContent
+@onready var user_image_container: HFlowContainer = %UserImageContainer
 @onready var error_message_container: VBoxContainer = %ErrorMessageContainer
 @onready var expand_icon: TextureRect = %ExpandIcon
 
@@ -36,6 +38,10 @@ var thinking: bool = false
 var think_time: float = 0.0
 var use_tool_list: Dictionary[String, Control] = {}
 
+# 长按检测
+var _long_press_timer: Timer = null
+var _long_press_url: String = ""
+
 enum MessageType {
 	None,
 	SystemMessage,
@@ -49,6 +55,8 @@ var message_type: MessageType = MessageType.None
 
 signal resend
 signal copy
+signal image_clicked(url: String)
+signal image_long_pressed(url: String)
 
 var message_id: String = ""
 
@@ -59,6 +67,12 @@ func _ready() -> void:
 	message_content.meta_clicked.connect(on_click_rich_text_url)
 	re_send_button.pressed.connect(resend.emit)
 	copy_button.pressed.connect(copy.emit)
+	# 长按检测 Timer
+	_long_press_timer = Timer.new()
+	_long_press_timer.wait_time = 0.5
+	_long_press_timer.one_shot = true
+	_long_press_timer.timeout.connect(_on_long_press_timeout)
+	add_child(_long_press_timer)
 
 	var auto_expand_think = AlphaAgentPlugin.global_setting.auto_expand_think
 	expand_button.button_pressed = auto_expand_think
@@ -98,11 +112,108 @@ func update_message_content(text: String):
 		message_container.show()
 		message_content.show()
 
-func update_user_message_content(text: String):
+func update_user_message_content(content: Variant):
 	message_type = MessageType.UserMessage
 	user_message_container.show()
 	user_message_content.show()
-	user_message_content.text = text
+
+	# 清空旧的图片
+	for child in user_image_container.get_children():
+		child.queue_free()
+	user_image_container.hide()
+
+	if content is String:
+		user_message_content.text = content
+	elif content is Array:
+		# content 是 OpenAI vision 格式的块数组
+		var text_parts: Array = []
+		var image_urls: Array = []
+		for part in content:
+			if part is Dictionary:
+				if part.get("type") == "text":
+					text_parts.append(part.get("text", ""))
+				elif part.get("type") == "image_url":
+					image_urls.append(part.get("image_url", {}).get("url", ""))
+		user_message_content.text = "\n".join(text_parts)
+		# 渲染图片缩略图
+		if image_urls.size() > 0:
+			user_image_container.show()
+			for url in image_urls:
+				_add_image_from_data_url(url, user_image_container)
+
+## 从 base64 data URL 解码并添加图片缩略图到指定容器
+func _add_image_from_data_url(url: String, container: HFlowContainer) -> void:
+	if not url.begins_with("data:"):
+		return
+	var comma_idx = url.find(",")
+	if comma_idx < 0:
+		return
+	var b64 = url.substr(comma_idx + 1)
+	var bytes = Marshalls.base64_to_raw(b64)
+	var img = Image.new()
+	var err = OK
+	# 检测图片格式（magic bytes），不依赖 MIME 声明
+	if bytes.size() >= 4 and bytes[0] == 0x89 and bytes[1] == 0x50:
+		# PNG: \x89PNG
+		err = img.load_png_from_buffer(bytes)
+	elif bytes.size() >= 3 and bytes[0] == 0xFF and bytes[1] == 0xD8:
+		# JPEG: \xFF\xD8\xFF
+		err = img.load_jpg_from_buffer(bytes)
+	elif bytes.size() >= 12 and bytes[0] == 0x52 and bytes[1] == 0x49:
+		# WebP: RIFF....WEBP
+		err = img.load_webp_from_buffer(bytes)
+	else:
+		# 未知格式，依次尝试
+		err = img.load_png_from_buffer(bytes)
+		if err != OK:
+			err = img.load_jpg_from_buffer(bytes)
+		if err != OK:
+			err = img.load_webp_from_buffer(bytes)
+	if err != OK or img.is_empty():
+		return
+	# 缩放为缩略图（最大边 200px）
+	var max_size = 200
+	var w = img.get_width()
+	var h = img.get_height()
+	if w > max_size or h > max_size:
+		var scale = min(float(max_size) / w, float(max_size) / h)
+		img.resize(int(w * scale), int(h * scale), Image.INTERPOLATE_LANCZOS)
+	var tex = ImageTexture.create_from_image(img)
+	var tex_rect = TextureRect.new()
+	tex_rect.texture = tex
+	tex_rect.custom_minimum_size = Vector2(tex.get_width(), tex.get_height())
+	tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	tex_rect.mouse_filter = Control.MOUSE_FILTER_STOP
+	# 点击图片打开查看器，长按图片触发保存
+	tex_rect.gui_input.connect(func(ev: InputEvent):
+		if ev is InputEventMouseButton and ev.button_index == MOUSE_BUTTON_LEFT:
+			if ev.pressed:
+				_long_press_url = url
+				_long_press_timer.start()
+			else:
+				if not _long_press_url.is_empty():
+					_long_press_timer.stop()
+					image_clicked.emit(url)
+				_long_press_url = ""
+		elif ev is InputEventMouseMotion and not _long_press_url.is_empty():
+			_long_press_timer.stop()
+			_long_press_url = ""
+	)
+	container.add_child(tex_rect)
+
+## 长按超时回调：触发保存
+func _on_long_press_timeout():
+	var url = _long_press_url
+	_long_press_url = ""
+	if not url.is_empty():
+		image_long_pressed.emit(url)
+
+## 展示生成的图片（assistant 消息）
+func show_generated_images(images: Array):
+	generated_image_container.show()
+	for url in images:
+		_add_image_from_data_url(url, generated_image_container)
 
 func _on_expand_button_toggled(toggled_on: bool) -> void:
 	#expand_button.text = " ▲ " if toggled_on else " ▼ "

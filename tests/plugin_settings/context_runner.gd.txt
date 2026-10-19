@@ -1,0 +1,157 @@
+@tool
+extends EditorPlugin
+
+var results: Array[Dictionary] = []
+var finished: bool = false
+
+func _enter_tree() -> void:
+    _run.call_deferred()
+
+func check(value: bool, label: String) -> void:
+    results.append({"check": label, "passed": value})
+    print("CONTEXT ", "PASS " if value else "FAIL ", label)
+
+func frames(count: int = 4) -> void:
+    for i in count:
+        await get_tree().process_frame
+
+func write_text(path: String, content: String) -> void:
+    var file = FileAccess.open(path, FileAccess.WRITE)
+    file.store_string(content)
+    file.close()
+
+func _run() -> void:
+    get_tree().create_timer(30.0).timeout.connect(func():
+        if not finished:
+            check(false, "Context checks completed within timeout")
+            _finish()
+    )
+    await get_tree().create_timer(1.0).timeout
+    while EditorInterface.get_resource_filesystem().is_scanning():
+        await get_tree().process_frame
+    var settings = AlphaAgentPlugin.global_setting
+    DirAccess.make_dir_recursive_absolute(settings.setting_dir)
+    write_text(settings.setting_file, "{}")
+    EditorInterface.set_plugin_enabled("agent", true)
+    while not is_instance_valid(AlphaAgentSingleton.get_instance().main_panel) or not AlphaAgentSingleton.get_instance().main_panel.startup_complete:
+        await get_tree().process_frame
+    var panel = AlphaAgentSingleton.get_instance().main_panel
+    var input = panel.input_container
+    var label: Label = input.usage_label
+    var manager = settings.model_manager
+    var supplier = manager.get_current_supplier()
+    var model = manager.get_current_model()
+
+    var old = ModelConfig.ModelInfo.from_dict({"max_tokens": 8192})
+    check(old.context_length == 0 and old.max_tokens == 8192, "Legacy output limit is not mistaken for context capacity")
+    var unknown = ModelConfig.ModelInfo.from_dict({"context_length": 0, "max_tokens": 8192})
+    check(unknown.context_length == 0, "Explicit unknown capacity stays unknown")
+    var known = ModelConfig.ModelInfo.from_dict({"context_length": 131072, "max_tokens": 8192})
+    check(known.context_length == 131072, "Explicit capacity stays separate from output limit")
+    check(ModelConfig.ModelInfo.from_dict(unknown.to_dict()).context_length == 0, "Save and reload do not invent an unknown capacity")
+    check(ModelConfig.ModelInfo.from_dict({"context_length": -1}).context_length == 0, "Negative capacity normalizes to unknown")
+    var reloaded = ModelConfig.ModelManager.new(settings.models_file)
+    var kimi = reloaded.suppliers.filter(func(item): return item.provider == "moonshot")[0].models[0]
+    check(kimi.context_length == 0 and kimi.max_tokens == 8192, "Default model reload no longer turns unknown context into 8K")
+
+    input.set_usage_label(32768, 65536)
+    check(label.text == "50.0%", "Usage uses token units directly")
+    input.set_usage_label(12288, old.context_length)
+    check(label.text == "—" and label.tooltip_text.contains("未设置上下文窗口"), "12K usage with missing capacity does not claim 150 percent")
+    input.set_usage_label(12288, 8192)
+    check(label.text == "100.0%+" and label.tooltip_text.contains("150.0%") and label.tooltip_text.contains("核对"), "Genuine overflow is marked and keeps raw ratio for diagnosis")
+    check(label.has_theme_color_override("font_color"), "Overflow is highlighted")
+    input.set_usage_label(8192, 8192)
+    check(label.text == "100.0%", "Exact capacity is distinct from overflow")
+    input.set_usage_label(9000, 10000, 0.95)
+    check(not label.has_theme_color_override("font_color"), "Warning color respects configured threshold")
+    input.set_usage_label(9600, 10000, 0.95)
+    check(label.has_theme_color_override("font_color"), "Warning color activates at threshold")
+    input.set_usage_label(0, 8192)
+    check(label.text == "—" and not label.has_theme_color_override("font_color"), "Missing usage clears prior ratio and warning")
+    input.set_usage_label(NAN, 8192)
+    check(label.text == "—", "Nonfinite provider usage has no invalid percentage")
+    input.set_usage_label(1024, INF)
+    check(label.text == "—", "Nonfinite capacity has no fake percentage")
+
+    model.active = true
+    model.max_tokens = 8192
+    model.context_length = 65536
+    var stream = DeepSeekChatStream.new()
+    panel.current_chat_stream = stream
+    panel.on_agent_finish("tool_calls", 32768)
+    check(label.text == "50.0%", "Reply callback divides by context capacity, not output limit")
+    model.context_length = 0
+    panel.on_agent_finish("tool_calls", 32768)
+    check(label.text == "—", "Reply callback does not invent a 128K context window")
+    panel.current_chat_stream = null
+    stream.free()
+
+    model.context_length = 0
+    check(not panel._should_compress_context(1000000), "Unknown capacity cannot trigger false compression")
+    model.context_length = 102400
+    settings.compress_threshold_ratio = 0.8
+    check(not panel._should_compress_context(81919), "Compression waits for actual context threshold")
+    check(panel._should_compress_context(81920), "Compression triggers at actual threshold")
+    check(panel._should_compress_context(204800), "Raw overflowing usage still triggers compression")
+    panel._compressing = true
+    check(not panel._should_compress_context(204800), "Active compression is not started twice")
+    panel._compressing = false
+
+    var window = load("res://addons/agent/ui/models/model_manager_window.tscn").instantiate()
+    add_child(window)
+    model.context_length = 0
+    window.set_supplier_info(supplier)
+    window.set_edit_model(model)
+    check(window.context_length_edit.value == 0, "Editing unknown capacity does not replace it with 128K")
+    window._clear_edit_fields()
+    check(window.context_length_edit.value == 0 and window.context_length_edit.min_value == 0, "New model can leave capacity unknown")
+    window.queue_free()
+    await frames()
+
+    input.set_usage_label(8000, 8192)
+    panel.on_click_new_chat_button()
+    check(label.text == "—", "New conversation clears previous usage")
+    check(not label.has_theme_color_override("font_color") and not label.tooltip_text.contains("8192"), "New conversation clears previous warning and tooltip")
+    input.restore_draft({"text": "keep draft", "usage": "150.0%"})
+    check(label.text == "—" and input.user_input.text == "keep draft", "Legacy draft snapshot cannot revive an unverified usage percentage")
+    input.set_usage_label(8000, 8192)
+    var history = AgentHistoryAndTitle.HistoryItem.from_dict({"id": "context-test", "title": "history", "message": [{"role": "user", "content": "test"}]})
+    panel.on_recovery_history(history)
+    check(label.text == "—", "Restoring history clears unrelated usage")
+    input.set_usage_label(8000, 8192)
+    panel._compressing = true
+    panel._on_compress_finish("Short summary", "")
+    check(label.text == "—" and label.tooltip_text.contains("已压缩"), "Compression clears old ratio instead of showing stale near-full usage")
+    check(panel.messages.size() == 2 and panel.messages[1].content.contains("Short summary"), "Summary replaces original context")
+
+    settings.quick_model_model_id = ""
+    var volc = manager.suppliers.filter(func(item): return item.provider == "volcengine")[0]
+    var compression = panel._create_context_compression_chat(volc, volc.models[0])
+    check(compression is VolcengineChat and compression.model_name == volc.models[0].model_name, "Volcengine can create its configured compression client")
+    compression.free()
+    var quick_supplier = manager.suppliers.filter(func(item): return item.provider == "minimax")[0]
+    var quick_model = quick_supplier.models[0]
+    quick_model.active = true
+    quick_supplier.api_key = "test-only-quick-key"
+    settings.quick_model_supplier_id = quick_supplier.id
+    settings.quick_model_model_id = quick_model.id
+    compression = panel._create_context_compression_chat(supplier, model)
+    check(compression is MiniMaxChat and compression.model_name == quick_model.model_name and compression.secret_key == "test-only-quick-key" and compression.api_base == quick_supplier.base_url, "Compression keeps quick model provider, key, endpoint and model")
+    check(compression.max_tokens == quick_model.max_tokens, "Compression keeps quick model output limit")
+    compression.free()
+    quick_model.active = false
+    compression = panel._create_context_compression_chat(supplier, model)
+    check(compression is DeepSeekChat and compression.model_name == model.model_name, "Disabled quick model falls back to current provider")
+    compression.free()
+    input.set_usage_label(8000, 8192)
+    var alternate = supplier.models[0]
+    panel._on_model_selected(supplier.id, alternate.id)
+    check(label.text == "—", "Changing model clears previous capacity comparison")
+    _finish()
+
+func _finish() -> void:
+    finished = true
+    var failed = results.filter(func(item): return not item.passed).size()
+    write_text("res://results.json", JSON.stringify({"engine": Engine.get_version_info().string, "checks": results.size(), "failed": failed, "results": results}))
+    get_tree().quit(0 if failed == 0 else 1)

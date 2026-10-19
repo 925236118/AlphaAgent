@@ -48,7 +48,7 @@ func post_message(messages: Array[Dictionary]):
 	var path: String = parsed.get("path", "/v1/messages")
 
 	if host.is_empty():
-		_emit_error("Anthropic API地址无效", {"api_base": api_base})
+		_emit_error("Anthropic API地址无效", {"api_base": api_base}, "request", false)
 		return
 
 	var request_data := _build_request_data(messages)
@@ -59,7 +59,7 @@ func post_message(messages: Array[Dictionary]):
 	AgentModelUtils.apply_proxy_to_http_client(client)
 	var err := client.connect_to_host(host, port, TLSOptions.client() if use_tls else null)
 	if err != OK:
-		_emit_error("Anthropic 连接失败", {"error": err})
+		_emit_error("Anthropic 连接失败", {"error": err}, "network", true)
 		return
 
 	while client.get_status() == HTTPClient.STATUS_CONNECTING or client.get_status() == HTTPClient.STATUS_RESOLVING:
@@ -67,7 +67,7 @@ func post_message(messages: Array[Dictionary]):
 		await get_tree().process_frame
 
 	if client.get_status() != HTTPClient.STATUS_CONNECTED:
-		_emit_error("Anthropic 连接失败", {"status": client.get_status()})
+		_emit_error("Anthropic 连接失败", {"status": client.get_status()}, "network", true)
 		return
 
 	var headers := PackedStringArray([
@@ -78,7 +78,7 @@ func post_message(messages: Array[Dictionary]):
 	])
 	err = client.request(HTTPClient.METHOD_POST, path, headers, request_body)
 	if err != OK:
-		_emit_error("Anthropic 请求发送失败", {"error": err})
+		_emit_error("Anthropic 请求发送失败", {"error": err}, "network", true)
 		return
 
 	generatting = true
@@ -103,7 +103,9 @@ func _process(_delta):
 					if error_chunk.size() > 0:
 						error_body.append_array(error_chunk)
 					await get_tree().process_frame
-				_emit_error("Anthropic HTTP错误 %d" % code, {"status_code": code, "body": error_body.get_string_from_utf8()})
+				generatting = false
+				_finished = true
+				error.emit(AgentModelUtils.map_http_error(code, error_body.get_string_from_utf8()))
 				return
 		var chunk = client.read_response_body_chunk()
 		if chunk.size() > 0:
@@ -191,7 +193,7 @@ func _process_chunk(event_name: String, data: Dictionary):
 		"message_stop":
 			_finalize()
 		"error":
-			_emit_error("Anthropic 流式错误", data.get("error", data))
+			_emit_error("Anthropic 流式错误", data.get("error", data), "server", true)
 		_:
 			pass
 
@@ -309,12 +311,15 @@ func _normalize_finish_reason(reason: String) -> String:
 		return "stop"
 	return value
 
-func _emit_error(error_msg: String, data):
+func _emit_error(error_msg: String, data, error_type: String = "server", retryable: bool = false, error_code: int = 0):
 	generatting = false
 	_finished = true
 	error.emit({
 		"error_msg": error_msg,
-		"data": data
+		"error_code": error_code,
+		"error_type": error_type,
+		"data": data,
+		"retryable": retryable
 	})
 
 func _parse_url_for_http_client(url: String) -> Dictionary:

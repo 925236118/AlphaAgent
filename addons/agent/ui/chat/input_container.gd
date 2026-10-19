@@ -6,6 +6,7 @@ extends MarginContainer
 @onready var send_button: Button = %SendButton
 @onready var clear_button: Button = %ClearButton
 @onready var usage_label: Label = %UsageLabel
+@onready var balance_label: Label = %BalanceLabel
 @onready var reference_list: HFlowContainer = %ReferenceList
 @onready var input_menu_list: ItemList = %InputMenuList
 @onready var use_thinking: CheckButton = %UseThinking
@@ -16,8 +17,14 @@ extends MarginContainer
 @onready var config_model_tip: VBoxContainer = %ConfigModelTip
 @onready var input_box: VBoxContainer = %InputBox
 @onready var role_button: OptionButton = %RoleButton
+@onready var image_button: Button = %ImageButton
+@onready var image_file_dialog: FileDialog = %ImageFileDialog
+@onready var aspect_ratio_option: OptionButton = %AspectRatioOption
+@onready var style_option: OptionButton = %StyleOption
 
 const REFERENCE_ITEM = preload("uid://bewckbivwp036")
+
+const IMAGE_VIEWER = preload("res://addons/agent/ui/chat/image_viewer.tscn")
 
 signal send_message(message: Dictionary, message_content: String)
 signal stop_chat
@@ -69,6 +76,7 @@ var model_id_list = {}
 var role_id_list = {}
 
 func _ready() -> void:
+	clear_usage_label()
 	#update_user_input_placeholder()
 
 	send_button.pressed.connect(on_click_send_message)
@@ -124,6 +132,7 @@ func update_model_selector(suppliers: Array, current_model_id: String, current_m
 				var supports_thinking: bool = model.supports_thinking
 				use_thinking.visible = supports_thinking
 				use_thinking.button_pressed = supports_thinking
+				image_button.visible = model.supports_vision or model.supports_image_generation
 			model_id_list[idx] = model.id
 			idx += 1
 
@@ -160,10 +169,28 @@ func _on_model_selected(idx: int):
 		var supports_thinking: bool = model.supports_thinking
 		use_thinking.visible = supports_thinking
 		use_thinking.button_pressed = supports_thinking
+		image_button.visible = model.supports_vision or model.supports_image_generation
+		# 生图模型显示比例/画风下拉框
+		var is_image_gen = model.supports_image_generation
+		aspect_ratio_option.visible = is_image_gen
+		# 画风仅 image-01-live 生效
+		style_option.visible = is_image_gen and model.model_name == "image-01-live"
+		# 动态填充比例选项（21:9 仅 image-01 可用，不支持的不展示）
+		if is_image_gen:
+			aspect_ratio_option.clear()
+			var ratios = ["1:1", "16:9", "4:3", "3:2", "2:3", "3:4", "9:16"]
+			if model.model_name == "image-01":
+				ratios.append("21:9")
+			for r in ratios:
+				aspect_ratio_option.add_item(r)
+			aspect_ratio_option.select(0)
 		model_changed.emit(supplier_id, model_id)
 	else:
 		use_thinking.visible = false
 		use_thinking.button_pressed = false
+		image_button.visible = false
+		aspect_ratio_option.visible = false
+		style_option.visible = false
 
 func update_role_selector(roles: Array, current_role_id: String):
 	if not role_button:
@@ -308,7 +335,7 @@ func user_input_drop_data(at_position: Vector2, data: Variant):
 # 完全初始化输入框
 func init():
 	user_input.text = ""
-	usage_label.text = ""
+	clear_usage_label()
 	clear_reference_list()
 	#set_input_mode_disable(false)
 	switch_button_to("Send")
@@ -321,16 +348,89 @@ func clear_reference_list():
 	for i in ref_count:
 		reference_list.get_child(ref_count - i - 1).queue_free()
 
+## 仅用于插件布局重载，保留草稿及附件，不发送请求。
+func capture_draft() -> Dictionary:
+	var refs: Array = []
+	for node in reference_list.get_children():
+		if not node.is_queued_for_deletion():
+			refs.append({"info": node.info.duplicate(true), "label": node.label.text, "tooltip": node.tooltip_text})
+	return {
+		"text": user_input.text, "line": user_input.get_caret_line(), "column": user_input.get_caret_column(),
+		"references": refs, "thinking": use_thinking.button_pressed,
+		"aspect": aspect_ratio_option.selected, "style": style_option.selected
+	}
+
+func restore_draft(draft: Dictionary) -> void:
+	for node in reference_list.get_children():
+		reference_list.remove_child(node)
+		node.queue_free()
+	user_input.text = draft.get("text", "")
+	user_input.set_caret_line(draft.get("line", 0))
+	user_input.set_caret_column(draft.get("column", 0))
+	for reference in draft.get("references", []):
+		var node = REFERENCE_ITEM.instantiate()
+		node.info = reference.info.duplicate(true)
+		reference_list.add_child(node)
+		node.set_label(reference.label)
+		node.set_tooltip(reference.tooltip)
+		if node.info.get("type") == "image" and FileAccess.file_exists(node.info.get("path", "")):
+			node.set_image(node.info.path)
+			node.image_clicked.connect(_on_reference_image_clicked)
+	use_thinking.button_pressed = draft.get("thinking", false)
+	if draft.get("aspect", -1) >= 0:
+		aspect_ratio_option.select(draft.aspect)
+	if draft.get("style", -1) >= 0:
+		style_option.select(draft.style)
+	# 用量不是草稿内容；旧快照中的百分比缺少容量和来源，不能恢复为当前统计。
+	clear_usage_label()
+
 ## 清空内容
 func on_click_clear_button():
 	user_input.text = ""
 	clear_reference_list()
 	_cached_file_list_valid = false
 
+## 点击上传图片按钮
+func _on_image_button_pressed():
+	image_file_dialog.popup_centered_clamped(Vector2i(800, 600))
+
+## 选择图片文件后添加图片引用项
+func _on_image_file_selected(path: String):
+	if not FileAccess.file_exists(path):
+		push_warning("图片文件不存在: " + path)
+		return
+	var ext = path.get_extension().to_lower()
+	if not ["png", "jpg", "jpeg", "gif", "webp"].has(ext):
+		push_warning("不支持的图片格式: " + ext)
+		return
+	var reference_item = REFERENCE_ITEM.instantiate()
+	reference_item.info = {
+		"type": "image",
+		"path": path
+	}
+	reference_list.add_child(reference_item)
+	reference_item.set_image(path)
+	reference_item.set_label(path.get_file())
+	reference_item.set_tooltip(path)
+	reference_item.image_clicked.connect(_on_reference_image_clicked)
+
+## 点击引用图片预览，打开查看器
+func _on_reference_image_clicked(path: String):
+	var viewer = IMAGE_VIEWER.instantiate()
+	add_child(viewer)
+	viewer.show_image_from_file(path)
+	viewer.popup_centered()
+
 ## 发送信息
 func on_click_send_message():
 	var message_text = user_input.text.strip_edges(true, true)
-	if message_text.is_empty():
+	# 允许只发图片不输入文字
+	var has_image = false
+	for child in reference_list.get_children():
+		if child.info and child.info.get("type", "") == "image":
+			has_image = true
+			break
+	if message_text.is_empty() and not has_image:
 		return
 
 	# 检查是否为命令
@@ -352,11 +452,46 @@ func on_click_send_message():
 
 	switch_button_to("Stop")
 	#set_input_mode_disable(true)
-	var info_list = reference_list.get_children().map(func(node): return node.info)
+	var info_list = reference_list.get_children().map(func(node):
+		var info = node.info.duplicate()
+		if info.has("path"):
+			info["path"] = ProjectSettings.localize_path(info["path"])
+		return info
+	)
 	var info_list_string = JSON.stringify(info_list)
+	var image_refs = info_list.filter(func(i): return i.get("type", "") == "image")
+
+	var content
+	if image_refs.is_empty():
+		# 无图片：保持 String 格式（兼容现状）
+		content = "用户输入的内容：" + message_text + "\n引用的内容信息：" + info_list_string
+	else:
+		# 有图片：构造 content 数组（OpenAI vision 格式）
+		var parts: Array = [{
+			"type": "text",
+			"text": "用户输入的内容：" + message_text + "\n引用的内容信息：" + info_list_string
+		}]
+		for img in image_refs:
+			if not FileAccess.file_exists(img.path):
+				push_warning("图片文件不存在: " + img.path)
+				continue
+			var f = FileAccess.open(img.path, FileAccess.READ)
+			if f == null:
+				push_warning("无法读取图片: " + img.path)
+				continue
+			var bytes: PackedByteArray = f.get_buffer(f.get_length())
+			f.close()
+			var b64: String = Marshalls.raw_to_base64(bytes)
+			var img_ext = img.path.get_extension().to_lower().replace("jpg", "jpeg")
+			parts.append({
+				"type": "image_url",
+				"image_url": {"url": "data:image/%s;base64,%s" % [img_ext, b64]}
+			})
+		content = parts
+
 	send_message.emit({
 		"role": "user",
-		"content": "用户输入的内容：" + message_text + "\n引用的内容信息：" + info_list_string
+		"content": content
 	}, message_text)
 
 
@@ -404,9 +539,43 @@ func handle_command(command: String, args: PackedStringArray):
 		_:
 			print("未知命令: ", command)
 
-func set_usage_label(total_tokens: float, max_content_length: float):
-	usage_label.text = "%.2f" % (total_tokens / (max_content_length * 1024)) + "%"
-	usage_label.tooltip_text = ("%.2f" % (total_tokens / (max_content_length * 1024))) + "%" + " | " + ("%d / 128k usage tokens" % total_tokens)
+func clear_usage_label(reason: String = "暂无当前上下文的用量统计，等待下一次请求返回。") -> void:
+	usage_label.text = "—"
+	usage_label.tooltip_text = reason
+	usage_label.remove_theme_color_override("font_color")
+
+## 参数统一使用 token 数，不把最大输出长度当成上下文容量。
+func set_usage_label(total_tokens: float, context_length: float, threshold_ratio: float = 0.8):
+	if not is_finite(total_tokens) or total_tokens <= 0:
+		clear_usage_label()
+		return
+	if not is_finite(context_length) or context_length <= 0:
+		clear_usage_label("本轮报告用量：%s tokens。\n模型未设置上下文窗口，无法计算占比；请在模型配置中填写实际窗口大小。" % _format_tokens(total_tokens))
+		return
+	var ratio: float = total_tokens / context_length
+	usage_label.text = "100.0%+" if ratio > 1.0 else "%.1f%%" % (ratio * 100)
+	usage_label.tooltip_text = "本轮报告用量：%s / %s tokens（%.1f%%）" % [_format_tokens(total_tokens), _format_tokens(context_length), ratio * 100]
+	if ratio > 1.0:
+		usage_label.tooltip_text += "\n报告用量已超过配置的上下文窗口，请核对模型窗口设置。"
+	if ratio >= threshold_ratio:
+		usage_label.add_theme_color_override("font_color", Color(0.9, 0.6, 0.2))
+	else:
+		usage_label.remove_theme_color_override("font_color")
+
+## 设置供应商余额显示
+func set_balance(text: String):
+	if balance_label:
+		balance_label.text = text
+		balance_label.visible = not text.is_empty()
+
+## 格式化 token 数：<1k 显示原数，1k-1M 显示 Xk，≥1M 显示 XM
+func _format_tokens(tokens: float) -> String:
+	if tokens < 1024:
+		return str(int(tokens))
+	elif tokens < 1048576:
+		return "%.1fk" % (tokens / 1024.0)
+	else:
+		return "%.1fM" % (tokens / 1048576.0)
 
 func check_disallowed_char(text: String) -> bool:
 	var disallowed_char = [" ", ",", ".", "，", "。"]
@@ -609,6 +778,16 @@ func on_click_stop_button():
 
 func get_use_thinking() -> bool:
 	return use_thinking.button_pressed
+
+## 获取生图参数（比例、画风）
+func get_image_params() -> Dictionary:
+	if not aspect_ratio_option.visible:
+		return {}
+	var params: Dictionary = {"aspect_ratio": aspect_ratio_option.get_item_text(aspect_ratio_option.selected)}
+	# 画风（仅 image-01-live）
+	if style_option.visible and style_option.selected > 0:
+		params["style_type"] = style_option.get_item_text(style_option.selected)
+	return params
 
 ## 获取过滤后的 skill 列表
 func get_filtered_skill_list(prefix: String) -> Array:

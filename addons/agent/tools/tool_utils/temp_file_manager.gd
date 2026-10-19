@@ -3,7 +3,7 @@ class_name AgentTempFileManager
 extends RefCounted
 
 ## 管理临时文件（用于“可回滚编辑文件列表”功能）
-## 说明：当前阶段尚未接入 tools.gd；这里先提供可复用实现，未来接入时可共享同一份状态。
+## 文件写入工具记录原始快照；显示设置只控制列表展示，不影响记录。
 
 static var _instance: AgentTempFileManager = null
 
@@ -50,6 +50,18 @@ func create_temp_file(target_path: String) -> void:
 	temp_file_array.append(result)
 
 func delete_temp_file(index: int) -> void:
-	var temp_file = temp_file_array[index]
-	DirAccess.remove_absolute(temp_file.origin_path)
+	if index >= 0 and index < temp_file_array.size():
+		remove_temp_file(temp_file_array[index])
+
+## 按记录本身删除，避免 UI 标题或批量操作改变索引后处理了错误文件。
+func remove_temp_file(temp_file: EditedFile) -> bool:
+	var index = temp_file_array.find(temp_file)
+	if index < 0:
+		return false
+	if not temp_file.origin_path.is_empty() and FileAccess.file_exists(temp_file.origin_path):
+		var error = DirAccess.remove_absolute(temp_file.origin_path)
+		if error != OK:
+			push_error("清理文件修改快照失败：%s（%s）" % [temp_file.origin_path, error_string(error)])
+			return false
 	temp_file_array.remove_at(index)
+	return true

@@ -17,8 +17,10 @@ func _ready() -> void:
 	delete_button.pressed.connect(delete.emit)
 	if not skill_name_label == null and not skill == null:
 		skill_name_label.text = skill.skill_name
+		skill_name_label.tooltip_text = skill.skill_name
 
 func set_skill(p_skill: AgentSkillResource):
 	self.skill = p_skill
 	if not skill_name_label == null and not skill == null:
 		skill_name_label.text = p_skill.skill_name
+		skill_name_label.tooltip_text = p_skill.skill_name

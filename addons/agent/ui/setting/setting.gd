@@ -11,6 +11,7 @@ extends ScrollContainer
 @onready var compress_threshold_spin: SpinBox = %CompressThresholdSpin
 @onready var search_provider_option: OptionButton = %SearchProviderOption
 @onready var search_kimi_key_edit: LineEdit = %SearchKimiKeyEdit
+@onready var search_deepseek_key_edit: LineEdit = %SearchDeepSeekKeyEdit
 @onready var search_zhihu_access_secret_edit: LineEdit = %ZhihuAccessSecretEdit
 
 #@onready var config_model_button: Button = $SettingPanel/SettingItemsContainer/ConfigModelButton
@@ -149,33 +150,41 @@ func _on_compress_threshold_changed(value: float):
 ## 初始化搜索配置
 func _init_search_config():
 	var gs = AlphaAgentPlugin.global_setting
-	var providers = ["", "kimi", "zhihu"]
+	var providers = ["", "kimi", "zhihu", "deepseek"]
 	var idx = providers.find(gs.search_provider)
 	search_provider_option.select(idx if idx >= 0 else 0)
 	search_kimi_key_edit.text = gs.search_kimi_api_key
+	search_deepseek_key_edit.text = gs.search_deepseek_api_key
 	search_zhihu_access_secret_edit.text = gs.search_zhihu_access_secret
 	_update_search_config_visibility()
 	if not search_provider_option.item_selected.is_connected(_on_search_provider_selected):
 		search_provider_option.item_selected.connect(_on_search_provider_selected)
 	if not search_kimi_key_edit.text_changed.is_connected(_on_search_kimi_key_changed):
 		search_kimi_key_edit.text_changed.connect(_on_search_kimi_key_changed)
+	if not search_deepseek_key_edit.text_changed.is_connected(_on_search_deepseek_key_changed):
+		search_deepseek_key_edit.text_changed.connect(_on_search_deepseek_key_changed)
 	if not search_zhihu_access_secret_edit.text_changed.is_connected(_on_search_zhihu_access_secret_changed):
 		search_zhihu_access_secret_edit.text_changed.connect(_on_search_zhihu_access_secret_changed)
 
 func _update_search_config_visibility():
 	var idx = search_provider_option.selected
-	# 0=禁用, 1=kimi, 2=zhihu
+	# 0=禁用, 1=kimi, 2=zhihu, 3=deepseek
 	search_kimi_key_edit.get_parent().visible = idx == 1
 	search_zhihu_access_secret_edit.get_parent().visible = idx == 2
+	search_deepseek_key_edit.get_parent().visible = idx == 3
 
 func _on_search_provider_selected(index: int):
-	var providers = ["", "kimi", "zhihu"]
+	var providers = ["", "kimi", "zhihu", "deepseek"]
 	AlphaAgentPlugin.global_setting.search_provider = providers[index]
 	AlphaAgentPlugin.global_setting.save_global_setting()
 	_update_search_config_visibility()
 
 func _on_search_kimi_key_changed(new_text: String):
 	AlphaAgentPlugin.global_setting.search_kimi_api_key = new_text
+	AlphaAgentPlugin.global_setting.save_global_setting()
+
+func _on_search_deepseek_key_changed(new_text: String):
+	AlphaAgentPlugin.global_setting.search_deepseek_api_key = new_text
 	AlphaAgentPlugin.global_setting.save_global_setting()
 
 func _on_search_zhihu_access_secret_changed(new_text: String):

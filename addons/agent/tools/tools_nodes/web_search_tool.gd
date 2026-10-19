@@ -20,7 +20,7 @@ func _get_tool_parameters() -> Dictionary:
 		"properties": {
 			"query": {
 				"type": "string",
-				"description": "搜索关键字，用简洁明确的语言描述要搜索的内容。例如：'Godot 4 C# 使用方法' 或 '2026年最新AI模型对比'"
+				"description": "搜索关键字，用简洁明确的语言描述要搜索的内容。DeepSeek 限 1～128 个字符，支持 site:、-site:、lang:、after:、before: 和引号精确匹配。例如：'Godot 4 site:docs.godotengine.org'"
 			},
 			"scope": {
 				"type": "string",
@@ -43,7 +43,9 @@ func do_action(tool_call: AgentModelUtils.ToolCallsInfo) -> Dictionary:
 		return {"error": "参数解析失败"}
 
 	var query = args.get("query", "")
-	if query.is_empty():
+	if not query is String:
+		return {"error": "搜索关键字必须是字符串"}
+	if query.strip_edges().is_empty():
 		return {"error": "搜索关键字不能为空"}
 
 	var scope = args.get("scope", "zhihu")
@@ -54,6 +56,11 @@ func do_action(tool_call: AgentModelUtils.ToolCallsInfo) -> Dictionary:
 	var result: Dictionary = {}
 	var provider: SearchProviderBase = null
 	match gs.search_provider:
+		"deepseek":
+			provider = DeepSeekSearch.new()
+			provider.api_key = gs.search_deepseek_api_key
+			add_child(provider)
+			result = await provider.search(query, 10)
 		"kimi":
 			provider = KimiSearch.new()
 			provider.api_key = gs.search_kimi_api_key

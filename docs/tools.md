@@ -34,3 +34,16 @@
 | 25 | `update_scene_node_property` | 调用编辑器接口设置场景中的节点的属性。 |
 | 26 | `update_script_file_content` | 调用编辑器接口更新脚本文件的内容。 |
 | 27 | `write_file` | 全量替换写入文件内容。 |
+| 28 | `web_search` | 联网搜索，返回标题、链接与摘要。支持 Kimi、知乎和 DeepSeek，在设置的「搜索配置」中选择供应商并填写对应密钥。 |
+
+### DeepSeek 搜索源
+
+在「设置 → 搜索配置」选择 **DeepSeek**，填写 DeepSeek 开放平台 API Key，配置自动保存。搜索密钥独立于对话模型及其它搜索源，任何支持工具调用的对话模型均可通过 `web_search` 使用该搜索源。
+
+- 接口：`POST https://api.deepseek.com/v1/tools/search`，使用 Bearer 鉴权，遵循全局 HTTP/HTTPS 代理设置。
+- 工具调用示例：`web_search({"query": "Godot 4 site:docs.godotengine.org"})`。
+- 搜索词须为 1～128 个字符，支持 `site:`、`-site:`、`lang:`、`after:`、`before:` 和引号精确匹配；`scope` 参数仅适用于知乎。
+- 每次获取 10 条结果，优先使用 `summary` 长摘要，回退到 `snippet`，按项目统一规则截取前 500 字；保留发布时间、权威度和排序分数。无匹配结果时返回空数组。
+- 密钥无效、余额不足、限流、网络超时及异常响应均作为工具错误返回。
+
+接口与字段依据：[DeepSeek 网页搜索与抓取文档](https://api-docs.deepseek.com/zh-cn/guides/search/)。本适配使用 Search 接口。

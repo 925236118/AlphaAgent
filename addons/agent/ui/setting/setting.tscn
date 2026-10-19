@@ -139,10 +139,11 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "选择联网搜索的供应商，不选则禁用网络搜索"
-item_count = 3
+item_count = 4
 popup/item_0/text = "禁用"
 popup/item_1/text = "Kimi (Moonshot)"
 popup/item_2/text = "知乎"
+popup/item_3/text = "DeepSeek"
 
 [node name="SearchKimiKeyContainer" type="HBoxContainer" parent="SettingPanel/SettingItemsContainer"]
 layout_mode = 2
@@ -172,6 +173,22 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "知乎开放平台 Access Secret"
+secret = true
+
+[node name="SearchDeepSeekKeyContainer" type="HBoxContainer" parent="SettingPanel/SettingItemsContainer"]
+layout_mode = 2
+visible = false
+
+[node name="Label" type="Label" parent="SettingPanel/SettingItemsContainer/SearchDeepSeekKeyContainer"]
+layout_mode = 2
+text = "DeepSeek API Key："
+
+[node name="SearchDeepSeekKeyEdit" type="LineEdit" parent="SettingPanel/SettingItemsContainer/SearchDeepSeekKeyContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "使用 DeepSeek 开放平台的 API Key，与 DeepSeek 对话 API 使用相同类型的密钥"
+placeholder_text = "DeepSeek API Key"
 secret = true
 
 [node name="HSeparator" type="HSeparator" parent="SettingPanel/SettingItemsContainer"]
